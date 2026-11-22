@@ -366,7 +366,7 @@ async function deleteContent(item) {
 /* ---------------- hoofdscherm ---------------- */
 const VIEWS = [['opstelling', 'Opstelling'], ['patronen', 'Patronen'], ['trainingen', 'Trainingen'], ['spelers', 'Spelers']];
 function render() {
-  const views = S.staff ? [VIEWS[0], ['huiswerk', 'Huiswerk'], ...VIEWS.slice(1), ['beheer', 'Beheer']] : S.mode === 'player' ? [['week', 'Mijn week'], ...VIEWS] : VIEWS;
+  const views = [...(S.staff ? [VIEWS[0], ['huiswerk', 'Huiswerk'], ...VIEWS.slice(1), ['beheer', 'Beheer']] : S.mode === 'player' ? [['week', 'Mijn week'], ...VIEWS] : VIEWS), ['uitleg', 'Uitleg']];
   if (!views.some(v => v[0] === S.view)) S.view = views[0][0];
   const teamSel = S.staff && S.teams.length > 1 ? `<select class="i" id="teamSel" style="width:auto;padding:6px 10px">${S.teams.map(t => `<option value="${t.id}" ${t.id === S.team.id ? 'selected' : ''}>${esc(t.name)}</option>`).join('')}</select>` : '';
   $('#app').innerHTML = `<header class="top"><div><div class="club">${esc(S.team.club || '')} · ${esc(S.team.name)} · ${FM().label}</div><h1 class="title">Ons <span>Speelboek</span></h1></div>
@@ -376,7 +376,7 @@ function render() {
   document.querySelectorAll('nav.tabs button').forEach(b => b.onclick = () => { S.view = b.dataset.v; stopPlay(); render(); });
   if ($('#logout')) $('#logout').onclick = async e => { e.preventDefault(); await sb.auth.signOut(); location.hash = ''; location.reload(); };
   if ($('#teamSel')) $('#teamSel').onchange = e => loadStaff(e.target.value);
-  ({ week: viewWeek, huiswerk: viewHomework, opstelling: viewLineup, patronen: viewPatterns, trainingen: viewTrainings, spelers: viewPlayers, beheer: viewAdmin })[S.view]();
+  ({ week: viewWeek, huiswerk: viewHomework, opstelling: viewLineup, patronen: viewPatterns, trainingen: viewTrainings, spelers: viewPlayers, beheer: viewAdmin, uitleg: viewHelp })[S.view]();
 }
 
 /* ---------------- veld ---------------- */
@@ -1067,6 +1067,61 @@ function viewWeek() {
   document.querySelectorAll('[data-done]').forEach(b => b.onclick = async () => { const [id, m] = b.dataset.done.split('|'); const { data, error } = await sb.rpc('complete_assignment', { p_token: S.token, p_assignment: id, p_mood: +m }); if (error || !data) return toast('Dat lukte niet'); toast('Goed gedaan!'); loadPlayer(); });
   document.querySelectorAll('[data-undo]').forEach(b => b.onclick = async () => { await sb.rpc('undo_completion', { p_token: S.token, p_assignment: b.dataset.undo }); loadPlayer(); });
   $('#wd').onclick = async e => { e.preventDefault(); if (!confirm('Weet je het zeker? De gegevens van deze speler worden direct verwijderd en deze link werkt daarna niet meer.')) return; await sb.rpc('withdraw_consent', { p_token: S.token }); renderMessage('De gegevens zijn verwijderd.', 'Je kunt deze pagina sluiten.'); };
+}
+
+
+/* ---------------- handleiding ---------------- */
+const HELP_TRAINER = [
+  ['Starten', [
+    ['Inloggen en een team maken', 'Log in met je e-mailadres en een wachtwoord. Bij je eerste keer maak je een team aan. Kies daarbij de speelvorm: 8 tegen 8 of 11 tegen 11. Laat “Startinhoud laden” aan staan: dan krijgt het team meteen spelers, systemen, patronen, oefenvormen en taken die al zijn uitgewerkt. Alles is daarna aan te passen.'],
+    ['8 tegen 8 en 11 tegen 11', 'Elke speelvorm is een eigen team met eigen posities, systemen, patronen en trainingen. Wil je beide, maak dan een tweede team aan via Beheer → Nieuw team aanmaken. Bovenaan wissel je tussen je teams. De speelvorm staat in de kop naast de teamnaam.']
+  ]],
+  ['Opstelling en systemen', [
+    ['Een systeem kiezen', 'Bovenaan de Opstelling staan de systemen en wedstrijdsituaties als knoppen. Tik er een aan om hem op het veld te zien. Rechts (op de telefoon eronder) staan het idee, wat het systeem sterk maakt, het risico en wanneer je het kiest. Klap “Speelwijze per fase” open voor opbouwen, aanvallen, verdedigen, omschakelen en waar je als trainer op let.'],
+    ['Taken van een speler zien', 'Tik op een shirt. Op de telefoon schuift er een blad omhoog, op de computer verschijnen de taken naast het veld. Op de computer zie je ook een korte samenvatting als je met de muis op een speler staat. De taken horen bij de plek in dit systeem: met bal, zonder bal, na balverlies, na balwinst, spelhervattingen, oefenvormen en thuisoefeningen.'],
+    ['Wisselen', 'Tik onder “Niet opgesteld” op een naam en daarna op een shirt. De nieuwe speler krijgt direct de taken, oefeningen en thuisoefeningen van die plek. Een shirt verplaatsen doe je door het te slepen.'],
+    ['Speler, positie of taken van een plek aanpassen', 'Tik op een shirt en kies “Speler, positie of taken wijzigen”. Je kiest de speler, de positie en de naam van de plek, en je past de taken in dit systeem aan. Kies je een andere positie, dan vullen de taken zich vanzelf met wat bij die positie hoort. Onderaan zet je wie hier ook kan spelen; die namen staan klein onder het shirt.'],
+    ['Systeem toevoegen of eigen situatie', '“Systeem toevoegen” zet een systeem uit de bibliotheek neer, ingevuld op de kwaliteiten van de spelers. “Nieuwe situatie” kopieert de huidige opstelling, zodat je een eigen variant kunt maken, bijvoorbeeld voor een bepaalde tegenstander. Met “Naam en uitleg aanpassen” geef je hem een naam of verwijder je hem.'],
+    ['Wedstrijdopstelling', 'Kies de opstelling voor de komende wedstrijd en tik op “☆ Maak wedstrijdopstelling”. Er komt een ster voor de naam. De spelerspagina’s, het tabblad Spelers en het huiswerk volgen dan automatisch deze opstelling. Wissel je daarin een speler, dan ziet hij op zijn eigen pagina meteen zijn nieuwe taken.']
+  ]],
+  ['Trainen', [
+    ['Training voor een systeem', 'Tik bij een opstelling op “Training voor dit systeem”. De oefenvormen die bij dat systeem passen, staan dan klaar in het tabblad Trainingen onder “Jouw training”.'],
+    ['Trainingsplan en oefenvormen', 'In Trainingen staat een weekplan. Met “Gebruik deze training” zet je een week klaar; met “Training kopiëren” plak je hem in WhatsApp of een mail. Bij elke oefenvorm staan het probleem, waarom en hoe, coachpunten en een makkelijkere of moeilijkere variant. Je kunt oefenvormen en weken aanpassen of toevoegen.'],
+    ['Patronen', 'In Patronen speel je spelsituaties stap voor stap af, met uitleg bij elke stap. Handig om voor de training of in de rust te laten zien.']
+  ]],
+  ['Spelers en huiswerk', [
+    ['Spelers en taken per positie', 'In Spelers zie je per speler zijn taken in de gekozen situatie. Met “Taken per positie” pas je de standaardtaken van een positie aan; elke speler op die positie krijgt ze automatisch, behalve waar een systeem of plek iets anders zegt.'],
+    ['Huiswerk geven', 'Tik bij een opstelling op “Huiswerk voor deze opstelling”, of ga naar Huiswerk → “Per positie geven”. Iedere speler krijgt de thuisoefeningen van zijn plek, met de plek erbij in de notitie. Je kunt ook zelf één oefening aan het team of een speler geven. Je ziet wie wat gedaan heeft en kunt een compliment sturen.'],
+    ['Spelerslink en toestemming', 'In Spelers maak je per speler een persoonlijke link en stuur je die naar de ouder. De ouder geeft eerst toestemming; daarna ziet de speler zijn taken en huiswerk. Een nieuwe link maakt de oude ongeldig.']
+  ]],
+  ['Delen en beheer', [
+    ['Teamlink', 'In Beheer staat de teamlink. Iedereen met die link kan meekijken naar opstellingen, patronen en trainingen, zonder in te loggen. Aanpassen kan alleen een trainer.'],
+    ['Assistent toevoegen', 'Laat de assistent eerst één keer inloggen in de app. Vul daarna in Beheer zijn e-mailadres in.'],
+    ['Kleuren en seizoen', 'In Beheer pas je teamnaam, club, seizoen en kleuren aan. Aan het eind van het seizoen verwijdert “Seizoen afsluiten” alle spelers en huiswerk; opstellingen, patronen en oefenvormen blijven bewaard.']
+  ]],
+  ['Privacy', [
+    ['Wat we bewaren', 'Alleen een voornaam of bijnaam, rugnummer, positie en welke oefeningen zijn afgevinkt, met een smiley. Geen achternaam, geboortedatum, foto of contactgegevens. Er is geen chat en geen ranglijst tussen kinderen. Een ouder kan op de spelerspagina zelf de toestemming intrekken; de gegevens worden dan direct verwijderd.']
+  ]]
+];
+const HELP_PLAYER = [
+  ['Voor spelers en ouders', [
+    ['Mijn week', 'Hier staat jouw taak op het veld in de opstelling voor de komende wedstrijd: wat je doet met de bal, zonder de bal, na balverlies, na balwinst en bij corners en vrije trappen. Daaronder staan je thuisoefeningen van deze week.'],
+    ['Thuis oefenen', 'Elke oefening duurt ongeveer tien minuten, op het terras, een pad of tegen een muur, alleen of met een ouder of vriend. Gedaan? Tik op de smiley die past bij hoe het ging. De trainer ziet dat en kan je een compliment sturen. Per ongeluk getikt? Kies “Toch nog niet gedaan”.'],
+    ['Meekijken', 'In Opstelling tik je op een speler om zijn taken te zien. In Patronen speel je spelsituaties stap voor stap af. In Trainingen zie je wat we op de training doen.'],
+    ['Privacy', 'We bewaren alleen je voornaam of bijnaam, rugnummer, positie en welke oefeningen je hebt gedaan. Onderaan Mijn week kan een ouder de toestemming intrekken; dan worden de gegevens meteen verwijderd.']
+  ]]
+];
+const HELP_VIEW = [
+  ['Meekijken', [
+    ['Wat zie je hier', 'Dit is de meekijkpagina van het team. In Opstelling tik je op een speler om zijn taken in dat systeem te zien; op de computer kun je ook met de muis op een speler gaan staan. In Patronen speel je spelsituaties stap voor stap af, in Trainingen staan het weekplan en de oefenvormen.'],
+    ['Aanpassen', 'Aanpassen kan alleen de trainer, na inloggen.']
+  ]]
+];
+function viewHelp() {
+  const parts = S.staff ? HELP_TRAINER : S.mode === 'player' ? HELP_PLAYER : HELP_VIEW;
+  $('#view').innerHTML = `<div class="panel help"><div class="kicker">Handleiding · ${FM().label}</div><h2>${S.staff ? 'Zo werkt Ons Speelboek' : 'Uitleg'}</h2>
+    <p class="muted" style="margin-top:0">${S.staff ? 'Alles in de app volgt de opstelling: kies je een systeem of wissel je een speler, dan passen taken, oefeningen en huiswerk zich vanzelf aan.' : 'Hier lees je hoe deze pagina werkt.'}</p>
+    ${parts.map(([kop, items]) => `<h3 class="mt">${esc(kop)}</h3>${items.map(([t, x]) => `<details><summary>${esc(t)}</summary><p>${esc(x)}</p></details>`).join('')}`).join('')}</div>`;
 }
 
 /* ---------------- dialoog ---------------- */
