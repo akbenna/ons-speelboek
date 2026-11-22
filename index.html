@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0d10">
+<meta name="robots" content="noindex, nofollow">
+<title>Ons Speelboek</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚽</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;1,800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --club:#db1e3b; --club2:#181519; --clubInk:#ffffff;
+  --bg:#0a0c0f; --panel:rgba(22,25,30,.82); --panel2:rgba(255,255,255,.04);
+  --line:rgba(255,255,255,.10); --ink:#f3f4f2; --muted:#9aa1a8; --chalk:#eef2ea;
+  --ok:#3ccf7a; --warn:#ffb020;
+  color-scheme:dark; box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100vh;color:var(--ink);font:400 16px/1.5 "Barlow",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  background:
+    radial-gradient(60vw 40vh at 8% -8%, rgba(255,255,240,.13), transparent 60%),
+    radial-gradient(60vw 40vh at 92% -8%, rgba(255,255,240,.11), transparent 60%),
+    radial-gradient(90vw 50vh at 50% 115%, color-mix(in srgb, var(--club) 28%, transparent), transparent 70%),
+    linear-gradient(180deg,#0d1014 0%, #0a0c0f 60%, #0b0a0c 100%);
+  background-attachment:fixed}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;opacity:.05;
+  background-image:repeating-linear-gradient(90deg, #fff 0 1px, transparent 1px 64px)}
+.wrap{max-width:1100px;margin:0 auto;padding:18px 16px 60px;position:relative;z-index:1}
+.h-cond{font-family:"Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:.01em}
+header.top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:6px 0 16px}
+.club{font:700 .8rem "Barlow Condensed",sans-serif;letter-spacing:.18em;text-transform:uppercase;color:var(--club);display:flex;align-items:center;gap:8px}
+.club::before{content:"";width:22px;height:4px;background:var(--club);border-radius:2px;box-shadow:0 0 12px var(--club)}
+h1.title{font:italic 800 clamp(2.2rem,8vw,3.4rem)/.95 "Barlow Condensed",sans-serif;margin:4px 0 0;text-transform:uppercase;letter-spacing:.01em}
+h1.title span{color:var(--club)}
+.who{font-size:.85rem;color:var(--muted);text-align:right}
+nav.tabs{display:flex;gap:4px;overflow-x:auto;padding:4px;background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:14px;margin-bottom:18px;scrollbar-width:none}
+nav.tabs button{flex:1 0 auto;border:0;background:transparent;color:var(--muted);font:700 .95rem "Barlow Condensed",sans-serif;letter-spacing:.06em;text-transform:uppercase;padding:10px 12px;border-radius:10px;cursor:pointer}
+nav.tabs button[aria-current="page"]{background:var(--club);color:var(--clubInk);box-shadow:0 6px 18px -6px var(--club)}
+.panel{background:var(--panel);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:18px;padding:18px}
+.panel h2,.panel h3{font-family:"Barlow Condensed",sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.02em;margin:0 0 8px;line-height:1.05}
+.panel h2{font-size:1.55rem}.panel h3{font-size:1.2rem}
+.kicker{font:700 .72rem "Barlow Condensed",sans-serif;letter-spacing:.16em;text-transform:uppercase;color:var(--club)}
+.muted{color:var(--muted)} .small{font-size:.88rem}
+.grid{display:grid;gap:14px}
+@media(min-width:760px){.grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.layout{display:grid;gap:18px}
+@media(min-width:900px){.layout{grid-template-columns:minmax(0,440px) 1fr;align-items:start}}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:12px;scrollbar-width:thin}
+.chips button{flex:none;border:1px solid var(--line);background:var(--panel2);color:var(--ink);font:600 .9rem "Barlow",sans-serif;padding:7px 13px;border-radius:999px;cursor:pointer;white-space:nowrap}
+.chips button.on{background:#fff;color:#111;border-color:#fff}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--panel2);color:var(--ink);font:700 .9rem "Barlow",sans-serif;padding:9px 14px;border-radius:12px;cursor:pointer;text-decoration:none}
+.btn:hover{border-color:rgba(255,255,255,.25)}
+.btn.primary{background:var(--club);border-color:var(--club);color:var(--clubInk);box-shadow:0 8px 22px -10px var(--club)}
+.btn.ghost{background:transparent}
+.btn.danger{border-color:rgba(255,80,80,.5);color:#ff8a8a}
+.btn:disabled{opacity:.45;cursor:default}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.mt{margin-top:12px}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.pitch{width:100%;height:auto;display:block;border-radius:18px;touch-action:none;user-select:none;-webkit-user-select:none;
+  box-shadow:0 30px 60px -30px rgba(0,0,0,.9), 0 0 0 1px rgba(255,255,255,.08)}
+.tok,.ballg{transition:transform .65s cubic-bezier(.3,.7,.3,1)}
+.tok{cursor:pointer}
+svg.edit .tok{cursor:grab}
+svg.noanim .tok,svg.noanim .ballg{transition:none}
+@media (prefers-reduced-motion: reduce){.tok,.ballg{transition:none}}
+dl.task{margin:0} dl.task dt{font:700 .78rem "Barlow Condensed",sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--club);margin-top:10px}
+dl.task dd{margin:2px 0 0}
+.bench{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.bench button{border:1px dashed rgba(255,255,255,.25);background:transparent;color:var(--ink);font:600 .9rem "Barlow",sans-serif;padding:6px 11px;border-radius:999px;cursor:pointer}
+.bench button.sel{border-style:solid;border-color:var(--club);background:color-mix(in srgb,var(--club) 22%,transparent)}
+.caption{min-height:3em;font-size:1.08rem;margin:12px 0 0}
+.drill svg{width:100%;height:auto;display:block;border-radius:12px;margin-bottom:12px}
+.drill ul{margin:6px 0 10px;padding-left:20px}
+details>summary{cursor:pointer;font-weight:700;color:var(--chalk);margin:10px 0}
+ol.clean{padding-left:22px;margin:8px 0} ol.clean li{margin:4px 0}
+.pcard{display:flex;gap:14px;align-items:flex-start}
+.shirt{flex:none;width:58px;height:58px}
+label.f{display:block;font:700 .75rem "Barlow Condensed",sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:12px 0 4px}
+input.i,select.i,textarea.i{width:100%;font:400 1rem "Barlow",sans-serif;color:var(--ink);background:rgba(0,0,0,.35);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+textarea.i{min-height:84px;resize:vertical}
+dialog{border:1px solid var(--line);border-radius:18px;background:#14171c;color:var(--ink);padding:0;width:min(560px,94vw);max-height:88vh}
+dialog::backdrop{background:rgba(0,0,0,.65);backdrop-filter:blur(3px)}
+dialog .dbody{padding:20px;overflow:auto;max-height:calc(88vh - 70px)}
+dialog .dfoot{display:flex;gap:8px;justify-content:flex-end;padding:12px 20px;border-top:1px solid var(--line)}
+.toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#fff;color:#111;font-weight:600;padding:10px 16px;border-radius:12px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:50;max-width:92vw}
+.toast.show{opacity:1}
+.hero{display:grid;gap:18px;align-items:center}
+@media(min-width:860px){.hero{grid-template-columns:1.1fr 1fr}}
+.hero p.lead{font-size:1.15rem;color:#d7dbd6;max-width:34ch}
+.badge{display:inline-block;font:700 .72rem "Barlow Condensed",sans-serif;letter-spacing:.12em;text-transform:uppercase;padding:3px 9px;border-radius:999px;background:rgba(255,255,255,.08);color:var(--muted)}
+.loading{display:grid;place-items:center;min-height:50vh;color:var(--muted);font:700 1rem "Barlow Condensed",sans-serif;letter-spacing:.14em;text-transform:uppercase}
+.empty{padding:22px;text-align:center;color:var(--muted)}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"><div class="loading">Speelboek laden…</div></div>
+<div class="toast" id="toast" role="status"></div>
+<dialog id="dlg"><form method="dialog" id="dlgForm"><div class="dbody" id="dlgBody"></div><div class="dfoot" id="dlgFoot"></div></form></dialog>
+<script type="module" src="./app.js"></script>
+</body>
+</html>
