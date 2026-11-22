@@ -1,0 +1,2402 @@
+{
+"ROLES": {
+"K": {
+"naam": "Keeper",
+"bal": "Speel kort uit op de centrale verdedigers of de backs. Lang alleen als de spitsen al diep lopen.",
+"geen": "Coach je verdediging en sta hoog genoeg om een bal achter de verdediging op te vangen.",
+"extra": [
+"Na een fout: handschoenen goed, “volgende bal”."
+],
+"drills": [
+"keeper",
+"opbouw11"
+],
+"home": [
+"h-keeper",
+"h-kaatsen"
+]
+},
+"RA": {
+"naam": "Rechtsback",
+"bal": "Sta breed en hoog bij de opbouw. Speel in op de rechtsbuiten of de middenvelder en kom mee voor de overlap.",
+"geen": "Houd je buitenspeler voor je. Is de bal aan de andere kant, schuif dan naar binnen.",
+"extra": [],
+"drills": [
+"1tegen1",
+"vleugelzones",
+"opbouw11"
+],
+"home": [
+"h-1tegen1",
+"h-kaatsen",
+"h-omkijken"
+]
+},
+"RCV": {
+"naam": "Rechter centrale verdediger",
+"bal": "Ga breed staan als de keeper de bal heeft. Speel in op de controleur of de rechtsback; dribbel in als er ruimte voor je is.",
+"geen": "Dek de spits samen met je maatje: één gaat naar de bal, de ander dekt erachter.",
+"extra": [
+"Bij corners voor ons blijf je achter."
+],
+"drills": [
+"1tegen1",
+"compact",
+"opbouw11"
+],
+"home": [
+"h-1tegen1",
+"h-kaatsen",
+"h-omkijken"
+]
+},
+"CV": {
+"naam": "Centrale verdediger",
+"bal": "Jij staat in het midden van de drie. Speel rustig in op de controleur en verdeel naar de kanten.",
+"geen": "Jij bent de laatste man: coach de lijn en dek achter je maatjes.",
+"extra": [
+"Zeg wat je ziet en stuur je medespelers."
+],
+"drills": [
+"1tegen1",
+"compact",
+"linies11"
+],
+"home": [
+"h-1tegen1",
+"h-kaatsen",
+"h-omkijken"
+]
+},
+"LCV": {
+"naam": "Linker centrale verdediger",
+"bal": "Ga breed staan als de keeper de bal heeft. Speel in op de controleur of de linksback; dribbel in als er ruimte voor je is.",
+"geen": "Dek de spits samen met je maatje: één gaat naar de bal, de ander dekt erachter.",
+"extra": [
+"Bij corners voor ons blijf je achter."
+],
+"drills": [
+"1tegen1",
+"compact",
+"opbouw11"
+],
+"home": [
+"h-1tegen1",
+"h-kaatsen",
+"h-omkijken"
+]
+},
+"LA": {
+"naam": "Linksback",
+"bal": "Sta breed en hoog bij de opbouw. Speel in op de linksbuiten of de middenvelder en kom mee voor de overlap.",
+"geen": "Houd je buitenspeler voor je. Is de bal aan de andere kant, schuif dan naar binnen.",
+"extra": [],
+"drills": [
+"1tegen1",
+"vleugelzones",
+"opbouw11"
+],
+"home": [
+"h-1tegen1",
+"h-kaatsen",
+"h-omkijken"
+]
+},
+"VM": {
+"naam": "Controleur (6)",
+"bal": "Kom tussen of voor de centrale verdedigers de bal halen, draai open en speel vooruit. Je bent altijd aanspeelbaar.",
+"geen": "Bescherm de ruimte voor de verdediging. Jij gaat niet mee de zestien in.",
+"extra": [
+"Bij balverlies ben jij de eerste die het midden dichtzet."
+],
+"drills": [
+"positie",
+"draaien",
+"linies11"
+],
+"home": [
+"h-omkijken",
+"h-draaien",
+"h-kaatsen"
+]
+},
+"CM": {
+"naam": "Middenvelder (8)",
+"bal": "Zoek de ruimte naast hun middenvelders, kom tussen de linies en ga mee de zestien in.",
+"geen": "Zet druk op hun middenvelder en loop mee terug tot naast de controleur.",
+"extra": [],
+"drills": [
+"positie",
+"derdeman",
+"rondo"
+],
+"home": [
+"h-muurpass",
+"h-omkijken",
+"h-steekpass"
+]
+},
+"AM": {
+"naam": "Aanvallende middenvelder (10)",
+"bal": "Zoek de ruimte achter hun middenveld, draai en speel de spits of een buitenspeler in. Kom in de zestien voor de tweede bal.",
+"geen": "Zet druk op hun controleur en sluit de pass naar het midden af.",
+"extra": [],
+"drills": [
+"draaien",
+"derdeman",
+"afronden"
+],
+"home": [
+"h-draaien",
+"h-steekpass",
+"h-afronden"
+]
+},
+"LM": {
+"naam": "Links middenveld",
+"bal": "Speel breed, combineer met de linksback en geef voorzetten.",
+"geen": "Loop terug en sluit de linkerkant af, naast de linksback.",
+"extra": [],
+"drills": [
+"vleugelzones",
+"actie"
+],
+"home": [
+"h-aanname",
+"h-steekpass",
+"h-dribbel"
+]
+},
+"RM": {
+"naam": "Rechts middenveld",
+"bal": "Speel breed, combineer met de rechtsback en geef voorzetten.",
+"geen": "Loop terug en sluit de rechterkant af, naast de rechtsback.",
+"extra": [],
+"drills": [
+"vleugelzones",
+"actie"
+],
+"home": [
+"h-aanname",
+"h-steekpass",
+"h-dribbel"
+]
+},
+"LW": {
+"naam": "Linksbuiten",
+"bal": "Sta breed bij de zijlijn. Ga 1 tegen 1, snij naar binnen of geef de voorzet.",
+"geen": "Zet druk op hun rechtsback. Bij balverlies terug tot de middenlijn.",
+"extra": [
+"Vraag de bal in de ruimte, niet in de voeten."
+],
+"drills": [
+"actie",
+"vleugelzones",
+"afronden"
+],
+"home": [
+"h-aanname",
+"h-dribbel",
+"h-afronden"
+]
+},
+"RW": {
+"naam": "Rechtsbuiten",
+"bal": "Sta breed bij de zijlijn. Ga 1 tegen 1, snij naar binnen of geef de voorzet.",
+"geen": "Zet druk op hun linksback. Bij balverlies terug tot de middenlijn.",
+"extra": [
+"Vraag de bal in de ruimte, niet in de voeten."
+],
+"drills": [
+"actie",
+"vleugelzones",
+"afronden"
+],
+"home": [
+"h-aanname",
+"h-dribbel",
+"h-afronden"
+]
+},
+"SP": {
+"naam": "Spits",
+"bal": "Loop diep achter de verdediging of kom kort om te kaatsen. Rond af in één of twee keer raken.",
+"geen": "Zet als eerste druk op de verdediger met de bal en stuur hem naar één kant.",
+"extra": [
+"Bij corners voor ons sta je bij de eerste paal."
+],
+"drills": [
+"afronden",
+"golven",
+"actie"
+],
+"home": [
+"h-afronden",
+"h-aanname",
+"h-dribbel"
+]
+},
+"SS": {
+"naam": "Tweede spits",
+"bal": "Kom kort tussen de linies, kaats en ga mee voor de rebound.",
+"geen": "Sluit de pass naar hun controleur af.",
+"extra": [],
+"drills": [
+"afronden",
+"derdeman",
+"actie"
+],
+"home": [
+"h-afronden",
+"h-aanname",
+"h-muurpass"
+]
+}
+},
+"SYSTEMS": {
+"1433": {
+"naam": "1-4-3-3",
+"titel": "1-4-3-3 Basis",
+"idee": "Vier verdedigers, drie middenvelders in een driehoek (6, 8 en 10) en drie aanvallers. Het basissysteem van de KNVB: altijd driehoeken op het veld en breedte via de buitenspelers.",
+"sterk": "Het veld is overal bezet en er zijn steeds driehoeken om in te spelen.",
+"risico": "Lopen de backs allebei mee naar voren, dan staan de centrale verdedigers alleen. Eén back blijft altijd achter.",
+"slots": [
+{
+"role": "K",
+"x": 50,
+"y": 95,
+"wie": "Mees"
+},
+{
+"role": "LA",
+"x": 12,
+"y": 74,
+"wie": "Nassim"
+},
+{
+"role": "LCV",
+"x": 36,
+"y": 83,
+"wie": "Sjoerd"
+},
+{
+"role": "RCV",
+"x": 64,
+"y": 83,
+"wie": "Tim"
+},
+{
+"role": "RA",
+"x": 88,
+"y": 74,
+"wie": "Stijn"
+},
+{
+"role": "VM",
+"x": 50,
+"y": 66,
+"wie": "Sasha"
+},
+{
+"role": "CM",
+"x": 34,
+"y": 52,
+"wie": "Suleiman"
+},
+{
+"role": "AM",
+"x": 64,
+"y": 46,
+"wie": "Amine"
+},
+{
+"role": "LW",
+"x": 12,
+"y": 26,
+"wie": "Maddox",
+"bal": "Sta breed links en snij naar binnen op je rechterbeen voor het schot. Nassim komt dan buitenom."
+},
+{
+"role": "SP",
+"x": 50,
+"y": 18,
+"wie": "Colin"
+},
+{
+"role": "RW",
+"x": 88,
+"y": 26,
+"wie": "Joas"
+}
+]
+},
+"14231": {
+"naam": "1-4-2-3-1",
+"titel": "1-4-2-3-1 Dubbele zes",
+"idee": "Vier verdedigers, twee controleurs naast elkaar, drie aanvallende middenvelders en één spits. Stevig in het midden, met Amine vrij achter de spits.",
+"sterk": "Twee spelers voor de verdediging: bij balverlies staat het midden meteen dicht.",
+"risico": "Colin staat alleen voorin; de drie erachter moeten op tijd aansluiten.",
+"slots": [
+{
+"role": "K",
+"x": 50,
+"y": 95,
+"wie": "Mees"
+},
+{
+"role": "LA",
+"x": 12,
+"y": 74,
+"wie": "Nassim"
+},
+{
+"role": "LCV",
+"x": 36,
+"y": 83,
+"wie": "Sjoerd"
+},
+{
+"role": "RCV",
+"x": 64,
+"y": 83,
+"wie": "Tim"
+},
+{
+"role": "RA",
+"x": 88,
+"y": 74,
+"wie": "Stijn"
+},
+{
+"role": "VM",
+"x": 40,
+"y": 64,
+"wie": "Sasha",
+"bal": "Samen met Suleiman vorm je de dubbele zes: jij blijft, hij mag mee. Speel kort en vooruit."
+},
+{
+"role": "CM",
+"x": 60,
+"y": 64,
+"wie": "Suleiman",
+"naam": "Tweede controleur",
+"bal": "Jij mag mee naar voren als Sasha achter blijft. Kom tussen de linies en zoek Amine.",
+"geen": "Terug naast Sasha: met z'n tweeën sluiten jullie het midden af."
+},
+{
+"role": "AM",
+"x": 50,
+"y": 44,
+"wie": "Amine",
+"naam": "Nummer 10",
+"bal": "Jij bent vrij achter de spits. Kom tussen de linies, draai en bedien Colin of de buitenspelers."
+},
+{
+"role": "LW",
+"x": 14,
+"y": 34,
+"wie": "Maddox",
+"bal": "Kom naar binnen op je rechterbeen en zoek het schot; laat de flank vrij voor Nassim."
+},
+{
+"role": "RW",
+"x": 86,
+"y": 34,
+"wie": "Joas"
+},
+{
+"role": "SP",
+"x": 50,
+"y": 18,
+"wie": "Colin",
+"bal": "Jij bent alleen voorin: houd de bal vast tot Amine en de buitenspelers aansluiten."
+}
+]
+},
+"1442": {
+"naam": "1-4-4-2",
+"titel": "1-4-4-2 Twee spitsen",
+"idee": "Vier verdedigers, vier middenvelders op een lijn en twee spitsen. Eenvoudig en duidelijk: iedereen heeft een vaste man of zone.",
+"sterk": "Twee spitsen zetten samen druk en er staan altijd twee spelers voor het doel.",
+"risico": "In het midden staan er maar twee; tegen drie middenvelders komen we daar tekort.",
+"slots": [
+{
+"role": "K",
+"x": 50,
+"y": 95,
+"wie": "Mees"
+},
+{
+"role": "LA",
+"x": 12,
+"y": 74,
+"wie": "Nassim"
+},
+{
+"role": "LCV",
+"x": 36,
+"y": 83,
+"wie": "Sjoerd"
+},
+{
+"role": "RCV",
+"x": 64,
+"y": 83,
+"wie": "Tim"
+},
+{
+"role": "RA",
+"x": 88,
+"y": 74,
+"wie": "Stijn"
+},
+{
+"role": "LM",
+"x": 14,
+"y": 50,
+"wie": "Maddox"
+},
+{
+"role": "VM",
+"x": 40,
+"y": 60,
+"wie": "Sasha",
+"naam": "Controleur"
+},
+{
+"role": "CM",
+"x": 60,
+"y": 56,
+"wie": "Amine",
+"naam": "Spelverdeler",
+"bal": "Haal de bal bij de verdedigers, draai en speel een van de twee spitsen in."
+},
+{
+"role": "RM",
+"x": 86,
+"y": 50,
+"wie": "Suleiman"
+},
+{
+"role": "SP",
+"x": 40,
+"y": 20,
+"wie": "Colin",
+"naam": "Diepe spits",
+"bal": "Loop diep; Joas komt kort."
+},
+{
+"role": "SS",
+"x": 60,
+"y": 24,
+"wie": "Joas"
+}
+]
+},
+"1343": {
+"naam": "1-3-4-3",
+"titel": "1-3-4-3 Aanvallend",
+"idee": "Drie verdedigers, vier middenvelders met vleugelverdedigers aan de kant en drie aanvallers. Voor als we de tegenstander willen vastzetten.",
+"sterk": "Veel spelers op de helft van de tegenstander en breedte zonder dat de backs het hele veld moeten lopen.",
+"risico": "Achter staan er maar drie; de vleugelverdedigers moeten bij balverlies een sprint terug trekken.",
+"slots": [
+{
+"role": "K",
+"x": 50,
+"y": 95,
+"wie": "Mees",
+"bal": "Speel kort op een van de drie verdedigers; zij staan breed in de zestien."
+},
+{
+"role": "LCV",
+"x": 24,
+"y": 80,
+"wie": "Nassim",
+"bal": "Je bent linksbenig: speel de bal naar voren langs de linkerkant op Stijn of Maddox."
+},
+{
+"role": "CV",
+"x": 50,
+"y": 84,
+"wie": "Sjoerd"
+},
+{
+"role": "RCV",
+"x": 76,
+"y": 80,
+"wie": "Tim"
+},
+{
+"role": "LM",
+"x": 8,
+"y": 56,
+"wie": "Stijn",
+"naam": "Linker vleugelverdediger",
+"bal": "Jij maakt links de breedte, helemaal tot aan de achterlijn.",
+"geen": "Bij balverlies meteen terug: dan zijn we achter met vier."
+},
+{
+"role": "VM",
+"x": 40,
+"y": 62,
+"wie": "Sasha"
+},
+{
+"role": "CM",
+"x": 60,
+"y": 56,
+"wie": "Amine",
+"naam": "Spelverdeler"
+},
+{
+"role": "RM",
+"x": 92,
+"y": 56,
+"wie": "Suleiman",
+"naam": "Rechter vleugelverdediger",
+"bal": "Jij maakt rechts de breedte en geeft de voorzetten.",
+"geen": "Bij balverlies meteen terug: dan zijn we achter met vier."
+},
+{
+"role": "LW",
+"x": 20,
+"y": 26,
+"wie": "Maddox",
+"bal": "Kom naar binnen, Stijn loopt buitenom."
+},
+{
+"role": "SP",
+"x": 50,
+"y": 18,
+"wie": "Colin"
+},
+{
+"role": "RW",
+"x": 80,
+"y": 26,
+"wie": "Joas",
+"bal": "Kom naar binnen, Suleiman loopt buitenom."
+}
+]
+},
+"14141": {
+"naam": "1-4-1-4-1",
+"titel": "1-4-1-4-1 Compact",
+"idee": "Vier verdedigers, één controleur, een lijn van vier en één spits. Compact verdedigen tegen een sterke tegenstander en snel omschakelen.",
+"sterk": "Twee lijnen van vier dicht bij elkaar: er is weinig ruimte om doorheen te spelen.",
+"risico": "Colin staat ver weg; bij balwinst moet het middenveld snel mee om hem te helpen.",
+"slots": [
+{
+"role": "K",
+"x": 50,
+"y": 95,
+"wie": "Mees"
+},
+{
+"role": "LA",
+"x": 12,
+"y": 74,
+"wie": "Nassim"
+},
+{
+"role": "LCV",
+"x": 36,
+"y": 83,
+"wie": "Sjoerd"
+},
+{
+"role": "RCV",
+"x": 64,
+"y": 83,
+"wie": "Tim"
+},
+{
+"role": "RA",
+"x": 88,
+"y": 74,
+"wie": "Stijn"
+},
+{
+"role": "VM",
+"x": 50,
+"y": 68,
+"wie": "Sasha",
+"bal": "Jij staat alleen voor de verdediging: kort en simpel spelen, de 8'en voor je zoeken."
+},
+{
+"role": "AM",
+"x": 36,
+"y": 50,
+"wie": "Amine",
+"naam": "Linker 8",
+"bal": "Bij balwinst meteen kijken naar Colin. Is hij niet vrij, dan rustig kort houden.",
+"geen": "Sluit de lijn van vier: blijf naast Suleiman en de buitenspelers."
+},
+{
+"role": "CM",
+"x": 64,
+"y": 50,
+"wie": "Suleiman",
+"naam": "Rechter 8",
+"bal": "Sluit snel aan bij Colin als hij de bal heeft.",
+"geen": "Sluit de lijn van vier: blijf naast Amine en de buitenspelers."
+},
+{
+"role": "LM",
+"x": 12,
+"y": 44,
+"wie": "Maddox",
+"geen": "Jij hoort bij de lijn van vier: loop terug tot naast Amine."
+},
+{
+"role": "RM",
+"x": 88,
+"y": 44,
+"wie": "Joas",
+"geen": "Jij hoort bij de lijn van vier: loop terug tot naast Suleiman."
+},
+{
+"role": "SP",
+"x": 50,
+"y": 24,
+"wie": "Colin",
+"naam": "Uitvalspunt",
+"bal": "Bij balwinst ben jij het aanspeelpunt. Houd de bal vast tot het middenveld aansluit.",
+"geen": "Blijf tussen hun verdedigers en de middenlijn; jaag niet op de keeper."
+}
+]
+}
+},
+"ALT": {
+"K": [
+"Maddox"
+],
+"LA": [
+"Stijn"
+],
+"LCV": [
+"Nassim"
+],
+"RCV": [
+"Sasha"
+],
+"CV": [
+"Sasha"
+],
+"RA": [
+"Ayden",
+"Tim"
+],
+"VM": [
+"Colin"
+],
+"CM": [
+"Joas",
+"Ayden"
+],
+"AM": [
+"Colin"
+],
+"LW": [
+"Ayden"
+],
+"RW": [
+"Ayden",
+"Suleiman"
+],
+"SP": [
+"Ayden",
+"Maddox"
+],
+"SS": [
+"Ayden",
+"Maddox"
+],
+"LM": [
+"Stijn",
+"Ayden"
+],
+"RM": [
+"Joas",
+"Ayden"
+]
+},
+"OPP": [
+[
+50,
+5
+],
+[
+14,
+24
+],
+[
+36,
+18
+],
+[
+64,
+18
+],
+[
+86,
+24
+],
+[
+50,
+32
+],
+[
+34,
+42
+],
+[
+66,
+42
+],
+[
+16,
+56
+],
+[
+50,
+62
+],
+[
+84,
+56
+]
+],
+"BASIS": {
+"Mees": [
+50,
+95,
+"K"
+],
+"Nassim": [
+12,
+74,
+"LA"
+],
+"Sjoerd": [
+36,
+83,
+"LCV"
+],
+"Tim": [
+64,
+83,
+"RCV"
+],
+"Stijn": [
+88,
+74,
+"RA"
+],
+"Sasha": [
+50,
+66,
+"VM"
+],
+"Suleiman": [
+34,
+52,
+"CM"
+],
+"Amine": [
+64,
+46,
+"AM"
+],
+"Maddox": [
+12,
+26,
+"LW"
+],
+"Colin": [
+50,
+18,
+"SP"
+],
+"Joas": [
+88,
+26,
+"RW"
+]
+},
+"PAT": [
+{
+"id": "opbouw4",
+"name": "Opbouw met vier achter",
+"frames": [
+{
+"ball": [
+50,
+93
+],
+"cap": "Mees heeft de bal. De tegenstander zet druk met drie aanvallers.",
+"opp": [
+[
+50,
+5
+],
+[
+14,
+24
+],
+[
+36,
+18
+],
+[
+64,
+18
+],
+[
+86,
+24
+],
+[
+50,
+32
+],
+[
+34,
+42
+],
+[
+66,
+42
+],
+[
+16,
+56
+],
+[
+50,
+62
+],
+[
+84,
+56
+]
+]
+},
+{
+"ball": [
+50,
+93
+],
+"cap": "De centrale verdedigers gaan breed in de zestien staan, de backs schuiven hoog op en Sasha komt tussen hen in de bal halen.",
+"opp": [
+[
+50,
+5
+],
+[
+14,
+24
+],
+[
+36,
+18
+],
+[
+64,
+18
+],
+[
+86,
+24
+],
+[
+50,
+32
+],
+[
+34,
+42
+],
+[
+66,
+42
+],
+[
+16,
+56
+],
+[
+50,
+62
+],
+[
+84,
+56
+]
+],
+"set": {
+"Sjoerd": [
+28,
+86
+],
+"Tim": [
+72,
+86
+],
+"Nassim": [
+8,
+62
+],
+"Stijn": [
+92,
+62
+],
+"Sasha": [
+50,
+76
+]
+},
+"ar": [
+[
+36,
+83,
+29,
+86,
+"run"
+],
+[
+64,
+83,
+71,
+86,
+"run"
+],
+[
+12,
+74,
+9,
+63,
+"run"
+],
+[
+88,
+74,
+91,
+63,
+"run"
+],
+[
+50,
+66,
+50,
+74,
+"run"
+]
+]
+},
+{
+"ball": [
+28,
+86
+],
+"cap": "Mees speelt kort op Sjoerd.",
+"opp": [
+[
+50,
+5
+],
+[
+14,
+24
+],
+[
+36,
+18
+],
+[
+64,
+18
+],
+[
+86,
+24
+],
+[
+50,
+32
+],
+[
+34,
+42
+],
+[
+66,
+42
+],
+[
+16,
+56
+],
+[
+50,
+62
+],
+[
+84,
+56
+]
+],
+"ar": [
+[
+50,
+93,
+29,
+86,
+"pass"
+]
+]
+},
+{
+"ball": [
+8,
+62
+],
+"cap": "Sjoerd speelt breed op Nassim, die op de flank de ruimte heeft.",
+"opp": [
+[
+50,
+5
+],
+[
+14,
+24
+],
+[
+36,
+18
+],
+[
+64,
+18
+],
+[
+86,
+24
+],
+[
+50,
+32
+],
+[
+34,
+42
+],
+[
+66,
+42
+],
+[
+16,
+56
+],
+[
+50,
+62
+],
+[
+84,
+56
+]
+],
+"ar": [
+[
+28,
+86,
+9,
+63,
+"pass"
+]
+]
+},
+{
+"ball": [
+30,
+46
+],
+"cap": "Nassim speelt in op Suleiman, die tussen de linies is komen staan. Nu kan hij draaien en vooruit spelen.",
+"opp": [
+[
+50,
+5
+],
+[
+14,
+24
+],
+[
+36,
+18
+],
+[
+64,
+18
+],
+[
+86,
+24
+],
+[
+50,
+32
+],
+[
+34,
+42
+],
+[
+66,
+42
+],
+[
+16,
+56
+],
+[
+50,
+62
+],
+[
+84,
+56
+]
+],
+"set": {
+"Suleiman": [
+30,
+46
+]
+},
+"ar": [
+[
+34,
+52,
+30,
+47,
+"run"
+],
+[
+8,
+62,
+29,
+47,
+"pass"
+]
+]
+}
+]
+},
+{
+"id": "derdeman6",
+"name": "Derde man via de 6",
+"frames": [
+{
+"ball": [
+64,
+83
+],
+"cap": "Tim heeft de bal. Het midden lijkt dicht.",
+"opp": [
+[
+50,
+5
+],
+[
+14,
+24
+],
+[
+36,
+18
+],
+[
+64,
+18
+],
+[
+86,
+24
+],
+[
+50,
+32
+],
+[
+34,
+42
+],
+[
+66,
+42
+],
+[
+16,
+56
+],
+[
+50,
+62
+],
+[
+84,
+56
+]
+]
+},
+{
+"ball": [
+64,
+46
+],
+"cap": "Tim speelt in op Amine, met zijn rug naar het doel.",
+"opp": [
+[
+50,
+5
+],
+[
+14,
+24
+],
+[
+36,
+18
+],
+[
+64,
+18
+],
+[
+86,
+24
+],
+[
+50,
+32
+],
+[
+34,
+42
+],
+[
+66,
+42
+],
+[
+16,
+56
+],
+[
+50,
+62
+],
+[
+84,
+56
+]
+],
+"ar": [
+[
+64,
+83,
+64,
+47,
+"pass"
+]
+]
+},
+{
+"ball": [
+50,
+64
+],
+"cap": "Amine draait niet, maar kaatst direct op Sasha, die het spel voor zich heeft.",
+"opp": [
+[
+50,
+5
+],
+[
+14,
+24
+],
+[
+36,
+18
+],
+[
+64,
+18
+],
+[
+86,
+24
+],
+[
+50,
+32
+],
+[
+34,
+42
+],
+[
+66,
+42
+],
+[
+16,
+56
+],
+[
+50,
+62
+],
+[
+84,
+56
+]
+],
+"ar": [
+[
+64,
+46,
+51,
+63,
+"pass"
+]
+]
+},
+{
+"ball": [
+84,
+14
+],
+"cap": "Sasha speelt diep op Joas, die achter de back wegloopt. Dat is de derde man.",
+"opp": [
+[
+50,
+5
+],
+[
+14,
+24
+],
+[
+36,
+18
+],
+[
+64,
+18
+],
+[
+86,
+24
+],
+[
+50,
+32
+],
+[
+34,
+42
+],
+[
+66,
+42
+],
+[
+16,
+56
+],
+[
+50,
+62
+],
+[
+84,
+56
+]
+],
+"set": {
+"Joas": [
+84,
+14
+]
+},
+"ar": [
+[
+88,
+26,
+85,
+15,
+"run"
+],
+[
+50,
+64,
+83,
+16,
+"pass"
+]
+]
+}
+]
+},
+{
+"id": "overlaplinks",
+"name": "Overlap over links",
+"frames": [
+{
+"ball": [
+12,
+26
+],
+"cap": "Maddox heeft de bal links en zijn back staat voor hem.",
+"opp": [
+[
+50,
+5
+],
+[
+14,
+24
+],
+[
+36,
+18
+],
+[
+64,
+18
+],
+[
+86,
+24
+],
+[
+50,
+32
+],
+[
+34,
+42
+],
+[
+66,
+42
+],
+[
+16,
+56
+],
+[
+50,
+62
+],
+[
+84,
+56
+]
+]
+},
+{
+"ball": [
+12,
+26
+],
+"cap": "Nassim loopt buitenom mee. Maddox snijdt naar binnen en neemt zijn man mee.",
+"opp": [
+[
+50,
+5
+],
+[
+14,
+24
+],
+[
+36,
+18
+],
+[
+64,
+18
+],
+[
+86,
+24
+],
+[
+50,
+32
+],
+[
+34,
+42
+],
+[
+66,
+42
+],
+[
+16,
+56
+],
+[
+50,
+62
+],
+[
+84,
+56
+]
+],
+"set": {
+"Nassim": [
+6,
+22
+],
+"Maddox": [
+24,
+28
+]
+},
+"ar": [
+[
+12,
+74,
+6,
+24,
+"run"
+],
+[
+12,
+26,
+23,
+28,
+"drib"
+]
+]
+},
+{
+"ball": [
+6,
+22
+],
+"cap": "Maddox legt de bal in de loop van Nassim.",
+"opp": [
+[
+50,
+5
+],
+[
+14,
+24
+],
+[
+36,
+18
+],
+[
+64,
+18
+],
+[
+86,
+24
+],
+[
+50,
+32
+],
+[
+34,
+42
+],
+[
+66,
+42
+],
+[
+16,
+56
+],
+[
+50,
+62
+],
+[
+84,
+56
+]
+],
+"ar": [
+[
+24,
+28,
+7,
+23,
+"pass"
+]
+]
+},
+{
+"ball": [
+50,
+12
+],
+"cap": "Nassim geeft de voorzet op Colin bij de eerste paal; Amine komt in de zestien voor de tweede bal.",
+"opp": [
+[
+50,
+5
+],
+[
+14,
+24
+],
+[
+36,
+18
+],
+[
+64,
+18
+],
+[
+86,
+24
+],
+[
+50,
+32
+],
+[
+34,
+42
+],
+[
+66,
+42
+],
+[
+16,
+56
+],
+[
+50,
+62
+],
+[
+84,
+56
+]
+],
+"set": {
+"Colin": [
+46,
+10
+],
+"Amine": [
+58,
+20
+]
+},
+"ar": [
+[
+50,
+18,
+46,
+11,
+"run"
+],
+[
+64,
+46,
+58,
+21,
+"run"
+],
+[
+6,
+22,
+46,
+11,
+"pass"
+]
+]
+}
+]
+},
+{
+"id": "druk11",
+"name": "Balverlies: samen druk zetten",
+"frames": [
+{
+"ball": [
+36,
+18
+],
+"cap": "We verliezen de bal op hun helft. Hun linker centrale verdediger heeft hem.",
+"opp": [
+[
+50,
+5
+],
+[
+14,
+24
+],
+[
+36,
+18
+],
+[
+64,
+18
+],
+[
+86,
+24
+],
+[
+50,
+32
+],
+[
+34,
+42
+],
+[
+66,
+42
+],
+[
+16,
+56
+],
+[
+50,
+62
+],
+[
+84,
+56
+]
+]
+},
+{
+"ball": [
+36,
+18
+],
+"cap": "Colin zet meteen druk en dwingt hem naar buiten. Maddox dekt de back, Amine de controleur.",
+"opp": [
+[
+50,
+5
+],
+[
+14,
+24
+],
+[
+36,
+18
+],
+[
+64,
+18
+],
+[
+86,
+24
+],
+[
+50,
+32
+],
+[
+34,
+42
+],
+[
+66,
+42
+],
+[
+16,
+56
+],
+[
+50,
+62
+],
+[
+84,
+56
+]
+],
+"set": {
+"Colin": [
+40,
+20
+],
+"Maddox": [
+18,
+28
+],
+"Amine": [
+52,
+32
+]
+},
+"ar": [
+[
+50,
+18,
+41,
+19,
+"run"
+],
+[
+12,
+26,
+17,
+27,
+"run"
+],
+[
+64,
+46,
+52,
+33,
+"run"
+]
+]
+},
+{
+"ball": [
+14,
+24
+],
+"cap": "De verdediger speelt naar zijn back, maar daar staat Maddox al.",
+"opp": [
+[
+50,
+5
+],
+[
+14,
+24
+],
+[
+36,
+18
+],
+[
+64,
+18
+],
+[
+86,
+24
+],
+[
+50,
+32
+],
+[
+34,
+42
+],
+[
+66,
+42
+],
+[
+16,
+56
+],
+[
+50,
+62
+],
+[
+84,
+56
+]
+],
+"ar": [
+[
+36,
+18,
+15,
+24,
+"pass"
+]
+]
+},
+{
+"ball": [
+46,
+14
+],
+"cap": "Maddox wint de bal en speelt direct op Colin: de tegenstander staat nog niet goed.",
+"opp": [
+[
+50,
+5
+],
+[
+14,
+24
+],
+[
+36,
+18
+],
+[
+64,
+18
+],
+[
+86,
+24
+],
+[
+50,
+32
+],
+[
+34,
+42
+],
+[
+66,
+42
+],
+[
+16,
+56
+],
+[
+50,
+62
+],
+[
+84,
+56
+]
+],
+"set": {
+"Maddox": [
+14,
+24
+],
+"Colin": [
+46,
+14
+]
+},
+"ar": [
+[
+18,
+28,
+15,
+25,
+"run"
+],
+[
+14,
+24,
+45,
+15,
+"pass"
+]
+]
+}
+]
+}
+],
+"DRILLS": [
+{
+"id": "opbouw11",
+"name": "Opbouwen met vier achter (5 tegen 3)",
+"min": 20,
+"tf": "Opbouwen",
+"prob": "De keeper trapt lang en de bal is meteen weg.",
+"waarom": "Met vier verdedigers en de keeper tegen drie aanvallers is korte opbouw haalbaar. Spelers leren breed staan en de vrije man vinden.",
+"uitleg": "De keeper, twee centrale verdedigers en twee backs tegen drie aanvallers op een derde van het veld. Het team scoort door over de lijn te dribbelen of in een van twee doeltjes te passen. De aanvallers scoren op het grote doel na balverovering.",
+"coach": [
+"Centrale verdedigers breed in de zestien",
+"Backs hoog en breed",
+"Zoek de vrije man, vaak aan de andere kant"
+],
+"vari": "Moeilijker: een controleur erbij voor het team en een vierde aanvaller.",
+"el": [
+[
+"g",
+3,
+35,
+16
+],
+[
+"p",
+8,
+35
+],
+[
+"p",
+18,
+22
+],
+[
+"p",
+18,
+48
+],
+[
+"p",
+34,
+8
+],
+[
+"p",
+34,
+62
+],
+[
+"o",
+26,
+30
+],
+[
+"o",
+26,
+42
+],
+[
+"o",
+40,
+35
+],
+[
+"l",
+55,
+4,
+55,
+66
+],
+[
+"b",
+11,
+35
+]
+],
+"ar": [
+[
+8,
+35,
+17,
+23,
+"pass"
+],
+[
+18,
+22,
+33,
+9,
+"pass"
+],
+[
+34,
+8,
+56,
+10,
+"drib"
+]
+]
+},
+{
+"id": "linies11",
+"name": "Linies op afstand (schuiven als team)",
+"min": 15,
+"tf": "Verdedigen",
+"prob": "De linies staan te ver uit elkaar, zodat de tegenstander tussen de linies vrij staat.",
+"waarom": "In 11 tegen 11 zijn de afstanden groot. Als de drie linies samen schuiven, blijft er weinig ruimte over.",
+"uitleg": "Elf spelers in hun systeem. De trainer speelt de bal rond langs de kanten; het team schuift mee naar de bal, zonder bal. Daarna: bij een fluitsignaal tien seconden echt verdedigen tegen vier aanvallers.",
+"coach": [
+"Afstand tussen de linies: niet meer dan twintig meter",
+"De lijn aan de balkant schuift door, de andere kant schuift in",
+"Praat: “schuiven”, “dichter”"
+],
+"vari": "Wedstrijdecht: speel het in een partij 8 tegen 8 op een groot veld met dezelfde regels.",
+"el": [
+[
+"z",
+60,
+10,
+30,
+50
+],
+[
+"p",
+62,
+14
+],
+[
+"p",
+62,
+28
+],
+[
+"p",
+62,
+42
+],
+[
+"p",
+62,
+56
+],
+[
+"p",
+76,
+20
+],
+[
+"p",
+76,
+35
+],
+[
+"p",
+76,
+50
+],
+[
+"o",
+40,
+12
+],
+[
+"o",
+40,
+58
+],
+[
+"b",
+41,
+12
+]
+],
+"ar": [
+[
+62,
+28,
+62,
+22,
+"run"
+],
+[
+76,
+35,
+76,
+28,
+"run"
+]
+]
+},
+{
+"id": "wedstrijd11",
+"name": "Partij 11 tegen 11 met thema",
+"min": 25,
+"tf": "Wedstrijdvorm",
+"prob": "Wat we trainen, moet in de wedstrijd terugkomen.",
+"waarom": "Sluit de training af in het eigen systeem. Zo zien spelers waar het thema van de dag in de wedstrijd terugkomt.",
+"uitleg": "Twee teams op een heel veld, of 9 tegen 9 tussen de zestienmeters als er te weinig spelers zijn. Het thema bepaalt de extra regel, bijvoorbeeld: elke aanval begint bij de keeper, of een goal na een overlap telt dubbel.",
+"coach": [
+"Coach begeleidend, leg het spel niet steeds stil",
+"Time-out: één aandachtspunt",
+"Benoem goede voorbeelden van het thema"
+],
+"vari": "Te weinig spelers: 9 tegen 9 op driekwart veld.",
+"el": [
+[
+"g",
+2,
+35,
+16
+],
+[
+"g",
+98,
+35,
+16
+],
+[
+"p",
+7,
+35
+],
+[
+"p",
+20,
+12
+],
+[
+"p",
+18,
+28
+],
+[
+"p",
+18,
+42
+],
+[
+"p",
+20,
+58
+],
+[
+"p",
+34,
+35
+],
+[
+"p",
+42,
+22
+],
+[
+"p",
+42,
+48
+],
+[
+"p",
+56,
+12
+],
+[
+"p",
+60,
+35
+],
+[
+"p",
+56,
+58
+],
+[
+"o",
+93,
+35
+],
+[
+"o",
+80,
+35
+],
+[
+"o",
+66,
+35
+],
+[
+"b",
+43,
+23
+]
+],
+"ar": [
+[
+42,
+22,
+56,
+14,
+"pass"
+]
+]
+}
+],
+"TRAIN": [
+{
+"weken": "Week 1 en 2",
+"name": "Opbouwen met vier achter",
+"prob": "Lange ballen van de keeper en balverlies onder druk.",
+"drills": [
+"rondo",
+"opbouw11",
+"5tegen4",
+"wedstrijd11"
+]
+},
+{
+"weken": "Week 3",
+"name": "Spelen tussen de linies",
+"prob": "De middenvelders krijgen de bal met hun rug naar het spel.",
+"drills": [
+"omkijk",
+"draaien",
+"derdeman",
+"wedstrijd11"
+]
+},
+{
+"weken": "Week 4 en 5",
+"name": "Aanvallen over de vleugel",
+"prob": "Aanvallen lopen dood op de flank.",
+"drills": [
+"rondo",
+"vleugelzones",
+"actie",
+"wedstrijd11"
+]
+},
+{
+"weken": "Week 6",
+"name": "Samen druk zetten",
+"prob": "De tegenstander bouwt rustig op.",
+"drills": [
+"rondo",
+"storen",
+"tweedebal",
+"wedstrijd11"
+]
+},
+{
+"weken": "Week 7",
+"name": "Compact verdedigen als team",
+"prob": "De linies staan te ver uit elkaar.",
+"drills": [
+"1tegen1",
+"linies11",
+"omschakel",
+"wedstrijd11"
+]
+}
+],
+"PERSONAL": {
+"Mees": [
+"Na een fout: handschoenen goed, “volgende bal”."
+],
+"Maddox": [
+"Als het tegenzit: bij het afgesproken signaal adem je even uit en speel je door.",
+"Als Mees er niet is, keep jij."
+]
+}
+}

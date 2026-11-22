@@ -1,5 +1,6 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm';
 const SEED = await fetch(new URL('./seed.json', import.meta.url)).then(r => r.json());
+const SEED11 = await fetch(new URL('./seed11.json', import.meta.url)).then(r => r.json());
 
 const SUPABASE_URL = 'https://ygxvhlmutsdmaqishzla.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_ql89Fvs9DRbCG_MRvkctrA_cQoTDuD0';
@@ -140,17 +141,25 @@ const SYSTEMS = {
     ] }
 };
 const SLUG_SYS = { basis: '1331', fase1: '1331', druk: '1331', voorsprong: '1331', zondermees: '1331', achterstand: '1232', tweespitsen: '1322' };
-const sysOf = L => L?.data?.sys || SLUG_SYS[L?.data?.slug] || null;
+/* Speelvorm per team: 8 tegen 8 (standaard) of 11 tegen 11. Elk team heeft zijn eigen posities, systemen en patronen. */
+const fmt = () => (S.team?.colors?.format === 11 ? 11 : 8);
+function FMf(f) {
+  return f === 11
+    ? { f: 11, label: '11 tegen 11', ROLES: SEED11.ROLES, SYSTEMS: SEED11.SYSTEMS, SLUG: {}, ALT: SEED11.ALT, OPP: SEED11.OPP, BASIS: SEED11.BASIS, PERSONAL: SEED11.PERSONAL, def: '1433', ORDER: ['1433', '14231', '1442', '1343', '14141'] }
+    : { f: 8, label: '8 tegen 8', ROLES, SYSTEMS, SLUG: SLUG_SYS, ALT: SEED.ALT, OPP: SEED.OPP, BASIS: SEED.BASIS, PERSONAL, def: '1322', ORDER: ['1331', '1322', '1313', '1232', '1421'] };
+}
+const FM = () => FMf(fmt());
+const sysOf = L => L?.data?.sys || FM().SLUG[L?.data?.slug] || null;
 /* De plek in het systeemsjabloon die bij dit slot hoort: zelfde positie, zelfde volgnummer. */
 function tplSlot(L, slot, orig = slot) {
-  const T = SYSTEMS[sysOf(L)]; if (!T) return null;
+  const T = FM().SYSTEMS[sysOf(L)]; if (!T) return null;
   const at = L.data.slots.indexOf(orig);
   const nr = L.data.slots.slice(0, at < 0 ? 0 : at).filter(s => s.role === slot.role).length;
   return T.slots.filter(s => s.role === slot.role)[nr] || null;
 }
 /* Taken voor deze plek: eigen aanpassing in deze opstelling, anders het systeem, anders de positiekaart. */
 function slotTasks(L, slot, orig = slot) {
-  const rc = roleCard(slot.role)?.data || ROLES[slot.role] || {};
+  const rc = roleCard(slot.role)?.data || FM().ROLES[slot.role] || {};
   const t = tplSlot(L, slot, orig) || {};
   return {
     naam: slot.naam || t.naam || rc.naam || slot.role,
@@ -211,7 +220,7 @@ async function loadStaff(preferId) {
   store.set('sb:team', S.team.id);
   await reloadTeamData();
   if (!kind('session').length) {
-    const { error } = await sb.from('content').insert(Object.entries(ROLES).map(([code, r], i) => ({ team_id: S.team.id, kind: 'session', title: r.naam, sort: i, data: { role: code, ...r }, updated_by: S.user.id })));
+    const { error } = await sb.from('content').insert(Object.entries(FM().ROLES).map(([code, r], i) => ({ team_id: S.team.id, kind: 'session', title: r.naam, sort: i, data: { role: code, ...r }, updated_by: S.user.id })));
     if (!error) await reloadTeamData();
   }
   await ensureSystems();
@@ -219,19 +228,19 @@ async function loadStaff(preferId) {
 }
 /* Elk systeem uit de bibliotheek staat één keer klaar als opstelling, ingevuld op kwaliteit. */
 function lineupFromSystem(code) {
-  const T = SYSTEMS[code], byName = n => S.players.find(p => p.nickname.toLowerCase() === String(n || '').toLowerCase())?.id || null;
+  const T = FM().SYSTEMS[code], byName = n => S.players.find(p => p.nickname.toLowerCase() === String(n || '').toLowerCase())?.id || null;
   const used = new Set();
   const slots = T.slots.map(t => { const id = byName(t.wie); if (id) used.add(id); return { role: t.role, x: t.x, y: t.y, player_id: id }; });
-  slots.forEach(sl => { sl.alt = (SEED.ALT[sl.role] || []).map(byName).filter(id => id && id !== sl.player_id); });
+  slots.forEach(sl => { sl.alt = (FM().ALT[sl.role] || []).map(byName).filter(id => id && id !== sl.player_id); });
   return { sys: code, slug: 'sys-' + code, note: T.idee, slots };
 }
 async function ensureSystems() {
   if (!S.staff || !S.players.length) return;
   const have = new Set(kind('lineup').map(sysOf).filter(Boolean));
-  const missing = Object.keys(SYSTEMS).filter(c => !have.has(c));
+  const missing = FM().ORDER.filter(c => !have.has(c));
   if (!missing.length) return;
   const base = Math.max(-1, ...kind('lineup').map(c => c.sort)) + 1;
-  const { error } = await sb.from('content').insert(missing.map((c, i) => ({ team_id: S.team.id, kind: 'lineup', title: SYSTEMS[c].titel, sort: base + i, data: lineupFromSystem(c), updated_by: S.user.id })));
+  const { error } = await sb.from('content').insert(missing.map((c, i) => ({ team_id: S.team.id, kind: 'lineup', title: FM().SYSTEMS[c].titel, sort: base + i, data: lineupFromSystem(c), updated_by: S.user.id })));
   if (!error) await reloadTeamData();
 }
 async function reloadTeamData() {
@@ -279,41 +288,49 @@ function renderLogin() {
 function renderCreateTeam() {
   shell(`<form class="panel" id="ctForm" style="max-width:560px"><div class="kicker">Welkom</div><h2>Maak je team aan</h2>
     <p class="muted small">Het team start met de opstellingen, patronen, trainingen en taken die al zijn uitgewerkt. Alles is daarna aan te passen.</p>
+    <label class="f" for="tfm">Speelvorm</label><select class="i" id="tfm"><option value="8">8 tegen 8 (onder 13)</option><option value="11">11 tegen 11 (vanaf onder 13)</option></select>
+    <p class="small muted" style="margin:4px 0 0">Elke speelvorm heeft eigen posities, systemen, patronen en trainingen. Wil je beide, maak dan twee teams aan.</p>
     <label class="f" for="tn">Teamnaam</label><input class="i" id="tn" required value="JO12">
     <label class="f" for="tc">Club</label><input class="i" id="tc" value="FC Geleen Zuid">
     <label class="f" for="ts">Seizoen</label><input class="i" id="ts" value="2026-2027">
     <label class="row small mt"><input type="checkbox" id="tseed" checked> Startinhoud en selectie laden (12 spelers met voornaam)</label>
     <div class="row mt"><button class="btn primary" type="submit" id="ctBtn">Team aanmaken</button></div><p class="small muted" id="ctMsg"></p></form>`);
+  $('#tfm').onchange = () => { const n = $('#tn'); if (n.value === 'JO12' || n.value === 'JO13') n.value = $('#tfm').value === '11' ? 'JO13' : 'JO12'; };
   $('#ctForm').onsubmit = async e => {
     e.preventDefault(); $('#ctBtn').disabled = true; $('#ctMsg').textContent = 'Team aanmaken…';
     const { data: id, error } = await sb.rpc('create_team', { p_name: $('#tn').value.trim(), p_club: $('#tc').value.trim() || null, p_season: $('#ts').value.trim() || null });
     if (error) { $('#ctMsg').textContent = error.message; $('#ctBtn').disabled = false; return; }
-    if ($('#tseed').checked) { $('#ctMsg').textContent = 'Startinhoud laden…'; await seedTeam(id); }
+    const f = +$('#tfm').value === 11 ? 11 : 8;
+    if (f === 11) { const { error: e2 } = await sb.from('teams').update({ colors: { format: 11 } }).eq('id', id); if (e2) { $('#ctMsg').textContent = e2.message; $('#ctBtn').disabled = false; return; } }
+    if ($('#tseed').checked) { $('#ctMsg').textContent = 'Startinhoud laden…'; await seedTeam(id, f); }
+    S.view = 'opstelling'; S.scen = null; selSlot = null;
     await loadStaff(id);
   };
 }
 
 /* ---------------- startinhoud ---------------- */
-async function seedTeam(teamId) {
-  const ids = {};
+async function seedTeam(teamId, f = 8) {
+  const C = FMf(f), ids = {};
+  const pos11 = Object.fromEntries(SEED11.SYSTEMS['1433'].slots.map(t => [t.wie, SEED11.ROLES[t.role].naam]));
   for (const name of SEED.ROSTER) {
-    const t = SEED.TASK[name];
-    const { data } = await sb.rpc('add_player', { p_team: teamId, p_nickname: name, p_position: t?.pos || null });
+    const position = f === 11 ? (pos11[name] || 'Wissel') : SEED.TASK[name]?.pos || null;
+    const { data } = await sb.rpc('add_player', { p_team: teamId, p_nickname: name, p_position: position });
     if (data?.[0]) ids[name] = data[0].player_id;
   }
   const rows = [];
-  SEED.SCEN.forEach((s, i) => rows.push({ team_id: teamId, kind: 'lineup', title: s.name, sort: i, data: {
+  if (f === 8) SEED.SCEN.forEach((s, i) => rows.push({ team_id: teamId, kind: 'lineup', title: s.name, sort: i, data: {
     slug: s.id, note: s.note,
     slots: Object.entries(s.pos).map(([n, v]) => ({ role: v[2], x: v[0], y: v[1], player_id: ids[n] || null,
       alt: (SEED.ALT[v[2]] || []).map(a => ids[a]).filter(Boolean) })) } }));
-  SEED.PAT.forEach((p, i) => rows.push({ team_id: teamId, kind: 'pattern', title: p.name, sort: i, data: { slug: p.id, frames: p.frames } }));
-  SEED.DRILLS.forEach((d, i) => { const { name, ...rest } = d; rows.push({ team_id: teamId, kind: 'drill', title: name, sort: i, data: { ...rest, slug: d.id } }); });
-  SEED.TRAIN.forEach((t, i) => rows.push({ team_id: teamId, kind: 'plan', title: t.name, sort: i, data: { weken: t.weken, prob: t.prob, drills: t.drills } }));
+  (f === 11 ? SEED11.PAT : SEED.PAT).forEach((p, i) => rows.push({ team_id: teamId, kind: 'pattern', title: p.name, sort: i, data: { slug: p.id, frames: p.frames } }));
+  const drills = f === 11 ? [...SEED11.DRILLS, ...SEED.DRILLS.filter(d => d.id !== 'wedstrijd8')] : SEED.DRILLS;
+  drills.forEach((d, i) => { const { name, ...rest } = d; rows.push({ team_id: teamId, kind: 'drill', title: name, sort: i, data: { ...rest, slug: d.id } }); });
+  (f === 11 ? SEED11.TRAIN : SEED.TRAIN).forEach((t, i) => rows.push({ team_id: teamId, kind: 'plan', title: t.name, sort: i, data: { weken: t.weken, prob: t.prob, drills: t.drills } }));
   HOME.forEach((h, i) => { const { title, ...rest } = h; rows.push({ team_id: teamId, kind: 'homedrill', title, sort: i, data: rest }); });
-  SEED.ROSTER.forEach((n, i) => { if (ids[n]) rows.push({ team_id: teamId, kind: 'taskcard', title: n, sort: i, data: { player_id: ids[n], extra: PERSONAL[n] || [] } }); });
+  SEED.ROSTER.forEach((n, i) => { if (ids[n]) rows.push({ team_id: teamId, kind: 'taskcard', title: n, sort: i, data: { player_id: ids[n], extra: C.PERSONAL[n] || [] } }); });
   const { error } = await sb.from('content').insert(rows);
   if (error) toast('Startinhoud deels geladen: ' + error.message);
-  await sb.from('content').insert(Object.entries(ROLES).map(([code, r], i) => ({ team_id: teamId, kind: 'session', title: r.naam, sort: i, data: { role: code, ...r } })));
+  await sb.from('content').insert(Object.entries(C.ROLES).map(([code, r], i) => ({ team_id: teamId, kind: 'session', title: r.naam, sort: i, data: { role: code, ...r } })));
 }
 
 /* ---------------- opslaan ---------------- */
@@ -341,7 +358,7 @@ function render() {
   const views = S.staff ? [VIEWS[0], ['huiswerk', 'Huiswerk'], ...VIEWS.slice(1), ['beheer', 'Beheer']] : S.mode === 'player' ? [['week', 'Mijn week'], ...VIEWS] : VIEWS;
   if (!views.some(v => v[0] === S.view)) S.view = views[0][0];
   const teamSel = S.staff && S.teams.length > 1 ? `<select class="i" id="teamSel" style="width:auto;padding:6px 10px">${S.teams.map(t => `<option value="${t.id}" ${t.id === S.team.id ? 'selected' : ''}>${esc(t.name)}</option>`).join('')}</select>` : '';
-  $('#app').innerHTML = `<header class="top"><div><div class="club">${esc(S.team.club || '')} · ${esc(S.team.name)}</div><h1 class="title">Ons <span>Speelboek</span></h1></div>
+  $('#app').innerHTML = `<header class="top"><div><div class="club">${esc(S.team.club || '')} · ${esc(S.team.name)} · ${FM().label}</div><h1 class="title">Ons <span>Speelboek</span></h1></div>
     <div class="who">${S.staff ? `${teamSel}<div class="mt small">Trainer · <a href="#" id="logout" style="color:inherit">uitloggen</a></div>` : S.mode === 'player' ? `<span class="badge">${esc(S.me.nickname)}</span>` : '<span class="badge">Meekijken</span>'}</div></header>
     <nav class="tabs" aria-label="Onderdelen">${views.map(([k, l]) => `<button data-v="${k}" ${k === S.view ? 'aria-current="page"' : ''}>${l}</button>`).join('')}</nav>
     <section id="view"></section>`;
@@ -415,7 +432,6 @@ function Board(svg, prefix) {
 }
 
 /* ---------------- opstelling ---------------- */
-const OPP = SEED.OPP;
 let lineupBoard = null, showOpp = false, benchSel = null;
 let selSlot = null;
 function viewLineup() {
@@ -423,7 +439,7 @@ function viewLineup() {
   if (!lineups.length) { $('#view').innerHTML = `<div class="panel empty">Nog geen opstellingen.</div>`; return; }
   if (!S.scen || !lineups.find(l => l.id === S.scen)) S.scen = lineups[0].id;
   const L = lineups.find(l => l.id === S.scen);
-  const T = SYSTEMS[sysOf(L)];
+  const T = FM().SYSTEMS[sysOf(L)];
   $('#view').innerHTML = `<div class="chips" role="group" aria-label="Systeem of wedstrijdsituatie">${lineups.map(l => `<button data-id="${l.id}" class="${l.id === S.scen ? 'on' : ''}">${esc(l.title)}</button>`).join('')}</div>
     <div class="layout"><div><svg class="pitch ${S.staff ? 'edit' : ''}" id="pitch" aria-label="Veld met opstelling"></svg>
       <div class="row mt"><button class="btn" id="oppT">${showOpp ? 'Tegenstander verbergen' : 'Tegenstander tonen'}</button>${S.staff ? '<button class="btn ghost" id="addSys">Systeem toevoegen</button><button class="btn ghost" id="addL">Nieuwe situatie</button>' : ''}</div></div>
@@ -450,11 +466,11 @@ function viewLineup() {
 }
 function addSystemDialog() {
   openDialog(`<div class="kicker">Systemen</div><h2>Systeem toevoegen</h2><p class="small muted">De spelers worden op hun kwaliteit ingevuld. Daarna kun je alles nog wisselen en aanpassen.</p>
-    ${Object.entries(SYSTEMS).map(([c, T]) => `<label class="sysopt"><input type="radio" name="sysc" value="${c}" ${c === '1322' ? 'checked' : ''}><span><b>${esc(T.titel)}</b><br><span class="small muted">${esc(T.idee)}</span></span></label>`).join('')}`,
+    ${FM().ORDER.map(c => [c, FM().SYSTEMS[c]]).map(([c, T]) => `<label class="sysopt"><input type="radio" name="sysc" value="${c}" ${c === FM().def ? 'checked' : ''}><span><b>${esc(T.titel)}</b><br><span class="small muted">${esc(T.idee)}</span></span></label>`).join('')}`,
     [['Annuleren'], ['Toevoegen', 'primary', async () => {
       const c = document.querySelector('input[name=sysc]:checked')?.value; if (!c) return;
-      const row = await insertContent('lineup', SYSTEMS[c].titel, lineupFromSystem(c));
-      if (row) { S.scen = row.id; selSlot = null; viewLineup(); toast(`${SYSTEMS[c].titel} staat klaar`); }
+      const T = FM().SYSTEMS[c], row = await insertContent('lineup', T.titel, lineupFromSystem(c));
+      if (row) { S.scen = row.id; selSlot = null; viewLineup(); toast(`${T.titel} staat klaar`); }
     }]]);
 }
 function pickSlot(L, i) {
@@ -509,7 +525,7 @@ function drawLineup(L, instant) {
     const p = playerById(s.player_id);
     return { key: 's' + i, name: p ? p.nickname : '—', names: alts.length ? [p ? p.nickname : '—', alts.join(' / ')] : [p ? p.nickname : '—'], label: p?.shirt ?? s.role, x: s.x, y: s.y };
   });
-  if (showOpp) OPP.forEach((o, i) => list.push({ key: 'o' + i, team: 'opp', x: o[0], y: o[1] }));
+  if (showOpp) FM().OPP.forEach((o, i) => list.push({ key: 'o' + i, team: 'opp', x: o[0], y: o[1] }));
   lineupBoard.render(list, instant);
   lineupBoard.svg.querySelectorAll('.tok').forEach(g => g.classList.toggle('sel', g.dataset.key === 's' + selSlot));
   if (S.staff && $('#bench')) {
@@ -551,9 +567,9 @@ function showCard(pid) {
   box.innerHTML = cardHTML(p);
 }
 function curLineup() { const ls = kind('lineup'); return ls.find(l => l.id === S.scen) || ls[0]; }
-function roleCards() { const db = kind('session'); return db.length ? db : Object.entries(ROLES).map(([code, r], i) => ({ id: 'std-' + code, kind: 'session', title: r.naam, sort: i, std: true, data: { role: code, ...r } })); }
+function roleCards() { const db = kind('session'); return db.length ? db : Object.entries(FM().ROLES).map(([code, r], i) => ({ id: 'std-' + code, kind: 'session', title: r.naam, sort: i, std: true, data: { role: code, ...r } })); }
 function roleCard(code) { return roleCards().find(r => r.data.role === code); }
-function roleName(code) { return roleCard(code)?.data.naam || ROLES[code]?.naam || code; }
+function roleName(code) { return roleCard(code)?.data.naam || FM().ROLES[code]?.naam || code; }
 function tasksFor(p, L = curLineup()) {
   const slot = L?.data.slots.find(s => s.player_id === p.id);
   const rc = slot ? roleCard(slot.role) : null;
@@ -643,13 +659,14 @@ function stopPlay() { if (timer) { clearInterval(timer); timer = null; } const b
 function drawPat(instant) {
   const P = curPat(); const fr = P.data.frames; const f = fr[S.step];
   const roles = basisRoleMap();
-  const st = {}; Object.entries(SEED.BASIS).forEach(([n, v]) => st[n] = [v[0], v[1], v[2]]);
+  const B = FM().BASIS;
+  const st = {}; Object.entries(B).forEach(([n, v]) => st[n] = [v[0], v[1], v[2]]);
   for (let k = 0; k <= S.step; k++) if (fr[k].set) Object.entries(fr[k].set).forEach(([n, v]) => { if (st[n]) { st[n][0] = v[0]; st[n][1] = v[1]; } });
   const list = Object.entries(st).map(([n, v]) => { const pid = roles[v[2]]; return { key: 's' + n, name: pid ? nick(pid) : n, label: v[2], x: v[0], y: v[1] }; });
   (f.opp || []).forEach((o, i) => list.push({ key: 'o' + i, team: 'opp', x: o[0], y: o[1] }));
   patBoard.render(list, instant); patBoard.ball(f.ball); patBoard.arrows(f.ar);
   $('#ptitle').textContent = P.title; $('#pstep').textContent = `Stap ${S.step + 1} van ${fr.length}`;
-  let cap = f.cap; Object.keys(SEED.BASIS).forEach(n => { const pid = roles[SEED.BASIS[n][2]]; if (pid && nick(pid) !== n) cap = cap.replaceAll(n, nick(pid)); });
+  let cap = f.cap; Object.keys(B).forEach(n => { const pid = roles[B[n][2]]; if (pid && nick(pid) !== n) cap = cap.replaceAll(n, nick(pid)); });
   $('#pcap').textContent = cap;
   $('#pprev').disabled = S.step === 0; $('#pnext').disabled = S.step === fr.length - 1;
 }
@@ -838,7 +855,7 @@ function viewAdmin() {
     <div class="panel"><div class="kicker">Delen</div><h2>Teamlink</h2><p class="muted small">Iedereen met deze link kan meekijken, zonder in te loggen. Aanpassen kan alleen een trainer.</p>
       <input class="i" readonly value="${esc(link)}" id="tl"><div class="row mt"><button class="btn primary" id="cpl">Kopieer link</button><button class="btn ghost" id="newl">Nieuwe link maken</button></div>
       <p class="small muted">Een nieuwe link maakt de oude ongeldig.</p></div>
-    <form class="panel" id="tf"><div class="kicker">Team</div><h2>Gegevens en kleuren</h2>
+    <form class="panel" id="tf"><div class="kicker">Team · ${FM().label}</div><h2>Gegevens en kleuren</h2>
       <label class="f" for="an">Teamnaam</label><input class="i" id="an" value="${esc(S.team.name)}">
       <label class="f" for="ac">Club</label><input class="i" id="ac" value="${esc(S.team.club || '')}">
       <label class="f" for="as">Seizoen</label><input class="i" id="as" value="${esc(S.team.season || '')}">
@@ -850,7 +867,7 @@ function viewAdmin() {
       <label class="f" for="se">E-mailadres</label><input class="i" id="se" type="email" required>
       <label class="f" for="sr">Rol</label><select class="i" id="sr"><option value="assistent">Assistent</option><option value="trainer">Trainer</option></select>
       <div class="row mt"><button class="btn primary" type="submit">Toevoegen</button></div></form>
-    <div class="panel"><div class="kicker">Meer teams</div><h2>Nog een team</h2><p class="muted small">Maak een tweede team aan, bijvoorbeeld voor een ander leeftijdsteam. Je wisselt bovenaan tussen teams.</p><button class="btn" id="newTeam">Nieuw team aanmaken</button></div>
+    <div class="panel"><div class="kicker">Meer teams</div><h2>Nog een team</h2><p class="muted small">Maak een tweede team aan, bijvoorbeeld een variant voor 11 tegen 11 of een ander leeftijdsteam. Elk team heeft zijn eigen systemen en patronen; je wisselt bovenaan tussen teams.</p><button class="btn" id="newTeam">Nieuw team aanmaken</button></div>
     <div class="panel"><div class="kicker">Privacy</div><h2>Einde seizoen</h2><p class="muted small">Verwijdert alle spelers, taakkaarten en huiswerk. Opstellingen, patronen en oefenvormen blijven bewaard voor volgend seizoen.</p>
       <button class="btn danger" id="wipe">Seizoen afsluiten</button></div></div>`;
   $('#cpl').onclick = () => copy(link, 'Teamlink gekopieerd');
@@ -858,7 +875,7 @@ function viewAdmin() {
   $('#newl').onclick = async () => { if (!confirm('Nieuwe link maken? De oude werkt daarna niet meer.')) return; const { data, error } = await sb.rpc('new_share_token', { p_team: S.team.id }); if (error) return toast(error.message); S.team.share_token = data; viewAdmin(); toast('Nieuwe link gemaakt'); };
   $('#tf').onsubmit = async e => {
     e.preventDefault();
-    const patch = { name: $('#an').value.trim() || S.team.name, club: $('#ac').value.trim() || null, season: $('#as').value.trim() || null, colors: { primary: $('#c1').value, secondary: $('#c2').value } };
+    const patch = { name: $('#an').value.trim() || S.team.name, club: $('#ac').value.trim() || null, season: $('#as').value.trim() || null, colors: { ...(S.team.colors || {}), primary: $('#c1').value, secondary: $('#c2').value } };
     const { error } = await sb.from('teams').update(patch).eq('id', S.team.id); if (error) return toast(error.message);
     Object.assign(S.team, patch); applyColors(); render(); toast('Opgeslagen');
   };
