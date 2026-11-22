@@ -140,6 +140,11 @@ const SYSTEMS = {
       { role: 'SP', x: 50, y: 32, wie: 'Colin', naam: 'Uitvalspunt', bal: 'Bij balwinst ben jij het aanspeelpunt. Houd de bal vast tot Maddox aansluit, of ga zelf diep.', geen: 'Blijf tussen hun verdedigers en de middenlijn; jaag niet op de keeper.' }
     ] }
 };
+/* Spelkennis 8 tegen 8: fases per positie, speelwijze per systeem, oefenvormen per plek. */
+Object.entries({"K": {"verlies": "Kom een paar meter uit je doel en coach: “terug!”", "winst": "Speel of gooi de bal snel naar een vrije speler aan de kant.", "herv": "Doeltrap: kort op een verdediger als die vrij staat. Corner tegen: roep “keeper” bij hoge ballen."}, "LA": {"verlies": "Meteen terug naar je plek: eerst je man, dan de bal.", "winst": "Speel snel vooruit of op de vrije middenvelder.", "herv": "Corner tegen: dek de eerste paal. Ingooi: gooi snel en vraag de bal terug."}, "CV": {"verlies": "Zak terug en houd de verdediging bij elkaar.", "winst": "Eerst kijken, dan de veilige pass vooruit.", "herv": "Corner voor: jij blijft achter. Corner tegen: dek hun beste kopper."}, "RA": {"verlies": "Meteen terug naar je plek: eerst je man, dan de bal.", "winst": "Schuif in naast de middenvelder en vraag de bal.", "herv": "Corner tegen: dek de tweede paal. Ingooi: gooi snel en vraag de bal terug."}, "LB": {"verlies": "Vijf seconden druk op de man met de bal, dan terug.", "winst": "Ga meteen diep langs de zijlijn.", "herv": "Corner voor: rand van de zestien voor de tweede bal. Corner tegen: dek hun back."}, "CM": {"verlies": "Zet direct druk, zodat ze niet snel vooruit kunnen.", "winst": "Zoek meteen de spits of een buitenspeler in de diepte.", "herv": "Corner voor: rand van de zestien. Vrije trap: jij neemt hem of legt hem klaar."}, "RB": {"verlies": "Vijf seconden druk op de man met de bal, dan terug.", "winst": "Ga meteen diep langs de zijlijn.", "herv": "Corner voor: rand van de zestien voor de tweede bal. Corner tegen: dek hun back."}, "SP": {"verlies": "Zet direct druk op de verdediger met de bal.", "winst": "Loop meteen diep of bied je kort aan.", "herv": "Corner voor: tweede paal. Corner tegen: blijf rond de middenlijn voor de counter."}, "LM": {"verlies": "Terug naar je kant en sluit de flank.", "winst": "Breed en vooruit, zoek de spitsen.", "herv": "Corner tegen: dek je man."}, "RM": {"verlies": "Terug naar je kant en sluit de flank.", "winst": "Breed en vooruit, zoek de spitsen.", "herv": "Corner tegen: dek je man."}}).forEach(([r, x]) => Object.assign(ROLES[r], x));
+Object.entries({"1331": {"fases": {"opbouw": "De keeper speelt kort op de backs. Amine komt de bal halen, Sasha schuift in naast hem.", "aanval": "Via Amine naar Colin in de diepte of naar Maddox die naar binnen komt. De backs maken het veld breed.", "verdedigen": "Colin stuurt hun verdediger naar één kant, het middenveld schuift mee en de laatste man coacht.", "omschakelen": "Bij balverlies vijf seconden samen druk, daarna terug in de vorm. Bij balwinst eerst Amine zoeken."}, "tegen": "Tegen bijna elke tegenstander: het uitgangspunt.", "coach": ["Staat Amine open als hij de bal krijgt?", "Blijven er altijd drie achter de bal?", "Sluiten de buitenspelers aan bij Colin?"], "train": ["rondo", "opbouw", "draaien", "wedstrijd8"]}, "1322": {"fases": {"opbouw": "Drie achter breed, Suleiman komt kort, Amine iets hoger.", "aanval": "Snel naar de twee spitsen: Colin diep, Maddox kort, Amine sluit aan voor de tweede bal.", "verdedigen": "Twee spitsen zetten druk op hun centrale verdedigers. De buitenkant laten we toe, het midden blijft dicht.", "omschakelen": "Bij balverlies zakt één buitenste verdediger direct terug. Bij balwinst meteen diep op Colin."}, "tegen": "Tegen een tegenstander met één spits, of die zwak opbouwt door het midden.", "coach": ["Lopen de spitsen tegengesteld: één diep, één kort?", "Staat Suleiman altijd achter de bal?", "Staan de buitenste verdedigers nooit allebei hoog?"], "train": ["golven", "afronden", "derdeman", "wedstrijd8"]}, "1313": {"fases": {"opbouw": "De backs schuiven op, Amine staat alleen in het midden en Sasha schuift in om hem te helpen.", "aanval": "Breed: de buitenspelers hoog aan de zijlijn, 1 tegen 1 en lage voorzetten op Colin.", "verdedigen": "Drie aanvallers zetten hoog druk, Amine schermt het midden af.", "omschakelen": "Bij balverlies de buitenspelers terug tot de middenlijn. Bij balwinst direct naar de vrije buitenspeler."}, "tegen": "Tegen een tegenstander die laag blijft staan of met vier verdedigers speelt.", "coach": ["Blijven de buitenspelers echt breed?", "Is Amine steeds aanspeelbaar?", "Komen de buitenspelers terug na balverlies?"], "train": ["vleugelzones", "actie", "storen", "wedstrijd8"]}, "1232": {"fases": {"opbouw": "Snel en vooruit. Weinig risico achterin: liever lang dan balverlies voor eigen doel.", "aanval": "Veel spelers rond hun zestien, schieten en de tweede bal pakken.", "verdedigen": "Hoog druk zetten, maar de twee verdedigers blijven altijd achter.", "omschakelen": "Bij balverlies trekt iedereen een sprint terug."}, "tegen": "Alleen als we moeten scoren, bijvoorbeeld de laatste tien minuten.", "coach": ["Blijven de twee verdedigers achter?", "Pakken we de tweede ballen?", "Sprint iedereen terug na balverlies?"], "train": ["tweedebal", "afronden", "golven", "wedstrijd8"]}, "1421": {"fases": {"opbouw": "Rustig achterin; bij twijfel lang op Colin.", "aanval": "Snel omschakelen naar Colin, Maddox sluit aan.", "verdedigen": "Compact op eigen helft: vier achter, twee voor de verdediging.", "omschakelen": "Bij balwinst direct diep. Bij balverlies meteen terug in twee lijnen."}, "tegen": "Tegen een sterkere of snellere tegenstander.", "coach": ["Staan de lijnen dicht bij elkaar?", "Gaat de bal na balwinst snel naar Colin?", "Sluit Maddox op tijd aan?"], "train": ["compact", "omschakel", "1tegen1", "wedstrijd8"]}}).forEach(([c, x]) => Object.assign(SYSTEMS[c], x));
+Object.entries({"1322": [["CM", 1, {"drills": ["positie", "compact", "rondo"], "home": ["h-omkijken", "h-kaatsen"]}], ["SP", 1, {"drills": ["afronden", "derdeman", "actie"], "home": ["h-draaien", "h-afronden"]}]], "1313": [["CM", 0, {"drills": ["positie", "draaien", "storen"], "home": ["h-omkijken", "h-draaien", "h-muurpass"]}]], "1232": [["CV", 0, {"drills": ["1tegen1", "compact"], "home": ["h-1tegen1", "h-kaatsen"]}], ["CV", 1, {"drills": ["1tegen1", "compact"], "home": ["h-1tegen1", "h-kaatsen"]}]], "1421": [["CM", 1, {"drills": ["afronden", "tweedebal", "derdeman"], "home": ["h-afronden", "h-steekpass"]}], ["SP", 0, {"drills": ["omschakel", "afronden", "actie"], "home": ["h-aanname", "h-afronden"]}]]}).forEach(([c, list]) => list.forEach(([r, n, ov]) => Object.assign(SYSTEMS[c].slots.filter(s => s.role === r)[n], ov)));
+Object.entries({"1322": [["CM", 1, {"verlies": "Blijf voor de verdediging en sluit het midden af; Amine zet druk.", "winst": "Speel de bal direct naar Amine of breed naar een vrije verdediger.", "extra": ["Jij gaat niet mee de zestien in, ook niet bij een corner voor ons."]}], ["SP", 1, {"verlies": "Jaag op de verdediger met de bal; Colin pakt de pass.", "winst": "Kom kort voor de bal of steek Colin diep.", "extra": ["Bij corners voor ons sta je bij de eerste paal."]}]], "1313": [["CM", 0, {"verlies": "Blijf in het midden en vertraag; de buitenspelers komen terug.", "winst": "Zoek meteen de vrije buitenspeler.", "extra": ["Ga niet mee de zestien in: jij bent het vangnet."]}]], "1232": [["CV", 0, {"verlies": "Blijf achter en praat: “terug!”", "winst": "Speel snel vooruit naar Amine of de spitsen.", "extra": []}], ["CV", 1, {"verlies": "Meteen terug naast Sjoerd.", "winst": "Speel snel vooruit naar Amine of de spitsen.", "extra": []}], ["SP", 1, {"verlies": "Zet druk op de verdediger met de bal.", "winst": "Kom kort en kaats, of ga mee diep.", "extra": []}]], "1421": [["CM", 0, {"verlies": "Sluit het midden af voor de verdediging.", "winst": "Kijk eerst naar Colin in de diepte.", "extra": ["Jij blijft achter bij corners voor ons."]}], ["CM", 1, {"verlies": "Terug naast Amine, samen het midden dicht.", "winst": "Sprint mee om Colin te helpen.", "extra": []}], ["SP", 0, {"verlies": "Blijf tussen hun verdedigers en de middenlijn; niet doorjagen.", "winst": "Bied je aan als uitvalspunt en houd de bal vast.", "extra": []}]]}).forEach(([c, list]) => list.forEach(([r, n, ov]) => Object.assign(SYSTEMS[c].slots.filter(s => s.role === r)[n], ov)));
 const SLUG_SYS = { basis: '1331', fase1: '1331', druk: '1331', voorsprong: '1331', zondermees: '1331', achterstand: '1232', tweespitsen: '1322' };
 /* Speelvorm per team: 8 tegen 8 (standaard) of 11 tegen 11. Elk team heeft zijn eigen posities, systemen en patronen. */
 const fmt = () => (S.team?.colors?.format === 11 ? 11 : 8);
@@ -159,14 +164,20 @@ function tplSlot(L, slot, orig = slot) {
 }
 /* Taken voor deze plek: eigen aanpassing in deze opstelling, anders het systeem, anders de positiekaart. */
 function slotTasks(L, slot, orig = slot) {
-  const rc = roleCard(slot.role)?.data || FM().ROLES[slot.role] || {};
+  const base = FM().ROLES[slot.role] || {};
+  const rc = { ...base, ...(roleCard(slot.role)?.data || {}) };
   const t = tplSlot(L, slot, orig) || {};
+  const pick = k => slot[k] || t[k] || rc[k] || base[k] || '';
+  const list = k => (slot[k]?.length ? slot[k] : t[k]?.length ? t[k] : rc[k]?.length ? rc[k] : base[k] || []);
   return {
     naam: slot.naam || t.naam || rc.naam || slot.role,
-    bal: slot.bal || t.bal || rc.bal || '', geen: slot.geen || t.geen || rc.geen || '',
-    eigen: !!(slot.bal || slot.geen), rc
+    bal: pick('bal'), geen: pick('geen'), verlies: pick('verlies'), winst: pick('winst'), herv: pick('herv'),
+    extra: Array.isArray(slot.extra) ? slot.extra : Array.isArray(t.extra) ? t.extra : rc.extra || [],
+    drills: list('drills'), home: list('home'), eigen: !!(slot.bal || slot.geen), rc
   };
 }
+/* De opstelling voor de komende wedstrijd: daar volgen de spelerspagina en het huiswerk standaard op. */
+function matchLineup() { const ls = kind('lineup'); return ls.find(l => l.data.match) || ls[0]; }
 
 const REACT = { top: 'Top!', goed_bezig: 'Goed bezig', knap: 'Knap gedaan', volhouden: 'Volhouden' };
 const MOOD = { 1: '😕', 2: '🙂', 3: '😄' };
@@ -437,19 +448,34 @@ let selSlot = null;
 function viewLineup() {
   const lineups = kind('lineup');
   if (!lineups.length) { $('#view').innerHTML = `<div class="panel empty">Nog geen opstellingen.</div>`; return; }
-  if (!S.scen || !lineups.find(l => l.id === S.scen)) S.scen = lineups[0].id;
+  if (!S.scen || !lineups.find(l => l.id === S.scen)) S.scen = matchLineup().id;
   const L = lineups.find(l => l.id === S.scen);
   const T = FM().SYSTEMS[sysOf(L)];
-  $('#view').innerHTML = `<div class="chips" role="group" aria-label="Systeem of wedstrijdsituatie">${lineups.map(l => `<button data-id="${l.id}" class="${l.id === S.scen ? 'on' : ''}">${esc(l.title)}</button>`).join('')}</div>
+  $('#view').innerHTML = `<div class="chips" role="group" aria-label="Systeem of wedstrijdsituatie">${lineups.map(l => `<button data-id="${l.id}" class="${l.id === S.scen ? 'on' : ''}">${l.data.match ? '★ ' : ''}${esc(l.title)}</button>`).join('')}</div>
     <div class="layout"><div><svg class="pitch ${S.staff ? 'edit' : ''}" id="pitch" aria-label="Veld met opstelling"></svg>
       <div class="row mt"><button class="btn" id="oppT">${showOpp ? 'Tegenstander verbergen' : 'Tegenstander tonen'}</button>${S.staff ? '<button class="btn ghost" id="addSys">Systeem toevoegen</button><button class="btn ghost" id="addL">Nieuwe situatie</button>' : ''}</div></div>
       <div><div class="panel"><div class="kicker">${T ? 'Systeem ' + esc(T.naam) : 'Wedstrijdsituatie'}</div><h2>${esc(L.title)}</h2><p style="margin:0">${esc(L.data.note || '')}</p>
-        ${T ? `<dl class="task sysinfo"><dt>Sterk</dt><dd>${esc(T.sterk)}</dd><dt>Risico</dt><dd>${esc(T.risico)}</dd></dl>` : ''}
+        ${L.data.match ? '<p class="small mt" style="margin-bottom:0"><span class="badge" style="background:var(--club);color:#fff">★ Wedstrijdopstelling</span> De spelerspagina\'s volgen deze opstelling.</p>' : ''}
+        ${T ? `<dl class="task sysinfo"><dt>Sterk</dt><dd>${esc(T.sterk)}</dd><dt>Risico</dt><dd>${esc(T.risico)}</dd>${T.tegen ? `<dt>Wanneer</dt><dd>${esc(T.tegen)}</dd>` : ''}</dl>
+        ${T.fases ? `<details class="speelwijze"><summary>Speelwijze per fase</summary><dl class="task"><dt>Opbouwen</dt><dd>${esc(T.fases.opbouw)}</dd><dt>Aanvallen</dt><dd>${esc(T.fases.aanval)}</dd><dt>Verdedigen</dt><dd>${esc(T.fases.verdedigen)}</dd><dt>Omschakelen</dt><dd>${esc(T.fases.omschakelen)}</dd>${(T.coach || []).length ? `<dt>Waar let de trainer op</dt>${T.coach.map(c => `<dd>${esc(c)}</dd>`).join('')}` : ''}</dl></details>` : ''}` : ''}
+        <div class="row mt">${T?.train ? '<button class="btn" id="trainSys">Training voor dit systeem</button>' : ''}${S.staff ? `<button class="btn" id="hwSys">Huiswerk voor deze opstelling</button><button class="btn ${L.data.match ? '' : 'ghost'}" id="matchL">${L.data.match ? '★ Wedstrijdopstelling' : '☆ Maak wedstrijdopstelling'}</button>` : ''}</div>
         ${S.staff ? `<p class="small muted mt">Tik op een shirt voor de taken van die speler in dit systeem. Sleep een shirt om het te verplaatsen.</p><div class="row"><button class="btn ghost" id="editL">Naam en uitleg aanpassen</button></div>
         <h3 class="mt">Niet opgesteld</h3><div class="bench" id="bench"></div><p class="small muted" style="margin:6px 0 0">Tik op een naam en daarna op een shirt om te wisselen. De taken passen zich meteen aan.</p>` : '<p class="small muted mt">Tik op een speler voor zijn taken in dit systeem.</p>'}</div>
         <div class="panel mt" id="card" aria-live="polite"></div></div></div>`;
   document.querySelectorAll('.chips button').forEach(b => b.onclick = () => { S.scen = b.dataset.id; benchSel = null; selSlot = null; viewLineup(); });
   $('#oppT').onclick = () => { showOpp = !showOpp; viewLineup(); };
+  if ($('#trainSys')) $('#trainSys').onclick = () => {
+    const have = new Set(kind('drill').map(d => d.data.slug || d.id));
+    session = T.train.filter(sl => have.has(sl)); store.set('sb:sessie', session);
+    S.view = 'trainingen'; render(); toast(`Training voor ${T.naam} staat klaar`);
+  };
+  if ($('#hwSys')) $('#hwSys').onclick = () => { S.week ||= weekStart(); assignByRole(L.id); };
+  if ($('#matchL')) $('#matchL').onclick = async () => {
+    const was = !!L.data.match;
+    for (const o of kind('lineup')) if (o.data.match && o.id !== L.id) { delete o.data.match; await saveContent(o, { data: o.data }); }
+    if (was) delete L.data.match; else L.data.match = true;
+    await saveContent(L, { data: L.data }); viewLineup(); toast(was ? 'Geen wedstrijdopstelling meer gekozen' : `${L.title} is de wedstrijdopstelling`);
+  };
   lineupBoard = Board($('#pitch'), 'b');
   if (selSlot == null || !L.data.slots[selSlot]) selSlot = Math.max(0, L.data.slots.findIndex(s => s.role === 'CM'));
   drawLineup(L, true);
@@ -566,7 +592,7 @@ function showCard(pid) {
   const p = playerById(pid); if (!p) { box.innerHTML = '<p class="muted">Kies een speler.</p>'; return; }
   box.innerHTML = cardHTML(p);
 }
-function curLineup() { const ls = kind('lineup'); return ls.find(l => l.id === S.scen) || ls[0]; }
+function curLineup() { const ls = kind('lineup'); return ls.find(l => l.id === S.scen) || matchLineup(); }
 function roleCards() { const db = kind('session'); return db.length ? db : Object.entries(FM().ROLES).map(([code, r], i) => ({ id: 'std-' + code, kind: 'session', title: r.naam, sort: i, std: true, data: { role: code, ...r } })); }
 function roleCard(code) { return roleCards().find(r => r.data.role === code); }
 function roleName(code) { return roleCard(code)?.data.naam || FM().ROLES[code]?.naam || code; }
@@ -581,9 +607,10 @@ function cardHTML(p, opts = {}) {
   const { slot, rc, tc, L, alsoRoles } = tasksFor(p, opts.lineup);
   const r = rc?.data;
   const bySlug = (k, sl) => kind(k).find(d => d.data.slug === sl);
-  const drills = (r?.drills || []).map(sl => bySlug('drill', sl)).filter(Boolean);
-  const homes = (r?.home || []).map(sl => bySlug('homedrill', sl)).filter(Boolean);
-  const roleExtra = (rc?.data.extra || []).map(x => x.split(' ').slice(0, 3).join(' ').toLowerCase());
+  const st0 = slot ? slotTasks(L, slot) : null;
+  const drills = (st0 ? st0.drills : r?.drills || []).map(sl => bySlug('drill', sl)).filter(Boolean);
+  const homes = (st0 ? st0.home : r?.home || []).map(sl => bySlug('homedrill', sl)).filter(Boolean);
+  const roleExtra = [...(rc?.data.extra || []), ...(slot ? slotTasks(L, slot).extra : [])].map(x => x.split(' ').slice(0, 3).join(' ').toLowerCase());
   const personal = (tc?.data.extra || []).filter(x => !roleExtra.includes(x.split(' ').slice(0, 3).join(' ').toLowerCase()));
   const st = slot ? slotTasks(L, slot) : null;
   const head = `<div class="pcard">${shirtSVG(p.shirt ?? (slot?.role || ''))}<div><h2 style="margin:0">${esc(p.nickname)}</h2><div class="muted">${slot ? `${esc(st.naam)} · ${esc(L.title)}` : `Niet opgesteld in ${esc(L?.title || 'deze situatie')}`}</div></div></div>`;
@@ -593,8 +620,10 @@ function cardHTML(p, opts = {}) {
       (legacy?.bal ? `<dl class="task"><dt>Wij hebben de bal</dt><dd>${esc(legacy.bal)}</dd><dt>Zij hebben de bal</dt><dd>${esc(legacy.geen || '')}</dd></dl>` : '') +
       (personal.length ? `<dl class="task"><dt>Persoonlijk</dt>${personal.map(x => `<dd>${esc(x)}</dd>`).join('')}</dl>` : '');
   }
-  const extra = [...(r?.extra || []), ...(slot?.note ? [slot.note] : [])];
+  const extra = [...(st ? st.extra : r?.extra || []), ...(slot?.note ? [slot.note] : [])];
   return head + `<dl class="task"><dt>Wij hebben de bal</dt><dd>${esc(st.bal)}</dd><dt>Zij hebben de bal</dt><dd>${esc(st.geen)}</dd>
+    ${st.verlies ? `<dt>Na balverlies</dt><dd>${esc(st.verlies)}</dd>` : ''}${st.winst ? `<dt>Na balwinst</dt><dd>${esc(st.winst)}</dd>` : ''}
+    ${st.herv && !opts.compact ? `<dt>Spelhervattingen</dt><dd>${esc(st.herv)}</dd>` : ''}
     ${extra.length ? `<dt>Let op</dt>${extra.map(x => `<dd>${esc(x)}</dd>`).join('')}` : ''}
     ${personal.length ? `<dt>Persoonlijk</dt>${personal.map(x => `<dd>${esc(x)}</dd>`).join('')}` : ''}
     ${opts.compact ? '' : `${drills.length ? `<dt>Oefenvormen op de training</dt><dd>${drills.map(d => esc(d.title)).join(', ')}</dd>` : ''}${homes.length ? `<dt>Thuis oefenen</dt><dd>${homes.map(h => esc(h.title)).join(', ')}</dd>` : ''}`}</dl>`;
@@ -610,19 +639,21 @@ function editSlot(L, slot) {
     <label class="f" for="snm">Naam van deze plek in dit systeem</label><input class="i" id="snm" maxlength="40" value="${esc(slotTasks(L, slot).naam)}">
     <label class="f" for="sbal">Wij hebben de bal (in dit systeem)</label><textarea class="i" id="sbal" maxlength="400">${esc(slotTasks(L, slot).bal)}</textarea>
     <label class="f" for="sgeen">Zij hebben de bal (in dit systeem)</label><textarea class="i" id="sgeen" maxlength="400">${esc(slotTasks(L, slot).geen)}</textarea>
+    <label class="f" for="sverl">Na balverlies (in dit systeem)</label><textarea class="i" id="sverl" maxlength="300">${esc(slotTasks(L, slot).verlies)}</textarea>
+    <label class="f" for="swin">Na balwinst (in dit systeem)</label><textarea class="i" id="swin" maxlength="300">${esc(slotTasks(L, slot).winst)}</textarea>
     <p class="small muted" style="margin:4px 0 0">Kies je een andere positie, dan vullen deze velden zich met de taken van die positie in dit systeem.</p>
     <label class="f" for="sno">Extra taak in deze situatie (optioneel)</label><input class="i" id="sno" maxlength="200" value="${esc(slot.note || '')}">
     <label class="f">Kan hier ook spelen</label><div class="grid two">${opts.map(p => `<label class="small"><input type="checkbox" value="${p.id}" class="altc" ${(slot.alt || []).includes(p.id) ? 'checked' : ''}> ${esc(p.nickname)}</label>`).join('')}</div>`,
     [['Annuleren'], ['Opslaan', 'primary', () => {
       slot.player_id = $('#sp').value || null; slot.note = $('#sno').value.trim() || undefined;
       slot.role = $('#sr').value || slot.role;
-      const auto = slotTasks(L, { ...slot, bal: undefined, geen: undefined, naam: undefined }, slot);
-      const v = { bal: $('#sbal').value.trim(), geen: $('#sgeen').value.trim(), naam: $('#snm').value.trim() };
-      for (const k of ['bal', 'geen', 'naam']) { if (v[k] && v[k] !== auto[k]) slot[k] = v[k]; else delete slot[k]; }
+      const auto = slotTasks(L, { ...slot, bal: undefined, geen: undefined, naam: undefined, verlies: undefined, winst: undefined }, slot);
+      const v = { bal: $('#sbal').value.trim(), geen: $('#sgeen').value.trim(), naam: $('#snm').value.trim(), verlies: $('#sverl').value.trim(), winst: $('#swin').value.trim() };
+      for (const k of ['bal', 'geen', 'naam', 'verlies', 'winst']) { if (v[k] && v[k] !== auto[k]) slot[k] = v[k]; else delete slot[k]; }
       slot.alt = [...document.querySelectorAll('.altc:checked')].map(c => c.value);
       saveContent(L, { data: L.data }); const i = L.data.slots.indexOf(slot); if ($('#pitch')) pickSlot(L, i); else showCard(slot.player_id);
     }]]);
-  $('#sr').onchange = () => { const t = slotTasks(L, { ...slot, role: $('#sr').value, bal: undefined, geen: undefined, naam: undefined }, slot); $('#sbal').value = t.bal; $('#sgeen').value = t.geen; $('#snm').value = t.naam; };
+  $('#sr').onchange = () => { const t = slotTasks(L, { ...slot, role: $('#sr').value, bal: undefined, geen: undefined, naam: undefined, verlies: undefined, winst: undefined }, slot); $('#sbal').value = t.bal; $('#sgeen').value = t.geen; $('#snm').value = t.naam; $('#sverl').value = t.verlies; $('#swin').value = t.winst; };
 }
 function editLineupMeta(L) {
   openDialog(`<h2>Situatie aanpassen</h2><label class="f" for="lt">Naam</label><input class="i" id="lt" value="${esc(L.title)}" maxlength="60">
@@ -793,12 +824,15 @@ function viewRoles() {
   document.querySelectorAll('[data-er]').forEach(b => b.onclick = () => editRole(rcs.find(r => r.id === b.dataset.er)));
 }
 function editRole(rc) {
-  const x = rc?.data || { role: '', extra: [], drills: [], home: [] };
+  const x = { ...(FM().ROLES[rc?.data.role] || {}), ...(rc?.data || { role: '', extra: [], drills: [], home: [] }) };
   const cb = (k, list, cls) => kind(k).map(d => { const sl = d.data.slug || d.id; return `<label class="small"><input type="checkbox" class="${cls}" value="${esc(sl)}" ${(list || []).includes(sl) ? 'checked' : ''}> ${esc(d.title)}</label>`; }).join('');
   openDialog(`<h2>${rc ? 'Positie bewerken' : 'Positie toevoegen'}</h2>
     <div class="grid two"><div><label class="f" for="rcode">Code</label><input class="i" id="rcode" maxlength="4" value="${esc(x.role)}" ${rc ? 'readonly' : ''} placeholder="bijv. CM"></div><div><label class="f" for="rnaam">Naam</label><input class="i" id="rnaam" value="${esc(rc?.title || '')}"></div></div>
     <label class="f" for="rbal">Wij hebben de bal</label><textarea class="i" id="rbal">${esc(x.bal || '')}</textarea>
     <label class="f" for="rgeen">Zij hebben de bal</label><textarea class="i" id="rgeen">${esc(x.geen || '')}</textarea>
+    <label class="f" for="rverl">Na balverlies</label><textarea class="i" id="rverl">${esc(x.verlies || '')}</textarea>
+    <label class="f" for="rwin">Na balwinst</label><textarea class="i" id="rwin">${esc(x.winst || '')}</textarea>
+    <label class="f" for="rherv">Spelhervattingen</label><textarea class="i" id="rherv">${esc(x.herv || '')}</textarea>
     <label class="f" for="rex">Let op (één per regel)</label><textarea class="i" id="rex">${esc((x.extra || []).join('\n'))}</textarea>
     <label class="f">Oefenvormen op de training</label><div class="grid two">${cb('drill', x.drills, 'rdc')}</div>
     <label class="f">Thuis oefenen</label><div class="grid two">${cb('homedrill', x.home, 'rhc')}</div>`,
@@ -806,7 +840,7 @@ function editRole(rc) {
     ['Annuleren'], ['Opslaan', 'primary', async () => {
       const role = $('#rcode').value.trim().toUpperCase(), naam = $('#rnaam').value.trim();
       if (!role || !naam) return toast('Vul een code en een naam in');
-      const data = { role, naam, bal: $('#rbal').value.trim(), geen: $('#rgeen').value.trim(), extra: $('#rex').value.split('\n').map(t => t.trim()).filter(Boolean),
+      const data = { role, naam, bal: $('#rbal').value.trim(), geen: $('#rgeen').value.trim(), verlies: $('#rverl').value.trim(), winst: $('#rwin').value.trim(), herv: $('#rherv').value.trim(), extra: $('#rex').value.split('\n').map(t => t.trim()).filter(Boolean),
         drills: [...document.querySelectorAll('.rdc:checked')].map(c => c.value), home: [...document.querySelectorAll('.rhc:checked')].map(c => c.value) };
       if (rc && !rc.std) await saveContent(rc, { title: naam, data }); else { const r = await insertContent('session', naam, data); if (!r) return; }
       viewRoles();
@@ -959,22 +993,22 @@ function assignDialog() {
       toast('Huiswerk gegeven'); viewHomework();
     }]]);
 }
-function assignByRole() {
-  const lineups = kind('lineup');
+function assignByRole(preId) {
+  const lineups = kind('lineup'); const pre = preId || curLineup()?.id;
   openDialog(`<div class="kicker">Week ${weekLabel(S.week)}</div><h2>Huiswerk per positie</h2>
     <p class="small muted">Iedere speler krijgt de thuisoefeningen die bij zijn positie horen, volgens de gekozen opstelling.</p>
-    <label class="f" for="abl">Opstelling</label><select class="i" id="abl">${lineups.map(l => `<option value="${l.id}" ${l.id === curLineup()?.id ? 'selected' : ''}>${esc(l.title)}</option>`).join('')}</select>
+    <label class="f" for="abl">Opstelling</label><select class="i" id="abl">${lineups.map(l => `<option value="${l.id}" ${l.id === pre ? 'selected' : ''}>${esc(l.title)}${l.data.match ? ' ★' : ''}</option>`).join('')}</select>
     <label class="f" for="abn">Aantal oefeningen per speler</label><select class="i" id="abn"><option value="1">1</option><option value="2" selected>2</option><option value="3">3</option></select>
     <div id="abprev" class="small mt"></div>`,
     [['Annuleren'], ['Geven', 'primary', async () => {
       const rows = plan(); if (!rows.length) return toast('Geen passende oefeningen gevonden');
-      const { error } = await sb.from('assignments').insert(rows.map(r => ({ team_id: S.team.id, drill_id: r.drill.id, player_id: r.pid, week_start: S.week, note: `Voor jouw positie: ${r.role}` })));
+      const { error } = await sb.from('assignments').insert(rows.map(r => ({ team_id: S.team.id, drill_id: r.drill.id, player_id: r.pid, week_start: S.week, note: `Voor jouw plek: ${r.role}` })));
       if (error) return toast(error.message);
       toast(`${rows.length} oefeningen gegeven`); viewHomework();
     }]]);
   function plan() {
     const L = lineups.find(l => l.id === $('#abl').value), n = +$('#abn').value, rows = [];
-    (L?.data.slots || []).forEach(s => { if (!s.player_id || !playerById(s.player_id)) return; const rc = roleCard(s.role); (rc?.data.home || []).slice(0, n).forEach(sl => { const d = kind('homedrill').find(h => h.data.slug === sl || h.id === sl); if (d) rows.push({ pid: s.player_id, drill: d, role: rc.title }); }); });
+    (L?.data.slots || []).forEach(s => { if (!s.player_id || !playerById(s.player_id)) return; const st = slotTasks(L, s); st.home.slice(0, n).forEach(sl => { const d = kind('homedrill').find(h => h.data.slug === sl || h.id === sl); if (d) rows.push({ pid: s.player_id, drill: d, role: `${st.naam} in ${L.title}` }); }); });
     return rows;
   }
   const prev = () => { const rows = plan(); const by = {}; rows.forEach(r => { (by[r.pid] ||= []).push(r.drill.title); }); $('#abprev').innerHTML = Object.entries(by).map(([pid, t]) => `<div><strong>${esc(nick(pid))}</strong>: ${t.map(esc).join(', ')}</div>`).join('') || '<span class="muted">Geen passende oefeningen.</span>'; };
@@ -1024,7 +1058,7 @@ function viewWeek() {
   $('#view').innerHTML = `<div class="layout">
     <div class="panel"><div class="pcard">${shirtSVG(me.shirt ?? '')}<div><div class="kicker">Week ${weekLabel(S.pweek)}</div><h2 style="margin:0">Hoi ${esc(me.nickname)}!</h2><div class="muted">${done} van ${S.assign.length} oefeningen gedaan</div></div></div>
       <div class="mt" style="padding:12px;border-radius:12px;background:color-mix(in srgb,var(--club) 18%,transparent);border:1px solid color-mix(in srgb,var(--club) 45%,transparent)"><div class="kicker" style="color:#fff">Het hele team</div><strong style="font:800 1.6rem 'Barlow Condensed'">${S.teamTotal}</strong> keer samen geoefend deze week</div>
-      <h3 class="mt">Jouw taak op het veld</h3>${cardHTML(playerById(me.id) || { id: me.id, nickname: me.nickname, shirt: me.shirt }, { lineup: kind('lineup')[0] }).replace(/^<div class="pcard">[\s\S]*?<\/div><\/div><\/div>/, '')}</div>
+      <h3 class="mt">Jouw taak op het veld</h3>${cardHTML(playerById(me.id) || { id: me.id, nickname: me.nickname, shirt: me.shirt }, { lineup: matchLineup() }).replace(/^<div class="pcard">[\s\S]*?<\/div><\/div><\/div>/, '')}</div>
     <div class="grid">${S.assign.map(a => { const h = { title: a.drill.title, data: a.drill.data };
       return `<article class="panel">${homeHTML(h, `${a.note ? `<p class="small"><strong>Trainer:</strong> “${esc(a.note)}”</p>` : ''}
         ${a.done ? `<p><strong>Gedaan ${MOOD[a.mood] || '✓'}</strong>${a.reaction ? ` · Trainer: <strong>${esc(REACT[a.reaction])}</strong>` : ''}</p><button class="btn ghost" data-undo="${a.id}">Toch nog niet gedaan</button>` :

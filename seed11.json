@@ -14,7 +14,10 @@
 "home": [
 "h-keeper",
 "h-kaatsen"
-]
+],
+"verlies": "Kom uit je doel en coach de lijn: “terug!”",
+"winst": "Snel uitgooien naar een vrije back of de controleur.",
+"herv": "Doeltrap: kort op een centrale verdediger als die vrij staat. Corner tegen: roep “keeper” bij hoge ballen."
 },
 "RA": {
 "naam": "Rechtsback",
@@ -30,7 +33,10 @@
 "h-1tegen1",
 "h-kaatsen",
 "h-omkijken"
-]
+],
+"verlies": "Terug naar je plek; is de bal links, schuif dan naar binnen.",
+"winst": "Speel vooruit op de rechtsbuiten of ga zelf diep.",
+"herv": "Corner tegen: dek de tweede paal. Ingooi: snel gooien en terugvragen."
 },
 "RCV": {
 "naam": "Rechter centrale verdediger",
@@ -48,7 +54,10 @@
 "h-1tegen1",
 "h-kaatsen",
 "h-omkijken"
-]
+],
+"verlies": "Zak terug, houd de lijn bij elkaar.",
+"winst": "Rustig kijken, dan de veilige pass vooruit.",
+"herv": "Corner voor: blijf achter. Corner tegen: dek hun beste kopper."
 },
 "CV": {
 "naam": "Centrale verdediger",
@@ -66,7 +75,10 @@
 "h-1tegen1",
 "h-kaatsen",
 "h-omkijken"
-]
+],
+"verlies": "Zak terug en coach de lijn.",
+"winst": "Rustig kijken, dan de veilige pass vooruit.",
+"herv": "Corner voor: blijf achter. Corner tegen: dek de ruimte voor het doel."
 },
 "LCV": {
 "naam": "Linker centrale verdediger",
@@ -84,7 +96,10 @@
 "h-1tegen1",
 "h-kaatsen",
 "h-omkijken"
-]
+],
+"verlies": "Zak terug, houd de lijn bij elkaar.",
+"winst": "Rustig kijken, dan de veilige pass vooruit.",
+"herv": "Corner voor: blijf achter. Corner tegen: dek een kopper."
 },
 "LA": {
 "naam": "Linksback",
@@ -100,7 +115,10 @@
 "h-1tegen1",
 "h-kaatsen",
 "h-omkijken"
-]
+],
+"verlies": "Terug naar je plek; is de bal rechts, schuif dan naar binnen.",
+"winst": "Speel vooruit op de linksbuiten of ga zelf diep.",
+"herv": "Corner tegen: dek de eerste paal. Ingooi: snel gooien en terugvragen."
 },
 "VM": {
 "naam": "Controleur (6)",
@@ -118,7 +136,10 @@
 "h-omkijken",
 "h-draaien",
 "h-kaatsen"
-]
+],
+"verlies": "Zet het midden dicht en vertraag de tegenstander.",
+"winst": "Speel direct vooruit op de 8 of 10.",
+"herv": "Corner voor: blijf achter rond de middenlijn. Corner tegen: dek de rand van de zestien."
 },
 "CM": {
 "naam": "Middenvelder (8)",
@@ -134,7 +155,10 @@
 "h-muurpass",
 "h-omkijken",
 "h-steekpass"
-]
+],
+"verlies": "Zet direct druk op de man met de bal.",
+"winst": "Loop mee vooruit, zoek de ruimte tussen de linies.",
+"herv": "Corner voor: rand van de zestien voor de tweede bal."
 },
 "AM": {
 "naam": "Aanvallende middenvelder (10)",
@@ -150,7 +174,10 @@
 "h-draaien",
 "h-steekpass",
 "h-afronden"
-]
+],
+"verlies": "Zet druk op hun controleur.",
+"winst": "Draai direct en zoek de spits of een buitenspeler.",
+"herv": "Vrije trap rond de zestien: jij neemt hem. Corner voor: rand van de zestien."
 },
 "LM": {
 "naam": "Links middenveld",
@@ -165,7 +192,10 @@
 "h-aanname",
 "h-steekpass",
 "h-dribbel"
-]
+],
+"verlies": "Terug naar je kant, naast de linksback.",
+"winst": "Breed en vooruit, zoek de spitsen.",
+"herv": "Corner tegen: dek je man."
 },
 "RM": {
 "naam": "Rechts middenveld",
@@ -180,7 +210,10 @@
 "h-aanname",
 "h-steekpass",
 "h-dribbel"
-]
+],
+"verlies": "Terug naar je kant, naast de rechtsback.",
+"winst": "Breed en vooruit, zoek de spitsen.",
+"herv": "Corner tegen: dek je man."
 },
 "LW": {
 "naam": "Linksbuiten",
@@ -198,7 +231,10 @@
 "h-aanname",
 "h-dribbel",
 "h-afronden"
-]
+],
+"verlies": "Vijf seconden jagen op hun back, dan terug tot de middenlijn.",
+"winst": "Ga meteen diep langs de zijlijn of snij naar binnen.",
+"herv": "Corner voor: tweede paal. Corner tegen: blijf rond de middenlijn voor de counter."
 },
 "RW": {
 "naam": "Rechtsbuiten",
@@ -216,7 +252,10 @@
 "h-aanname",
 "h-dribbel",
 "h-afronden"
-]
+],
+"verlies": "Vijf seconden jagen op hun back, dan terug tot de middenlijn.",
+"winst": "Ga meteen diep langs de zijlijn of snij naar binnen.",
+"herv": "Corner voor: tweede paal. Corner tegen: blijf rond de middenlijn voor de counter."
 },
 "SP": {
 "naam": "Spits",
@@ -234,7 +273,10 @@
 "h-afronden",
 "h-aanname",
 "h-dribbel"
-]
+],
+"verlies": "Zet direct druk op de verdediger met de bal.",
+"winst": "Loop meteen diep of bied je kort aan.",
+"herv": "Corner voor: eerste paal. Corner tegen: blijf voorin voor de counter."
 },
 "SS": {
 "naam": "Tweede spits",
@@ -250,7 +292,10 @@
 "h-afronden",
 "h-aanname",
 "h-muurpass"
-]
+],
+"verlies": "Sluit de pass naar hun controleur af.",
+"winst": "Kom kort en kaats, of ga mee diep.",
+"herv": "Corner voor: rand van de zestien."
 }
 },
 "SYSTEMS": {
@@ -328,6 +373,24 @@
 "y": 26,
 "wie": "Joas"
 }
+],
+"fases": {
+"opbouw": "Centrale verdedigers breed in de zestien, de backs hoog, de controleur tussen of voor de centrale verdedigers.",
+"aanval": "Via de 8 en 10 tussen de linies naar de spits of de buitenspelers; de backs komen mee voor de overlap.",
+"verdedigen": "De spits stuurt de opbouw naar één kant, het middenveld schuift mee en één back blijft altijd achter.",
+"omschakelen": "Bij balverlies vijf seconden druk met de dichtstbijzijnde spelers. Bij balwinst eerst kijken naar de spits."
+},
+"tegen": "Het uitgangspunt van de KNVB, tegen bijna elke tegenstander.",
+"coach": [
+"Staan er overal driehoeken?",
+"Blijft er één back achter?",
+"Komt de 10 tussen de linies vrij?"
+],
+"train": [
+"rondo",
+"opbouw11",
+"derdeman",
+"wedstrijd11"
 ]
 },
 "14231": {
@@ -381,7 +444,19 @@
 "wie": "Suleiman",
 "naam": "Tweede controleur",
 "bal": "Jij mag mee naar voren als Sasha achter blijft. Kom tussen de linies en zoek Amine.",
-"geen": "Terug naast Sasha: met z'n tweeën sluiten jullie het midden af."
+"geen": "Terug naast Sasha: met z'n tweeën sluiten jullie het midden af.",
+"drills": [
+"positie",
+"compact",
+"rondo"
+],
+"home": [
+"h-omkijken",
+"h-kaatsen"
+],
+"verlies": "Terug naast Sasha: samen het midden dicht.",
+"winst": "Speel direct vooruit op Amine.",
+"extra": []
 },
 {
 "role": "AM",
@@ -411,6 +486,24 @@
 "wie": "Colin",
 "bal": "Jij bent alleen voorin: houd de bal vast tot Amine en de buitenspelers aansluiten."
 }
+],
+"fases": {
+"opbouw": "Twee controleurs voor de verdediging: één komt de bal halen, de ander blijft.",
+"aanval": "Amine vrij achter de spits; de buitenspelers komen naar binnen en de backs maken het veld breed.",
+"verdedigen": "Twee controleurs sluiten het midden; de 10 zet druk op hun 6.",
+"omschakelen": "Bij balverlies staat het midden meteen dicht. Bij balwinst Amine zoeken."
+},
+"tegen": "Tegen een tegenstander met een sterk middenveld.",
+"coach": [
+"Blijft er altijd één controleur achter?",
+"Is Amine vrij tussen de linies?",
+"Sluit het middenveld aan bij de spits?"
+],
+"train": [
+"positie",
+"draaien",
+"afronden",
+"wedstrijd11"
 ]
 },
 "1442": {
@@ -491,6 +584,24 @@
 "y": 24,
 "wie": "Joas"
 }
+],
+"fases": {
+"opbouw": "Rustig via de centrale verdedigers naar de spelverdeler.",
+"aanval": "Snel naar de twee spitsen: één diep, één kort. De middenvelders aan de kant geven voorzetten.",
+"verdedigen": "Twee spitsen zetten samen druk; de lijnen van vier blijven dicht bij elkaar.",
+"omschakelen": "Bij balverlies meteen terug in twee lijnen van vier. Bij balwinst diep op de spits."
+},
+"tegen": "Tegen een tegenstander die lang speelt, of om simpel te beginnen.",
+"coach": [
+"Lopen de spitsen tegengesteld?",
+"Staan de lijnen van vier dicht bij elkaar?",
+"Komt de kant met de bal mee naar voren?"
+],
+"train": [
+"golven",
+"vleugelzones",
+"compact",
+"wedstrijd11"
 ]
 },
 "1343": {
@@ -533,7 +644,19 @@
 "wie": "Stijn",
 "naam": "Linker vleugelverdediger",
 "bal": "Jij maakt links de breedte, helemaal tot aan de achterlijn.",
-"geen": "Bij balverlies meteen terug: dan zijn we achter met vier."
+"geen": "Bij balverlies meteen terug: dan zijn we achter met vier.",
+"drills": [
+"vleugelzones",
+"1tegen1",
+"actie"
+],
+"home": [
+"h-1tegen1",
+"h-steekpass"
+],
+"verlies": "Sprint terug tot naast de linker centrale verdediger.",
+"winst": "Ga meteen breed en hoog langs de zijlijn.",
+"extra": []
 },
 {
 "role": "VM",
@@ -555,7 +678,19 @@
 "wie": "Suleiman",
 "naam": "Rechter vleugelverdediger",
 "bal": "Jij maakt rechts de breedte en geeft de voorzetten.",
-"geen": "Bij balverlies meteen terug: dan zijn we achter met vier."
+"geen": "Bij balverlies meteen terug: dan zijn we achter met vier.",
+"drills": [
+"vleugelzones",
+"1tegen1",
+"actie"
+],
+"home": [
+"h-1tegen1",
+"h-steekpass"
+],
+"verlies": "Sprint terug tot naast de rechter centrale verdediger.",
+"winst": "Ga meteen breed en hoog langs de zijlijn.",
+"extra": []
 },
 {
 "role": "LW",
@@ -577,6 +712,24 @@
 "wie": "Joas",
 "bal": "Kom naar binnen, Suleiman loopt buitenom."
 }
+],
+"fases": {
+"opbouw": "Drie centrale verdedigers breed, de vleugelverdedigers hoog aan de zijlijn.",
+"aanval": "Veel spelers voorin: de buitenspelers komen naar binnen, de vleugelverdedigers lopen buitenom.",
+"verdedigen": "Hoog druk met drie aanvallers; de vleugelverdedigers zakken terug tot een lijn van vijf als het moet.",
+"omschakelen": "Bij balverlies sprinten de vleugelverdedigers terug. Bij balwinst snel naar de vrije vleugelverdediger."
+},
+"tegen": "Tegen een tegenstander die achter blijft, of als we het spel willen maken.",
+"coach": [
+"Zijn de vleugelverdedigers op tijd terug?",
+"Blijven er drie achter?",
+"Gebruiken we de breedte?"
+],
+"train": [
+"vleugelzones",
+"storen",
+"linies11",
+"wedstrijd11"
 ]
 },
 "14141": {
@@ -630,7 +783,10 @@
 "wie": "Amine",
 "naam": "Linker 8",
 "bal": "Bij balwinst meteen kijken naar Colin. Is hij niet vrij, dan rustig kort houden.",
-"geen": "Sluit de lijn van vier: blijf naast Suleiman en de buitenspelers."
+"geen": "Sluit de lijn van vier: blijf naast Suleiman en de buitenspelers.",
+"verlies": "Sluit de lijn van vier: naast Suleiman en de buitenspelers.",
+"winst": "Kijk eerst naar Colin in de diepte.",
+"extra": []
 },
 {
 "role": "CM",
@@ -639,7 +795,10 @@
 "wie": "Suleiman",
 "naam": "Rechter 8",
 "bal": "Sluit snel aan bij Colin als hij de bal heeft.",
-"geen": "Sluit de lijn van vier: blijf naast Amine en de buitenspelers."
+"geen": "Sluit de lijn van vier: blijf naast Amine en de buitenspelers.",
+"verlies": "Sluit de lijn van vier: naast Amine en de buitenspelers.",
+"winst": "Sprint mee om Colin te helpen.",
+"extra": []
 },
 {
 "role": "LM",
@@ -662,8 +821,38 @@
 "wie": "Colin",
 "naam": "Uitvalspunt",
 "bal": "Bij balwinst ben jij het aanspeelpunt. Houd de bal vast tot het middenveld aansluit.",
-"geen": "Blijf tussen hun verdedigers en de middenlijn; jaag niet op de keeper."
+"geen": "Blijf tussen hun verdedigers en de middenlijn; jaag niet op de keeper.",
+"drills": [
+"omschakel",
+"afronden",
+"actie"
+],
+"home": [
+"h-aanname",
+"h-afronden"
+],
+"verlies": "Blijf tussen hun verdedigers en de middenlijn.",
+"winst": "Bied je aan en houd de bal vast tot het middenveld aansluit.",
+"extra": []
 }
+],
+"fases": {
+"opbouw": "Rustig achterin; de controleur alleen voor de verdediging, de 8'en dichtbij.",
+"aanval": "Snel omschakelen naar Colin, de 8'en en buitenspelers sluiten aan.",
+"verdedigen": "Twee lijnen van vier dicht bij elkaar, weinig ruimte ertussen.",
+"omschakelen": "Bij balwinst snel vooruit. Bij balverlies direct terug in de lijnen."
+},
+"tegen": "Tegen een sterke tegenstander.",
+"coach": [
+"Staan de lijnen dicht bij elkaar?",
+"Gaat de bal na balwinst snel vooruit?",
+"Is de controleur altijd aanspeelbaar?"
+],
+"train": [
+"linies11",
+"compact",
+"omschakel",
+"wedstrijd11"
 ]
 }
 },
