@@ -70,6 +70,95 @@ const PERSONAL = {
   Joas: ['Als Mees er niet is, speel je links en loop je mee terug om Nassim te helpen.'],
   Mees: ['Na een fout: handschoenen goed, “volgende bal”.']
 };
+/* ---------------- systemen ----------------
+   Per systeem: idee, sterk, risico en per plek (in volgorde) de speler die er op kwaliteit het best past,
+   met taken die in dit systeem afwijken van de standaard positiekaart. Niet ingevuld = standaard positiekaart. */
+const SYSTEMS = {
+  '1331': { naam: '1-3-3-1', titel: 'Basis 1-3-3-1',
+    idee: 'Drie achter, drie op het middenveld en één spits. Amine verdeelt het spel, Sasha schuift bij balbezit in naast hem en Maddox komt vanaf links naar binnen.',
+    sterk: 'Evenwichtig: altijd drie spelers achter de bal en een vaste spelverdeler in het midden.',
+    risico: 'Colin staat vaak alleen voorin; de buitenspelers moeten op tijd aansluiten.',
+    slots: [
+      ['K', 50, 94, 'Mees'], ['LA', 18, 76, 'Nassim'], ['CV', 50, 80, 'Sjoerd'], ['RA', 82, 76, 'Sasha'],
+      ['LB', 18, 48, 'Maddox'], ['CM', 50, 56, 'Amine'], ['RB', 82, 48, 'Suleiman'], ['SP', 50, 24, 'Colin']
+    ].map(([role, x, y, wie]) => ({ role, x, y, wie })) },
+  '1322': { naam: '1-3-2-2', titel: 'Twee spitsen 1-3-2-2',
+    idee: 'Drie achter, twee op het middenveld en twee spitsen. Colin gaat diep, Maddox komt kort en Amine bedient ze, met Suleiman als vangnet achter hem.',
+    sterk: 'Altijd twee spelers voor het doel en veel druk op hun verdediging.',
+    risico: 'Er staat niemand vast op de flanken: de buitenste verdedigers maken de breedte, maar nooit allebei tegelijk.',
+    slots: [
+      { role: 'K', x: 50, y: 94, wie: 'Mees', bal: 'Speel kort uit naar de buitenste verdedigers; zij staan breed. Is alles dicht, dan lang op Colin.' },
+      { role: 'LA', x: 18, y: 78, wie: 'Nassim', bal: 'Jij bent ook de linksbuiten: schuif op langs de zijlijn als de bal rechts is, zo maak je het veld breed.', geen: 'Bij balverlies meteen terug. Jij en de rechtsachter staan nooit allebei hoog.' },
+      { role: 'CV', x: 50, y: 82, wie: 'Sjoerd', geen: 'Met twee spitsen voorin zijn we achter met z\'n drieën: blijf centraal en stuur de buitenste verdedigers terug.' },
+      { role: 'RA', x: 82, y: 78, wie: 'Sasha', bal: 'Schuif op langs de zijlijn als Nassim achter blijft. Jij maakt rechts de breedte en speelt in op Maddox.', geen: 'Nooit samen met Nassim hoog: één van jullie blijft altijd achter.' },
+      { role: 'CM', x: 38, y: 56, wie: 'Amine', naam: 'Spelmaker', bal: 'Haal de bal, kijk om en draai. Zoek Colin in de diepte of Maddox in de voeten, en ga daarna mee voor de tweede bal.', geen: 'Zet druk op hun middenvelder. Suleiman blijft achter je.' },
+      { role: 'CM', x: 62, y: 60, wie: 'Suleiman', naam: 'Controleur', bal: 'Sta schuin achter Amine als aanspeelpunt. Zit het midden dicht, speel dan simpel breed naar een buitenste verdediger.', geen: 'Jij blijft altijd voor de verdediging. Onderschep de bal en geef hem meteen aan Amine.' },
+      { role: 'SP', x: 38, y: 24, wie: 'Colin', naam: 'Diepe spits', bal: 'Loop diep in de ruimte tussen hun centrale verdediger en de back. Maddox komt kort, jij gaat lang.', geen: 'Zet samen met Maddox druk op hun verdedigers en sluit de pass naar het midden af.' },
+      { role: 'SP', x: 62, y: 26, wie: 'Maddox', naam: 'Tweede spits', bal: 'Kom kort tussen de linies, draai op je rechterbeen en schiet, of steek Colin diep.', geen: 'Jaag op de verdediger met de bal; Colin pakt de pass naar zijn maatje.' }
+    ] },
+  '1313': { naam: '1-3-1-3', titel: 'Breed aanvallen 1-3-1-3',
+    idee: 'Drie achter, Amine als enige middenvelder en drie aanvallers hoog en breed. We zetten de tegenstander vast op zijn eigen helft.',
+    sterk: 'Drie aanvallers houden hun hele verdediging bezig; het veld wordt groot en Amine krijgt ruimte.',
+    risico: 'Amine staat alleen in het midden. Bij balverlies moeten de buitenspelers meteen terug tot de middenlijn.',
+    slots: [
+      { role: 'K', x: 50, y: 94, wie: 'Mees' },
+      { role: 'LA', x: 18, y: 78, wie: 'Nassim', bal: 'Schuif op tot de middenlijn en speel kort op Amine of op Maddox aan de zijlijn.' },
+      { role: 'CV', x: 50, y: 82, wie: 'Sjoerd' },
+      { role: 'RA', x: 82, y: 78, wie: 'Sasha', bal: 'Schuif in naast Amine, zodat hij er niet alleen voor staat.', geen: 'Bij balverlies meteen terug naar rechtsachter.' },
+      { role: 'CM', x: 50, y: 58, wie: 'Amine', naam: 'Enige middenvelder', bal: 'Jij bent het aanspeelpunt in het midden: blijf bewegen, kijk om en speel de drie aanvallers aan. Ga niet te ver mee naar voren.', geen: 'Blijf in het midden voor de verdediging en vertraag de tegenstander tot de buitenspelers terug zijn.' },
+      { role: 'LB', x: 14, y: 28, wie: 'Maddox', bal: 'Blijf hoog en breed bij de zijlijn. Neem de bal aan en snij naar binnen op je rechterbeen.', geen: 'Zet druk op hun rechtsachter. Bij balverlies vijf seconden jagen, dan terug tot de middenlijn.' },
+      { role: 'SP', x: 50, y: 22, wie: 'Colin', bal: 'Blijf tussen de centrale verdedigers. Kom kort om te kaatsen, ga diep zodra een buitenspeler de bal heeft.', geen: 'Zet druk op hun laatste man.' },
+      { role: 'RB', x: 86, y: 28, wie: 'Suleiman', bal: 'Sta hoog en breed. Ga 1 tegen 1 of geef een lage voorzet op Colin.', geen: 'Zet druk op hun linksachter, dan terug tot de middenlijn.' }
+    ] },
+  '1232': { naam: '1-2-3-2', titel: 'Bij achterstand 1-2-3-2',
+    idee: 'Twee verdedigers, drie middenvelders en twee spitsen. Aanvallender, maar kwetsbaar bij balverlies, dus alleen als we moeten scoren.',
+    sterk: 'Veel spelers rond hun zestien; elke bal mag snel naar voren.',
+    risico: 'Achter staan er maar twee. Bij balverlies moet iedereen een sprint terug trekken.',
+    slots: [
+      { role: 'K', x: 50, y: 94, wie: 'Mees', geen: 'Sta wat verder voor je doel; een lange bal achter de verdediging is voor jou.' },
+      { role: 'CV', x: 34, y: 78, wie: 'Sjoerd', naam: 'Linker verdediger', bal: 'Jullie staan met z\'n tweeën achter. Speel rustig breed naar je maatje of kort op Amine.', geen: 'Jij blijft altijd achter, ook bij een corner voor ons.' },
+      { role: 'CV', x: 66, y: 78, wie: 'Sasha', naam: 'Rechter verdediger', bal: 'Je mag inschuiven tot de middenlijn, nooit verder.', geen: 'Bij balverlies meteen terug naast Sjoerd. Blijf dicht bij elkaar.' },
+      { role: 'LM', x: 15, y: 50, wie: 'Maddox', bal: 'Breed bij de zijlijn, snij naar binnen en schiet.', geen: 'Loop terug tot naast de verdedigers: jij bent nu ook linksachter.' },
+      { role: 'CM', x: 50, y: 56, wie: 'Amine', bal: 'Speel snel vooruit naar de twee spitsen; elke bal mag naar voren.', geen: 'Zak terug voor de twee verdedigers.' },
+      { role: 'RM', x: 85, y: 50, wie: 'Suleiman', bal: 'Breed en hoog, geef voorzetten op de spitsen.', geen: 'Terug tot naast Sasha.' },
+      { role: 'SP', x: 38, y: 24, wie: 'Colin', naam: 'Diepe spits', bal: 'Loop diep; Joas komt kort.', geen: 'Zet druk op hun verdedigers.' },
+      { role: 'SP', x: 62, y: 24, wie: 'Joas', naam: 'Tweede spits', bal: 'Kom kort, kaats op Amine en ga mee de zestien in.', geen: 'Zet druk op de verdediger met de bal.' }
+    ] },
+  '1421': { naam: '1-4-2-1', titel: 'Compact 1-4-2-1',
+    idee: 'Vier achter, twee op het middenveld en Colin alleen voorin. Voor tegenstanders die sneller of sterker zijn: weinig ruimte achter ons, en bij balwinst snel naar Colin.',
+    sterk: 'Moeilijk te bespelen; de verdediging kan altijd met één speler extra dekken.',
+    risico: 'Colin staat alleen. Het middenveld moet snel aansluiten, anders komt de bal steeds terug.',
+    slots: [
+      { role: 'K', x: 50, y: 95, wie: 'Mees', geen: 'Kom uit je doel bij een lange bal achter de verdediging.' },
+      { role: 'LA', x: 12, y: 78, wie: 'Nassim', bal: 'Speel kort op Amine of meteen diep op Colin.', geen: 'Blijf dicht bij je centrale verdediger, laat geen gat.' },
+      { role: 'CV', x: 38, y: 83, wie: 'Sjoerd', bal: 'Speel breed naar Nassim of kort op Amine.', geen: 'Jij en Sasha staan dicht bij elkaar: één gaat naar de bal, de ander dekt achter hem.' },
+      { role: 'CV', x: 62, y: 83, wie: 'Sasha', bal: 'Speel kort op Amine of breed naar rechts.', geen: 'Dek achter Sjoerd als hij naar de bal gaat.' },
+      { role: 'RA', x: 88, y: 78, wie: 'Suleiman', bal: 'Schuif op als de bal rechts is en we rust hebben.', geen: 'Houd je man voor je en laat hem niet naar binnen.' },
+      { role: 'CM', x: 38, y: 60, wie: 'Amine', naam: 'Controleur en spelverdeler', bal: 'Bij balwinst meteen kijken naar Colin. Is hij niet vrij, dan rustig kort houden.', geen: 'Blijf voor de verdediging en sluit het midden af.' },
+      { role: 'CM', x: 62, y: 56, wie: 'Maddox', naam: 'Aanvallende middenvelder', bal: 'Sluit snel aan bij Colin als hij de bal heeft. Schiet van afstand als je ruimte krijgt.', geen: 'Loop terug tot naast Amine; samen sluiten jullie het midden af.' },
+      { role: 'SP', x: 50, y: 32, wie: 'Colin', naam: 'Uitvalspunt', bal: 'Bij balwinst ben jij het aanspeelpunt. Houd de bal vast tot Maddox aansluit, of ga zelf diep.', geen: 'Blijf tussen hun verdedigers en de middenlijn; jaag niet op de keeper.' }
+    ] }
+};
+const SLUG_SYS = { basis: '1331', fase1: '1331', druk: '1331', voorsprong: '1331', zondermees: '1331', achterstand: '1232', tweespitsen: '1322' };
+const sysOf = L => L?.data?.sys || SLUG_SYS[L?.data?.slug] || null;
+/* De plek in het systeemsjabloon die bij dit slot hoort: zelfde positie, zelfde volgnummer. */
+function tplSlot(L, slot, orig = slot) {
+  const T = SYSTEMS[sysOf(L)]; if (!T) return null;
+  const at = L.data.slots.indexOf(orig);
+  const nr = L.data.slots.slice(0, at < 0 ? 0 : at).filter(s => s.role === slot.role).length;
+  return T.slots.filter(s => s.role === slot.role)[nr] || null;
+}
+/* Taken voor deze plek: eigen aanpassing in deze opstelling, anders het systeem, anders de positiekaart. */
+function slotTasks(L, slot, orig = slot) {
+  const rc = roleCard(slot.role)?.data || ROLES[slot.role] || {};
+  const t = tplSlot(L, slot, orig) || {};
+  return {
+    naam: slot.naam || t.naam || rc.naam || slot.role,
+    bal: slot.bal || t.bal || rc.bal || '', geen: slot.geen || t.geen || rc.geen || '',
+    eigen: !!(slot.bal || slot.geen), rc
+  };
+}
+
 const REACT = { top: 'Top!', goed_bezig: 'Goed bezig', knap: 'Knap gedaan', volhouden: 'Volhouden' };
 const MOOD = { 1: '😕', 2: '🙂', 3: '😄' };
 function weekStart(d = new Date()) { const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}-${String(x.getDate()).padStart(2, '0')}`; }
@@ -125,7 +214,25 @@ async function loadStaff(preferId) {
     const { error } = await sb.from('content').insert(Object.entries(ROLES).map(([code, r], i) => ({ team_id: S.team.id, kind: 'session', title: r.naam, sort: i, data: { role: code, ...r }, updated_by: S.user.id })));
     if (!error) await reloadTeamData();
   }
+  await ensureSystems();
   render();
+}
+/* Elk systeem uit de bibliotheek staat één keer klaar als opstelling, ingevuld op kwaliteit. */
+function lineupFromSystem(code) {
+  const T = SYSTEMS[code], byName = n => S.players.find(p => p.nickname.toLowerCase() === String(n || '').toLowerCase())?.id || null;
+  const used = new Set();
+  const slots = T.slots.map(t => { const id = byName(t.wie); if (id) used.add(id); return { role: t.role, x: t.x, y: t.y, player_id: id }; });
+  slots.forEach(sl => { sl.alt = (SEED.ALT[sl.role] || []).map(byName).filter(id => id && id !== sl.player_id); });
+  return { sys: code, slug: 'sys-' + code, note: T.idee, slots };
+}
+async function ensureSystems() {
+  if (!S.staff || !S.players.length) return;
+  const have = new Set(kind('lineup').map(sysOf).filter(Boolean));
+  const missing = Object.keys(SYSTEMS).filter(c => !have.has(c));
+  if (!missing.length) return;
+  const base = Math.max(-1, ...kind('lineup').map(c => c.sort)) + 1;
+  const { error } = await sb.from('content').insert(missing.map((c, i) => ({ team_id: S.team.id, kind: 'lineup', title: SYSTEMS[c].titel, sort: base + i, data: lineupFromSystem(c), updated_by: S.user.id })));
+  if (!error) await reloadTeamData();
 }
 async function reloadTeamData() {
   const [p, c] = await Promise.all([
@@ -310,29 +417,90 @@ function Board(svg, prefix) {
 /* ---------------- opstelling ---------------- */
 const OPP = SEED.OPP;
 let lineupBoard = null, showOpp = false, benchSel = null;
+let selSlot = null;
 function viewLineup() {
   const lineups = kind('lineup');
   if (!lineups.length) { $('#view').innerHTML = `<div class="panel empty">Nog geen opstellingen.</div>`; return; }
   if (!S.scen || !lineups.find(l => l.id === S.scen)) S.scen = lineups[0].id;
   const L = lineups.find(l => l.id === S.scen);
-  $('#view').innerHTML = `<div class="chips" role="group" aria-label="Wedstrijdsituatie">${lineups.map(l => `<button data-id="${l.id}" class="${l.id === S.scen ? 'on' : ''}">${esc(l.title)}</button>`).join('')}</div>
+  const T = SYSTEMS[sysOf(L)];
+  $('#view').innerHTML = `<div class="chips" role="group" aria-label="Systeem of wedstrijdsituatie">${lineups.map(l => `<button data-id="${l.id}" class="${l.id === S.scen ? 'on' : ''}">${esc(l.title)}</button>`).join('')}</div>
     <div class="layout"><div><svg class="pitch ${S.staff ? 'edit' : ''}" id="pitch" aria-label="Veld met opstelling"></svg>
-      <div class="row mt"><button class="btn" id="oppT">${showOpp ? 'Tegenstander verbergen' : 'Tegenstander tonen'}</button>${S.staff ? '<button class="btn ghost" id="addL">Nieuwe situatie</button>' : ''}</div></div>
-      <div><div class="panel"><div class="kicker">Wedstrijdsituatie</div><h2>${esc(L.title)}</h2><p style="margin:0">${esc(L.data.note || '')}</p>
-        ${S.staff ? `<p class="small muted mt">Sleep een shirt om het te verplaatsen. Tik op een shirt om de speler en alternatieven te kiezen.</p><div class="row"><button class="btn ghost" id="editL">Naam en uitleg aanpassen</button></div>
-        <h3 class="mt">Niet opgesteld</h3><div class="bench" id="bench"></div><p class="small muted" style="margin:6px 0 0">Tik op een naam en daarna op een shirt om te wisselen.</p>` : '<p class="small muted mt">Tik op een speler voor zijn taken.</p>'}</div>
-        <div class="panel mt" id="card"></div></div></div>`;
-  document.querySelectorAll('.chips button').forEach(b => b.onclick = () => { S.scen = b.dataset.id; benchSel = null; viewLineup(); });
+      <div class="row mt"><button class="btn" id="oppT">${showOpp ? 'Tegenstander verbergen' : 'Tegenstander tonen'}</button>${S.staff ? '<button class="btn ghost" id="addSys">Systeem toevoegen</button><button class="btn ghost" id="addL">Nieuwe situatie</button>' : ''}</div></div>
+      <div><div class="panel"><div class="kicker">${T ? 'Systeem ' + esc(T.naam) : 'Wedstrijdsituatie'}</div><h2>${esc(L.title)}</h2><p style="margin:0">${esc(L.data.note || '')}</p>
+        ${T ? `<dl class="task sysinfo"><dt>Sterk</dt><dd>${esc(T.sterk)}</dd><dt>Risico</dt><dd>${esc(T.risico)}</dd></dl>` : ''}
+        ${S.staff ? `<p class="small muted mt">Tik op een shirt voor de taken van die speler in dit systeem. Sleep een shirt om het te verplaatsen.</p><div class="row"><button class="btn ghost" id="editL">Naam en uitleg aanpassen</button></div>
+        <h3 class="mt">Niet opgesteld</h3><div class="bench" id="bench"></div><p class="small muted" style="margin:6px 0 0">Tik op een naam en daarna op een shirt om te wisselen. De taken passen zich meteen aan.</p>` : '<p class="small muted mt">Tik op een speler voor zijn taken in dit systeem.</p>'}</div>
+        <div class="panel mt" id="card" aria-live="polite"></div></div></div>`;
+  document.querySelectorAll('.chips button').forEach(b => b.onclick = () => { S.scen = b.dataset.id; benchSel = null; selSlot = null; viewLineup(); });
   $('#oppT').onclick = () => { showOpp = !showOpp; viewLineup(); };
   lineupBoard = Board($('#pitch'), 'b');
+  if (selSlot == null || !L.data.slots[selSlot]) selSlot = Math.max(0, L.data.slots.findIndex(s => s.role === 'CM'));
   drawLineup(L, true);
   if (S.staff) {
     $('#editL').onclick = () => editLineupMeta(L);
-    $('#addL').onclick = async () => { const base = lineups[0]; const row = await insertContent('lineup', 'Nieuwe situatie', JSON.parse(JSON.stringify({ ...base.data, slug: null, note: '' }))); if (row) { S.scen = row.id; viewLineup(); } };
+    $('#addL').onclick = async () => { const base = L; const row = await insertContent('lineup', 'Nieuwe situatie', JSON.parse(JSON.stringify({ ...base.data, slug: null, note: '' }))); if (row) { S.scen = row.id; viewLineup(); } };
+    $('#addSys').onclick = () => addSystemDialog();
     wireDrag(L);
+  } else {
+    $('#pitch').onclick = e => { const g = e.target.closest('.tok'); if (g && g.dataset.key[0] === 's') pickSlot(L, +g.dataset.key.slice(1)); };
   }
-  const first = L.data.slots.find(s => s.role === 'CM') || L.data.slots[0];
-  showCard(first?.player_id);
+  wireHover(L);
+  showSlot(L, selSlot, false);
+}
+function addSystemDialog() {
+  openDialog(`<div class="kicker">Systemen</div><h2>Systeem toevoegen</h2><p class="small muted">De spelers worden op hun kwaliteit ingevuld. Daarna kun je alles nog wisselen en aanpassen.</p>
+    ${Object.entries(SYSTEMS).map(([c, T]) => `<label class="sysopt"><input type="radio" name="sysc" value="${c}" ${c === '1322' ? 'checked' : ''}><span><b>${esc(T.titel)}</b><br><span class="small muted">${esc(T.idee)}</span></span></label>`).join('')}`,
+    [['Annuleren'], ['Toevoegen', 'primary', async () => {
+      const c = document.querySelector('input[name=sysc]:checked')?.value; if (!c) return;
+      const row = await insertContent('lineup', SYSTEMS[c].titel, lineupFromSystem(c));
+      if (row) { S.scen = row.id; selSlot = null; viewLineup(); toast(`${SYSTEMS[c].titel} staat klaar`); }
+    }]]);
+}
+function pickSlot(L, i) {
+  selSlot = i; drawLineup(L); showSlot(L, i, true);
+}
+/* Taken van één plek tonen: naast het veld, en op een smal scherm als blad dat van onder opschuift. */
+function showSlot(L, i, open) {
+  const slot = L.data.slots[i]; if (!slot) return;
+  const p = playerById(slot.player_id);
+  const html = (p ? cardHTML(p, { lineup: L }) : emptySlotHTML(L, slot)) + (S.staff ? `<div class="row mt"><button class="btn" data-es="${i}">Speler, positie of taken wijzigen</button></div>` : '');
+  const box = $('#card'); if (box) box.innerHTML = html;
+  if (open && !matchMedia('(min-width: 900px)').matches) openSheet(html);
+  document.querySelectorAll('[data-es]').forEach(b => b.onclick = () => { closeSheet(); editSlot(L, L.data.slots[+b.dataset.es]); });
+}
+function emptySlotHTML(L, slot) {
+  const st = slotTasks(L, slot);
+  return `<div class="pcard">${shirtSVG(slot.role)}<div><h2 style="margin:0">Nog leeg</h2><div class="muted">${esc(st.naam)} · ${esc(L.title)}</div></div></div>
+    <dl class="task"><dt>Wij hebben de bal</dt><dd>${esc(st.bal)}</dd><dt>Zij hebben de bal</dt><dd>${esc(st.geen)}</dd></dl>`;
+}
+function openSheet(html) {
+  let sh = $('#sheet');
+  if (!sh) { sh = document.createElement('div'); sh.id = 'sheet'; sh.className = 'sheet'; sh.setAttribute('role', 'dialog'); sh.setAttribute('aria-label', 'Taken van de speler'); document.body.appendChild(sh); }
+  sh.innerHTML = `<button class="sheet-x" aria-label="Sluiten">×</button><div class="sheet-grip"></div><div class="sheet-body">${html}</div>`;
+  sh.querySelector('.sheet-x').onclick = closeSheet;
+  sh.querySelectorAll('[data-es]').forEach(b => { const L = curLineup(); b.onclick = () => { closeSheet(); editSlot(L, L.data.slots[+b.dataset.es]); }; });
+  requestAnimationFrame(() => sh.classList.add('open'));
+}
+function closeSheet() { const sh = $('#sheet'); if (sh) sh.classList.remove('open'); }
+/* Met de muis boven een shirt: korte samenvatting van de taken. */
+function wireHover(L) {
+  if (!matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+  const svg = $('#pitch'); let tip = $('#tip');
+  if (!tip) { tip = document.createElement('div'); tip.id = 'tip'; tip.className = 'tip'; tip.setAttribute('role', 'tooltip'); document.body.appendChild(tip); }
+  tip.classList.remove('show');
+  svg.onpointerover = e => {
+    const g = e.target.closest('.tok'); if (!g || g.dataset.key[0] !== 's') return;
+    const slot = L.data.slots[+g.dataset.key.slice(1)]; if (!slot) return;
+    const st = slotTasks(L, slot), p = playerById(slot.player_id);
+    tip.innerHTML = `<b>${esc(p ? p.nickname : 'Nog leeg')}</b> · ${esc(st.naam)}<div><span>Met bal</span> ${esc(st.bal)}</div><div><span>Zonder bal</span> ${esc(st.geen)}</div>`;
+    const r = g.getBoundingClientRect(); tip.classList.add('show');
+    const w = tip.offsetWidth, h = tip.offsetHeight;
+    let x = r.right + 10, y = r.top + r.height / 2 - h / 2;
+    if (x + w > innerWidth - 8) x = r.left - w - 10;
+    tip.style.left = Math.max(8, x) + 'px'; tip.style.top = Math.min(innerHeight - h - 8, Math.max(8, y)) + 'px';
+  };
+  svg.onpointerout = e => { if (!e.relatedTarget || !e.relatedTarget.closest?.('.tok')) tip.classList.remove('show'); };
 }
 function drawLineup(L, instant) {
   const onField = new Set(L.data.slots.map(s => s.player_id));
@@ -343,6 +511,7 @@ function drawLineup(L, instant) {
   });
   if (showOpp) OPP.forEach((o, i) => list.push({ key: 'o' + i, team: 'opp', x: o[0], y: o[1] }));
   lineupBoard.render(list, instant);
+  lineupBoard.svg.querySelectorAll('.tok').forEach(g => g.classList.toggle('sel', g.dataset.key === 's' + selSlot));
   if (S.staff && $('#bench')) {
     const b = $('#bench'); b.innerHTML = '';
     S.players.filter(p => p.active && !onField.has(p.id)).forEach(p => {
@@ -371,8 +540,8 @@ function wireDrag(L) {
     const slot = L.data.slots[+d.key.slice(1)];
     if (d.moved) { clearTimeout(saveT); saveT = setTimeout(() => saveContent(L, { data: L.data }), 500); return; }
     if (benchSel) {
-      slot.player_id = benchSel; benchSel = null; saveContent(L, { data: L.data }); drawLineup(L); showCard(slot.player_id); toast(`${nick(slot.player_id)} staat nu op ${slot.role}`);
-    } else editSlot(L, slot);
+      slot.player_id = benchSel; benchSel = null; saveContent(L, { data: L.data }); pickSlot(L, +d.key.slice(1)); toast(`${nick(slot.player_id)} staat nu op ${slotTasks(L, slot).naam}`);
+    } else pickSlot(L, +d.key.slice(1));
   };
   svg.onpointerup = end; svg.onpointercancel = end;
 }
@@ -400,15 +569,16 @@ function cardHTML(p, opts = {}) {
   const homes = (r?.home || []).map(sl => bySlug('homedrill', sl)).filter(Boolean);
   const roleExtra = (rc?.data.extra || []).map(x => x.split(' ').slice(0, 3).join(' ').toLowerCase());
   const personal = (tc?.data.extra || []).filter(x => !roleExtra.includes(x.split(' ').slice(0, 3).join(' ').toLowerCase()));
-  const head = `<div class="pcard">${shirtSVG(p.shirt ?? (slot?.role || ''))}<div><h2 style="margin:0">${esc(p.nickname)}</h2><div class="muted">${slot ? `${esc(roleName(slot.role))} · ${esc(L.title)}` : `Niet opgesteld in ${esc(L?.title || 'deze situatie')}`}</div></div></div>`;
-  if (!r) {
+  const st = slot ? slotTasks(L, slot) : null;
+  const head = `<div class="pcard">${shirtSVG(p.shirt ?? (slot?.role || ''))}<div><h2 style="margin:0">${esc(p.nickname)}</h2><div class="muted">${slot ? `${esc(st.naam)} · ${esc(L.title)}` : `Niet opgesteld in ${esc(L?.title || 'deze situatie')}`}</div></div></div>`;
+  if (!r && !st) {
     const legacy = tc?.data;
     return head + (alsoRoles.length ? `<p class="small muted mt">Kan in deze situatie ook spelen als ${alsoRoles.map(x => esc(roleName(x))).join(' of ')}.</p>` : '') +
       (legacy?.bal ? `<dl class="task"><dt>Wij hebben de bal</dt><dd>${esc(legacy.bal)}</dd><dt>Zij hebben de bal</dt><dd>${esc(legacy.geen || '')}</dd></dl>` : '') +
       (personal.length ? `<dl class="task"><dt>Persoonlijk</dt>${personal.map(x => `<dd>${esc(x)}</dd>`).join('')}</dl>` : '');
   }
-  const extra = [...(r.extra || []), ...(slot?.note ? [slot.note] : [])];
-  return head + `<dl class="task"><dt>Wij hebben de bal</dt><dd>${esc(r.bal || '')}</dd><dt>Zij hebben de bal</dt><dd>${esc(r.geen || '')}</dd>
+  const extra = [...(r?.extra || []), ...(slot?.note ? [slot.note] : [])];
+  return head + `<dl class="task"><dt>Wij hebben de bal</dt><dd>${esc(st.bal)}</dd><dt>Zij hebben de bal</dt><dd>${esc(st.geen)}</dd>
     ${extra.length ? `<dt>Let op</dt>${extra.map(x => `<dd>${esc(x)}</dd>`).join('')}` : ''}
     ${personal.length ? `<dt>Persoonlijk</dt>${personal.map(x => `<dd>${esc(x)}</dd>`).join('')}` : ''}
     ${opts.compact ? '' : `${drills.length ? `<dt>Oefenvormen op de training</dt><dd>${drills.map(d => esc(d.title)).join(', ')}</dd>` : ''}${homes.length ? `<dt>Thuis oefenen</dt><dd>${homes.map(h => esc(h.title)).join(', ')}</dd>` : ''}`}</dl>`;
@@ -421,13 +591,22 @@ function editSlot(L, slot) {
   openDialog(`<div class="kicker">Positie ${esc(slot.role)}</div><h2>Wie speelt hier?</h2>
     <label class="f" for="sp">Speler</label><select class="i" id="sp"><option value="">— leeg —</option>${opts.map(p => `<option value="${p.id}" ${p.id === slot.player_id ? 'selected' : ''}>${esc(p.nickname)}</option>`).join('')}</select>
     <label class="f" for="sr">Positie</label><select class="i" id="sr">${roleCards().map(r => `<option value="${esc(r.data.role)}" ${r.data.role === slot.role ? 'selected' : ''}>${esc(r.data.role)} · ${esc(r.title)}</option>`).join('')}${roleCard(slot.role) ? '' : `<option selected value="${esc(slot.role)}">${esc(slot.role)}</option>`}</select>
+    <label class="f" for="snm">Naam van deze plek in dit systeem</label><input class="i" id="snm" maxlength="40" value="${esc(slotTasks(L, slot).naam)}">
+    <label class="f" for="sbal">Wij hebben de bal (in dit systeem)</label><textarea class="i" id="sbal" maxlength="400">${esc(slotTasks(L, slot).bal)}</textarea>
+    <label class="f" for="sgeen">Zij hebben de bal (in dit systeem)</label><textarea class="i" id="sgeen" maxlength="400">${esc(slotTasks(L, slot).geen)}</textarea>
+    <p class="small muted" style="margin:4px 0 0">Kies je een andere positie, dan vullen deze velden zich met de taken van die positie in dit systeem.</p>
     <label class="f" for="sno">Extra taak in deze situatie (optioneel)</label><input class="i" id="sno" maxlength="200" value="${esc(slot.note || '')}">
     <label class="f">Kan hier ook spelen</label><div class="grid two">${opts.map(p => `<label class="small"><input type="checkbox" value="${p.id}" class="altc" ${(slot.alt || []).includes(p.id) ? 'checked' : ''}> ${esc(p.nickname)}</label>`).join('')}</div>`,
     [['Annuleren'], ['Opslaan', 'primary', () => {
-      slot.player_id = $('#sp').value || null; slot.role = $('#sr').value || slot.role; slot.note = $('#sno').value.trim() || undefined;
+      slot.player_id = $('#sp').value || null; slot.note = $('#sno').value.trim() || undefined;
+      slot.role = $('#sr').value || slot.role;
+      const auto = slotTasks(L, { ...slot, bal: undefined, geen: undefined, naam: undefined }, slot);
+      const v = { bal: $('#sbal').value.trim(), geen: $('#sgeen').value.trim(), naam: $('#snm').value.trim() };
+      for (const k of ['bal', 'geen', 'naam']) { if (v[k] && v[k] !== auto[k]) slot[k] = v[k]; else delete slot[k]; }
       slot.alt = [...document.querySelectorAll('.altc:checked')].map(c => c.value);
-      saveContent(L, { data: L.data }); drawLineup(L); showCard(slot.player_id);
+      saveContent(L, { data: L.data }); const i = L.data.slots.indexOf(slot); if ($('#pitch')) pickSlot(L, i); else showCard(slot.player_id);
     }]]);
+  $('#sr').onchange = () => { const t = slotTasks(L, { ...slot, role: $('#sr').value, bal: undefined, geen: undefined, naam: undefined }, slot); $('#sbal').value = t.bal; $('#sgeen').value = t.geen; $('#snm').value = t.naam; };
 }
 function editLineupMeta(L) {
   openDialog(`<h2>Situatie aanpassen</h2><label class="f" for="lt">Naam</label><input class="i" id="lt" value="${esc(L.title)}" maxlength="60">

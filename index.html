@@ -96,6 +96,20 @@ dialog .dfoot{display:flex;gap:8px;justify-content:flex-end;padding:12px 20px;bo
 .badge{display:inline-block;font:700 .72rem "Barlow Condensed",sans-serif;letter-spacing:.12em;text-transform:uppercase;padding:3px 9px;border-radius:999px;background:rgba(255,255,255,.08);color:var(--muted)}
 .loading{display:grid;place-items:center;min-height:50vh;color:var(--muted);font:700 1rem "Barlow Condensed",sans-serif;letter-spacing:.14em;text-transform:uppercase}
 .empty{padding:22px;text-align:center;color:var(--muted)}
+.tok.sel path{stroke:#fff;stroke-width:.8}
+.sysinfo{margin-top:6px}
+label.sysopt{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:12px;margin:8px 0;cursor:pointer}
+label.sysopt:has(input:checked){border-color:var(--club);background:color-mix(in srgb,var(--club) 14%,transparent)}
+label.sysopt input{margin-top:4px;accent-color:var(--club)}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:40;max-height:72vh;overflow:auto;background:#14171c;border-top:1px solid var(--line);border-radius:20px 20px 0 0;box-shadow:0 -20px 50px rgba(0,0,0,.6);padding:10px 18px calc(22px + env(safe-area-inset-bottom,0px));transform:translateY(105%);transition:transform .28s cubic-bezier(.3,.7,.3,1)}
+.sheet.open{transform:none}
+.sheet-grip{width:44px;height:5px;border-radius:3px;background:rgba(255,255,255,.25);margin:0 auto 10px}
+.sheet-x{position:absolute;right:10px;top:8px;width:40px;height:40px;border:0;border-radius:50%;background:rgba(255,255,255,.08);color:var(--ink);font-size:1.5rem;line-height:1;cursor:pointer}
+@media (prefers-reduced-motion: reduce){.sheet{transition:none}}
+.tip{position:fixed;z-index:45;max-width:300px;background:#fff;color:#111;border-radius:12px;padding:10px 12px;font-size:.88rem;line-height:1.35;box-shadow:0 14px 34px rgba(0,0,0,.45);pointer-events:none;opacity:0;transition:opacity .12s}
+.tip.show{opacity:1}
+.tip b{font-family:"Barlow Condensed",sans-serif;font-size:1.05rem;text-transform:uppercase}
+.tip div{margin-top:5px}.tip span{font:700 .7rem "Barlow Condensed",sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--club);margin-right:4px}
 [hidden]{display:none!important}
 </style>
 </head>
