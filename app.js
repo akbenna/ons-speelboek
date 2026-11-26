@@ -797,8 +797,10 @@ function Film(svg, P) {
     me.raf = requestAnimationFrame(loop);
   }
   function stop() { cancelAnimationFrame(me.raf); me.raf = 0; me.playing = false; }
+  const total = () => (states.length - 1) * (MOVE + HOLD) + END;
   Object.assign(me, {
-    svg, toks,
+    svg, toks, duration: total,
+    renderAt(t) { const seg = MOVE + HOLD, k = Math.floor(t / seg); if (k >= states.length - 1) { draw(states[states.length - 1], states[states.length - 1], 1); return states.length - 1; } const r = t - k * seg; draw(states[k], states[k + 1], r / MOVE); return r >= MOVE ? k + 1 : k; },
     show(k) { stop(); me.k = k; draw(states[k], states[k], 1); },
     play() { if (me.playing) return; me.playing = true; me.t0 = 0; me.entered = false; if (me.k >= states.length - 1) { me.k = 0; me.onFrame(0); } me.raf = requestAnimationFrame(loop); },
     pause() { const k = me.entered ? me.k + 1 : me.k; stop(); me.show(Math.min(k, states.length - 1)); },
@@ -831,7 +833,10 @@ function viewPatterns() {
         : `<div class="row mt"><button class="btn" id="pprev">Vorige</button><button class="btn primary" id="pplay">Afspelen</button><button class="btn" id="pnext">Volgende</button><button class="btn ghost" id="toFilm">Film</button></div><p class="small muted mt">Witte lijn: pass. Gele stippellijn: loopactie. Witte stippen: dribbel.</p>`}
       <label class="f" for="pfol">Volg een speler</label><select class="i" id="pfol"><option value="">Niemand, het hele team</option>${cast.map(c => `<option value="${esc(c.n)}" ${c.n === S.follow ? 'selected' : ''}>${esc(c.name)} (${c.num})</option>`).join('')}</select>
       <div class="row mt"><button class="btn" id="quizB" ${S.follow ? '' : 'disabled'}>Waar loop jij naartoe?</button></div>
-      <div id="quiz" class="quiz" hidden></div></div></div>`;
+      <div id="quiz" class="quiz" hidden></div>
+      <div class="row mt"><button class="btn" id="vidB">Deel als video</button>${S.staff ? `<button class="btn ghost" id="editP">Patroon aanpassen</button><button class="btn ghost" id="newP">Nieuw patroon</button>` : ''}</div></div></div>`;
+  $('#vidB').onclick = () => { if (S.pmode !== 'film') { S.pmode = 'film'; viewPatterns(); } shareVideo(); };
+  if (S.staff) { $('#editP').onclick = () => editPattern(curPat()); $('#newP').onclick = () => editPattern(null, S.psys); }
   document.querySelectorAll('[data-sys]').forEach(b => b.onclick = () => { S.psys = b.dataset.sys; S.pat = null; viewPatterns(); });
   document.querySelectorAll('[data-id]').forEach(b => b.onclick = () => { S.pat = b.dataset.id; S.step = 0; viewPatterns(); });
   $('#pfol').onchange = () => { S.follow = $('#pfol').value || null; if (film) { film.follow = S.follow; film.decorate(); film.show(film.k); } $('#quizB').disabled = !S.follow; showCap(S.pmode === 'film' ? film.k : S.step); if (S.pmode !== 'film') drawPat(); };
@@ -909,6 +914,135 @@ function askQuiz() {
   };
   tok.style.cursor = 'grab'; tok.style.touchAction = 'none';
   tok.onpointerdown = e => { if (!quiz || quiz.qs[quiz.i] !== k) return; e.preventDefault(); drag = true; svg.addEventListener('pointermove', move); svg.addEventListener('pointerup', up); svg.addEventListener('pointercancel', up); };
+}
+
+/* ---- delen als video ---- */
+async function shareVideo() {
+  const P = curPat(), btn = $('#vidB'); if (!P || !film) return;
+  if (!('VideoEncoder' in window)) return toast('Deze browser kan geen video maken. Probeer Chrome of Safari.');
+  btn.disabled = true; const label = btn.textContent;
+  try {
+    const { Muxer, ArrayBufferTarget } = await import('https://cdn.jsdelivr.net/npm/mp4-muxer@5.1.3/+esm');
+    const W = 720, H = 1080, FPS = 25, FH = Math.round(W * 106 / 100), TOP = 70;
+    let cfg = null;
+    for (const c of [{ codec: 'avc1.42001f', m: 'avc' }, { codec: 'avc1.4d0028', m: 'avc' }, { codec: 'vp09.00.10.08', m: 'vp9' }]) {
+      const conf = { codec: c.codec, width: W, height: H, bitrate: 2_500_000, framerate: FPS };
+      if ((await VideoEncoder.isConfigSupported(conf).catch(() => ({}))).supported) { cfg = { conf, m: c.m }; break; }
+    }
+    if (!cfg) throw new Error('geen videocodec');
+    const muxer = new Muxer({ target: new ArrayBufferTarget(), video: { codec: cfg.m, width: W, height: H }, fastStart: 'in-memory' });
+    let fail = null;
+    const enc = new VideoEncoder({ output: (ch, meta) => muxer.addVideoChunk(ch, meta), error: e => { fail = e; } });
+    enc.configure(cfg.conf);
+    const cv = document.createElement('canvas'); cv.width = W; cv.height = H; const ctx = cv.getContext('2d');
+    const club = getComputedStyle(document.documentElement).getPropertyValue('--club').trim() || '#db1e3b';
+    const st = patStates(P), total = film.duration(), n = Math.ceil(total / 1000 * FPS);
+    const wasPlaying = film.playing; film.stop();
+    const wrap = (text, max) => { const words = String(text).split(' '), lines = []; let l = ''; words.forEach(w => { const t = l ? l + ' ' + w : w; if (ctx.measureText(t).width > max && l) { lines.push(l); l = w; } else l = t; }); if (l) lines.push(l); return lines; };
+    for (let i = 0; i <= n; i++) {
+      if (fail) throw fail;
+      const k = film.renderAt(i * 1000 / FPS);
+      const svgTxt = new XMLSerializer().serializeToString(film.svg).replace('<svg', `<svg width="${W}" height="${FH}"`);
+      const img = new Image(); img.src = URL.createObjectURL(new Blob([svgTxt], { type: 'image/svg+xml' }));
+      await img.decode(); URL.revokeObjectURL(img.src);
+      ctx.fillStyle = '#0d1014'; ctx.fillRect(0, 0, W, H);
+      ctx.drawImage(img, 0, TOP, W, FH);
+      ctx.fillStyle = club; ctx.fillRect(0, 0, W, TOP);
+      ctx.fillStyle = '#fff'; ctx.font = '800 30px Barlow Condensed, Arial Narrow, sans-serif'; ctx.textBaseline = 'middle';
+      ctx.fillText(`${FM().SYSTEMS[patSys(P)].naam} · ${P.title}`.toUpperCase().slice(0, 48), 22, TOP / 2);
+      const capY = TOP + FH + 46;
+      ctx.font = '600 28px Barlow, Arial, sans-serif'; ctx.fillStyle = '#fff'; ctx.textBaseline = 'alphabetic';
+      let y = capY + 10; wrap(patCap(P, st[k].cap), W - 44).slice(0, 3).forEach(line => { ctx.fillText(line, 22, y); y += 36; });
+      if (S.follow) { ctx.font = '700 27px Barlow, Arial, sans-serif'; ctx.fillStyle = '#ffd84d'; wrap(youLine(P, st, k, S.follow), W - 44).slice(0, 2).forEach(line => { ctx.fillText(line, 22, y + 4); y += 34; }); }
+      ctx.font = '700 22px Barlow, Arial, sans-serif'; ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.fillText(`Stap ${k + 1} van ${st.length} · ${S.team.name}`, 22, H - 18);
+      const vf = new VideoFrame(cv, { timestamp: Math.round(i * 1e6 / FPS), duration: Math.round(1e6 / FPS) });
+      enc.encode(vf, { keyFrame: i % (FPS * 2) === 0 }); vf.close();
+      if (i % 10 === 0) { btn.textContent = `Video maken… ${Math.round(i / n * 100)}%`; await new Promise(r => setTimeout(r)); }
+    }
+    await enc.flush(); muxer.finalize();
+    film.show(0); if (wasPlaying) film.play();
+    const name = `${P.title.replace(/[^\w\- ]+/g, '').trim().replace(/\s+/g, '-').toLowerCase() || 'patroon'}.mp4`;
+    const file = new File([muxer.target.buffer], name, { type: 'video/mp4' });
+    S.lastVideo = file;
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try { await navigator.share({ files: [file], title: P.title, text: `${P.title} (${FM().SYSTEMS[patSys(P)].naam})` }); }
+      catch (e) { if (e.name !== 'AbortError') downloadFile(file); }
+    } else downloadFile(file);
+    toast('Video klaar');
+  } catch (e) { toast('Video maken lukte niet: ' + (e.message || e)); }
+  finally { btn.disabled = false; btn.textContent = label; }
+}
+function downloadFile(file) { const a = document.createElement('a'); a.href = URL.createObjectURL(file); a.download = file.name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000); }
+
+/* ---- animatiebord: zelf een patroon maken of aanpassen ---- */
+function editPattern(P0, sys0) {
+  stopPlay(); if (film) film.stop(); closeQuiz();
+  const sys = P0 ? patSys(P0) : sys0;
+  const tmp = P0 || { title: 'Nieuw patroon', data: { sys, frames: [{ ball: null, opp: FM().OPP, cap: '' }] } };
+  const cast = patCast(tmp), first = patStates(tmp);
+  const holderOf = s => { if (!s.ball) return ''; if (s.ball[1] <= 3) return '__goal'; const own = Object.entries(s.pos).find(([, p]) => Math.hypot(s.ball[0] - p[0], s.ball[1] - 3 - p[1]) < 5); if (own) return own[0]; const oi = s.opp.findIndex(o => Math.hypot(s.ball[0] - o[0], s.ball[1] - o[1]) < 6); return oi >= 0 ? 'o' + oi : ''; };
+  const E = { title: tmp.title, sys, k: 0, steps: first.map(s => ({ pos: JSON.parse(JSON.stringify(s.pos)), opp: JSON.parse(JSON.stringify(s.opp)), hold: holderOf(s), cap: s.cap || '' })) };
+  if (!E.steps[0].hold) E.steps[0].hold = cast[0].n;
+  const ballOf = s => s.hold === '__goal' ? [50, 2] : s.hold?.[0] === 'o' && /^o\d+$/.test(s.hold) ? [s.opp[+s.hold.slice(1)][0], s.opp[+s.hold.slice(1)][1] + 2] : s.pos[s.hold] ? [s.pos[s.hold][0], s.pos[s.hold][1] + 3] : null;
+  $('#view').innerHTML = `<div class="kicker">Animatiebord · ${esc(FM().SYSTEMS[sys].naam)}</div>
+    <div class="layout"><div><svg class="pitch edit" id="epitch" aria-label="Animatiebord"></svg><p class="small muted">Sleep spelers en pionnen naar waar ze in deze stap staan. Geef de bal aan een speler hieronder.</p></div>
+    <div class="panel"><label class="f" for="etitle">Naam van het patroon</label><input class="i" id="etitle" maxlength="60" value="${esc(E.title)}">
+      <div class="row mt" style="justify-content:space-between"><strong id="estep"></strong><div class="row"><button class="btn" id="eprev" aria-label="Vorige stap">‹</button><button class="btn" id="enext" aria-label="Volgende stap">›</button></div></div>
+      <label class="f" for="ehold">Bal bij</label><select class="i" id="ehold"></select>
+      <label class="f" for="ecap">Uitleg bij deze stap</label><textarea class="i" id="ecap" maxlength="240" placeholder="Bijvoorbeeld: Sasha speelt in op Amine, die tussen de linies vrij staat."></textarea>
+      <div class="row mt"><button class="btn" id="eadd">+ Stap erbij</button><button class="btn ghost" id="edel">Stap weg</button></div>
+      <div class="row mt"><button class="btn primary" id="esave">Opslaan</button><button class="btn ghost" id="ecancel">Annuleren</button>${P0 ? '<button class="btn danger" id="eremove">Patroon verwijderen</button>' : ''}</div></div></div>`;
+  const board = Board($('#epitch'), 'e');
+  const svg = $('#epitch');
+  function paint(instant) {
+    const s = E.steps[E.k];
+    const list = cast.map(c => ({ key: 's' + c.n, name: c.name, label: c.num, x: s.pos[c.n][0], y: s.pos[c.n][1] }));
+    s.opp.forEach((o, i) => list.push({ key: 'o' + i, team: 'opp', x: o[0], y: o[1] }));
+    board.render(list, instant); board.ball(ballOf(s));
+    if (E.k > 0) { const p = E.steps[E.k - 1], ar = []; cast.forEach(c => { const a = p.pos[c.n], b = s.pos[c.n]; if (dist(a, b) > 2) ar.push([a[0], a[1], b[0], b[1], s.hold === c.n && p.hold === c.n ? 'drib' : 'run']); }); const pb = ballOf(p), nb = ballOf(s); if (pb && nb && p.hold !== s.hold) ar.push([pb[0], pb[1] - 3, nb[0], nb[1] - 3, 'pass']); board.arrows(ar); } else board.arrows([]);
+    $('#estep').textContent = `Stap ${E.k + 1} van ${E.steps.length}`;
+    $('#ehold').innerHTML = cast.map(c => `<option value="${esc(c.n)}">${esc(c.name)}</option>`).join('') + '<option value="__opp">Een tegenstander (dichtstbij)</option><option value="__goal">Schot op doel</option>';
+    $('#ehold').value = s.hold?.[0] === 'o' && /^o\d+$/.test(s.hold) ? '__opp' : s.hold || '';
+    $('#ecap').value = s.cap; $('#eprev').disabled = E.k === 0; $('#enext').disabled = E.k === E.steps.length - 1; $('#edel').disabled = E.steps.length < 2;
+  }
+  $('#ehold').onchange = () => {
+    const s = E.steps[E.k], v = $('#ehold').value;
+    if (v === '__opp') { const b = ballOf(s) || [50, 50]; let bi = 0, bd = 1e9; s.opp.forEach((o, i) => { const d = dist(o, b); if (d < bd) { bd = d; bi = i; } }); s.hold = 'o' + bi; } else s.hold = v;
+    paint();
+  };
+  $('#ecap').oninput = () => { E.steps[E.k].cap = $('#ecap').value; };
+  $('#eprev').onclick = () => { E.k--; paint(true); };
+  $('#enext').onclick = () => { E.k++; paint(true); };
+  $('#eadd').onclick = () => { const s = E.steps[E.k]; E.steps.splice(E.k + 1, 0, { pos: JSON.parse(JSON.stringify(s.pos)), opp: JSON.parse(JSON.stringify(s.opp)), hold: s.hold, cap: '' }); E.k++; paint(true); $('#ecap').focus(); };
+  $('#edel').onclick = () => { if (E.steps.length < 2) return; E.steps.splice(E.k, 1); E.k = Math.max(0, E.k - 1); paint(true); };
+  $('#ecancel').onclick = () => viewPatterns();
+  if ($('#eremove')) $('#eremove').onclick = async () => { if (!confirm('Dit patroon verwijderen?')) return; await deleteContent(P0); S.pat = null; viewPatterns(); };
+  $('#esave').onclick = async () => {
+    const title = $('#etitle').value.trim(); if (!title) return toast('Geef het patroon een naam');
+    if (E.steps.some(s => !s.cap.trim())) return toast('Schrijf bij elke stap een korte uitleg');
+    const base = Object.fromEntries(FM().SYSTEMS[sys].slots.map(t => [t.wie, [t.x, t.y]]));
+    const frames = E.steps.map((s, k) => {
+      const prev = k ? E.steps[k - 1] : { pos: base, hold: null }, f = { ball: ballOf(s), opp: s.opp.map(o => [Math.round(o[0]), Math.round(o[1])]), cap: s.cap.trim() };
+      const set = {}; cast.forEach(c => { if (dist(prev.pos[c.n], s.pos[c.n]) > 1) set[c.n] = s.pos[c.n].map(Math.round); }); if (Object.keys(set).length) f.set = set;
+      if (k) { const ar = []; cast.forEach(c => { const a = prev.pos[c.n], b = s.pos[c.n]; if (dist(a, b) > 2) ar.push([a, b, s.hold === c.n && prev.hold === c.n ? 'drib' : 'run']); }); const pb = ballOf(prev), nb = ballOf(s); if (pb && nb && prev.hold !== s.hold) ar.push([[pb[0], pb[1] - 3], [nb[0], nb[1] - 3], 'pass']); if (ar.length) f.ar = ar.map(([a, b, t]) => [Math.round(a[0]), Math.round(a[1]), Math.round(b[0]), Math.round(b[1]), t]); }
+      if (f.ball) f.ball = f.ball.map(Math.round);
+      return f;
+    });
+    const data = { ...(P0?.data || {}), sys, frames, slug: P0?.data.slug || 'eigen-' + Date.now() };
+    if (P0) await saveContent(P0, { title, data }); else { const row = await insertContent('pattern', title, data); if (!row) return; S.pat = row.id; }
+    S.psys = sys; toast('Patroon opgeslagen'); viewPatterns();
+  };
+  let drag = null;
+  const toField = e => { const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY; const p = pt.matrixTransform(svg.getScreenCTM().inverse()); return [Math.max(0, Math.min(100, (p.x - 2) / 0.56)), Math.max(0, Math.min(100, (p.y - 2) / 0.86))]; };
+  svg.addEventListener('pointerdown', e => { const g = e.target.closest('.tok'); if (!g) return; e.preventDefault(); drag = g.dataset.key; svg.setPointerCapture?.(e.pointerId); svg.classList.add('noanim'); });
+  svg.addEventListener('pointermove', e => {
+    if (!drag) return; e.preventDefault(); const [x, y] = toField(e), s = E.steps[E.k];
+    if (drag[0] === 's') s.pos[drag.slice(1)] = [x, y]; else s.opp[+drag.slice(1)] = [x, y];
+    board.place(drag, x, y); board.ball(ballOf(s));
+  });
+  const end = () => { if (!drag) return; drag = null; svg.classList.remove('noanim'); paint(); };
+  svg.addEventListener('pointerup', end); svg.addEventListener('pointercancel', end);
+  paint(true);
 }
 
 /* ---------------- trainingen ---------------- */
@@ -1300,6 +1434,8 @@ const HELP_TRAINER = [
     ['Trainingsplan en oefenvormen', 'In Trainingen staat een weekplan. Met “Gebruik deze training” zet je een week klaar; met “Training kopiëren” plak je hem in WhatsApp of een mail. Bij elke oefenvorm staan het probleem, waarom en hoe, coachpunten en een makkelijkere of moeilijkere variant. Je kunt oefenvormen en weken aanpassen of toevoegen.'],
     ['Patronen als film', 'In Patronen kies je eerst het systeem (de ster is de wedstrijdopstelling) en dan een patroon. Het speelt af als een filmpje op een schuin veld, met rugnummers en gele pionnen als tegenstanders. “Langzaam” halveert het tempo; “Stap voor stap” laat pijlen en elke stap apart zien.'],
     ['Volg een speler', 'Kies bij “Volg een speler” een naam. Die speler krijgt een gele ring, de rest wordt lichter, en bij elke stap staat in één zin wat híj doet. Op de pagina van een speler staat hij zelf al gekozen.'],
+    ['Delen als video', 'Tik bij een patroon op “Deel als video”. De app maakt er een filmpje van, met de uitleg in beeld; volg je een speler, dan staat ook zijn zin erbij. Op de telefoon kies je daarna direct WhatsApp, op de computer wordt het bestand gedownload.'],
+    ['Zelf een patroon maken', 'Tik op “Nieuw patroon” (in het gekozen systeem) of “Patroon aanpassen”. Sleep spelers en pionnen naar hun plek, kies bij wie de bal is en schrijf bij elke stap een korte uitleg. Met “+ Stap erbij” maak je de volgende stap; die begint waar de vorige eindigde. De pijlen tekent de app zelf. Na “Opslaan” speelt je patroon als film en werkt “Waar loop jij naartoe?” er ook mee.'],
     ['Waar loop jij naartoe?', 'Kies eerst een speler en tik dan op “Waar loop jij naartoe?”. Het filmpje stopt vlak voor elke actie van die speler; hij sleept zijn rondje naar de plek waar hij heen gaat en ziet meteen of het klopt. Kijken én zelf aanwijzen blijft beter hangen dan alleen kijken. Laat kinderen het thuis doen, of samen op een tablet in de kleedkamer.']
   ]],
   ['Spelers en huiswerk', [
