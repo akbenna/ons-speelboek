@@ -235,6 +235,7 @@ async function loadStaff(preferId) {
     if (!error) await reloadTeamData();
   }
   await ensureSystems();
+  await ensurePatterns();
   render();
 }
 /* Elk systeem uit de bibliotheek staat één keer klaar als opstelling, ingevuld op kwaliteit. */
@@ -244,6 +245,16 @@ function lineupFromSystem(code) {
   const slots = T.slots.map(t => { const id = byName(t.wie); if (id) used.add(id); return { role: t.role, x: t.x, y: t.y, player_id: id }; });
   slots.forEach(sl => { sl.alt = (FM().ALT[sl.role] || []).map(byName).filter(id => id && id !== sl.player_id); });
   return { sys: code, slug: 'sys-' + code, note: T.idee, slots };
+}
+/* Patronen per systeem: ontbrekende uit de bibliotheek één keer toevoegen. */
+async function ensurePatterns() {
+  if (!S.staff) return;
+  const src = (fmt() === 11 ? SEED11 : SEED).PATSYS || [];
+  const have = new Set(kind('pattern').map(p => p.data.slug));
+  const missing = src.filter(p => !have.has(p.id)); if (!missing.length) return;
+  const base = Math.max(-1, ...kind('pattern').map(c => c.sort)) + 1;
+  const { error } = await sb.from('content').insert(missing.map((p, i) => ({ team_id: S.team.id, kind: 'pattern', title: p.name, sort: base + i, data: { slug: p.id, sys: p.sys, frames: p.frames }, updated_by: S.user.id })));
+  if (!error) await reloadTeamData();
 }
 async function ensureSystems() {
   if (!S.staff || !S.players.length) return;
@@ -333,7 +344,7 @@ async function seedTeam(teamId, f = 8) {
     slug: s.id, note: s.note,
     slots: Object.entries(s.pos).map(([n, v]) => ({ role: v[2], x: v[0], y: v[1], player_id: ids[n] || null,
       alt: (SEED.ALT[v[2]] || []).map(a => ids[a]).filter(Boolean) })) } }));
-  (f === 11 ? SEED11.PAT : SEED.PAT).forEach((p, i) => rows.push({ team_id: teamId, kind: 'pattern', title: p.name, sort: i, data: { slug: p.id, frames: p.frames } }));
+  [...(f === 11 ? SEED11 : SEED).PAT, ...(f === 11 ? SEED11 : SEED).PATSYS].forEach((p, i) => rows.push({ team_id: teamId, kind: 'pattern', title: p.name, sort: i, data: { slug: p.id, sys: p.sys, frames: p.frames } }));
   const drills = f === 11 ? [...SEED11.DRILLS, ...SEED.DRILLS.filter(d => d.id !== 'wedstrijd8')] : SEED.DRILLS;
   drills.forEach((d, i) => { const { name, ...rest } = d; rows.push({ team_id: teamId, kind: 'drill', title: name, sort: i, data: { ...rest, slug: d.id } }); });
   (f === 11 ? SEED11.TRAIN : SEED.TRAIN).forEach((t, i) => rows.push({ team_id: teamId, kind: 'plan', title: t.name, sort: i, data: { weken: t.weken, prob: t.prob, drills: t.drills } }));
@@ -663,43 +674,241 @@ function editLineupMeta(L) {
 }
 
 /* ---------------- patronen ---------------- */
-let patBoard = null, timer = null;
+let patBoard = null, timer = null, film = null;
+const ROLENUM = { K: 1, RA: 2, CV: 3, RCV: 3, LCV: 4, LA: 5, VM: 6, RB: 7, RM: 7, RW: 7, CM: 8, SP: 9, AM: 10, SS: 10, LB: 11, LM: 11, LW: 11 };
 function basisRoleMap() {
   const basis = kind('lineup')[0];
   const m = {}; (basis?.data.slots || []).forEach(s => { m[s.role] = s.player_id; });
   return m;
 }
+const patSys = P => (P.data.sys && FM().SYSTEMS[P.data.sys]) ? P.data.sys : FM().ORDER[0];
+/* Wie staat waar in dit patroon: het systeemsjabloon, met de echte spelers uit de opstelling van dat systeem. */
+function patCast(P) {
+  const sys = patSys(P), T = FM().SYSTEMS[sys];
+  const ls = kind('lineup').filter(l => sysOf(l) === sys), L = ls.find(l => l.data.match) || ls[0];
+  const byNick = n => S.players.find(p => p.nickname.toLowerCase() === String(n).toLowerCase())?.id || null;
+  const used = new Set();
+  const out = T.slots.map((t, i) => {
+    const nr = T.slots.slice(0, i).filter(s => s.role === t.role).length;
+    const sl = L?.data.slots.filter(s => s.role === t.role)[nr];
+    const pid = sl ? sl.player_id : byNick(t.wie);
+    const p = pid ? playerById(pid) : null;
+    if (p?.shirt != null) used.add(p.shirt);
+    return { n: t.wie, x: t.x, y: t.y, role: t.role, pid, name: p ? p.nickname : t.wie, num: p?.shirt ?? null };
+  });
+  /* Geen eigen rugnummer: het positienummer, en bij dubbele posities het eerstvolgende vrije nummer. */
+  out.forEach(c => { if (c.num != null) return; let n = ROLENUM[c.role]; if (n == null || used.has(n)) n = [6, 10, 11, 7, 4, 9, 2, 3, 5, 8, 12, 13, 14].find(x => !used.has(x)); c.num = n; used.add(n); });
+  return out;
+}
+function patStates(P) {
+  const cast = patCast(P), pos = Object.fromEntries(cast.map(c => [c.n, [c.x, c.y]]));
+  return P.data.frames.map(f => {
+    if (f.set) Object.entries(f.set).forEach(([n, v]) => { if (pos[n]) pos[n] = [v[0], v[1]]; });
+    return { pos: JSON.parse(JSON.stringify(pos)), opp: f.opp || [], ball: f.ball, cap: f.cap, ar: f.ar };
+  });
+}
+function patCap(P, cap) { let c = cap || ''; patCast(P).forEach(x => { if (x.name !== x.n) c = c.replaceAll(x.n, x.name); }); return c; }
+const dist = (a, b) => Math.hypot((a[0] - b[0]) * 0.6, (a[1] - b[1]) * 0.9);
+/* Eén zin voor één speler: wat doe jij in deze stap? */
+function youLine(P, states, k, n) {
+  const cast = patCast(P), nm = x => cast.find(c => c.n === x)?.name || x;
+  const cur = states[k], prev = states[k - 1];
+  const at = (st, who) => { const p = st.pos[who]; return p && st.ball && Math.hypot(st.ball[0] - p[0], st.ball[1] - 3 - p[1]) < 5; };
+  const holder = st => Object.keys(st.pos).find(w => at(st, w));
+  if (!prev) return at(cur, n) ? 'Jij hebt de bal. Kijk eerst om je heen: wie staat er vrij?' : 'Hier sta jij. Kijk waar de bal is en wie hem heeft.';
+  const a = prev.pos[n], b = cur.pos[n], moved = dist(a, b) > 3, had = at(prev, n), gets = at(cur, n);
+  const dx = b[0] - a[0], dy = b[1] - a[1], dir = [];
+  if (dy < -4) dir.push('naar voren'); else if (dy > 4) dir.push('terug');
+  if (Math.abs(dx) > 4) dir.push(Math.abs(b[0] - 50) < Math.abs(a[0] - 50) ? 'naar binnen' : 'naar buiten');
+  const waar = dir.join(' en ') || 'een paar meter op';
+  if (had && !gets) {
+    if (cur.ball && cur.ball[1] <= 3) return 'Jij schiet op doel!';
+    const to = holder(cur); return to ? `Jij speelt de bal naar ${nm(to)}.` : 'Jij speelt de bal.';
+  }
+  if (had && gets) return moved ? `Jij dribbelt met de bal ${waar}.` : 'Jij houdt de bal en kijkt om je heen.';
+  if (gets) return moved ? `Jij loopt ${waar} en krijgt de bal.` : 'Jij krijgt de bal. Neem hem goed aan en kijk vooruit.';
+  if (moved) return `Jij loopt ${waar}. Zo maak je ruimte of word je aanspeelbaar.`;
+  return 'Jij blijft op je plek, houdt je positie en kijkt mee waar de bal gaat.';
+}
+/* ---- schuin veld in perspectief ---- */
+const F0 = 240, D0 = 150, HC = 143.3, HZ = -135.3;
+function proj(x, y) { const u = (x - 50) * 0.6, d = D0 + (100 - y) * 0.9; return [50 + u * F0 / d, HZ + HC * F0 / d, F0 / d]; }
+function unproj(sx, sy) { const d = HC * F0 / Math.max(1, sy - HZ), u = (sx - 50) * d / F0; return [Math.max(0, Math.min(100, 50 + u / 0.6)), Math.max(0, Math.min(100, 100 - (d - D0) / 0.9))]; }
+const ease = p => p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+function Film(svg, P) {
+  svg.setAttribute('viewBox', '0 0 100 106'); svg.innerHTML = '';
+  const club = getComputedStyle(document.documentElement).getPropertyValue('--club').trim() || '#db1e3b';
+  const poly = (pts, attrs, parent) => el('polygon', { points: pts.map(([x, y]) => proj(x, y).slice(0, 2).map(v => v.toFixed(2)).join(',')).join(' '), ...attrs }, parent);
+  const line = (pts, attrs, parent) => el('polyline', { points: pts.map(([x, y]) => proj(x, y).slice(0, 2).map(v => v.toFixed(2)).join(',')).join(' '), fill: 'none', ...attrs }, parent);
+  el('rect', { x: -5, y: -5, width: 110, height: 116, fill: '#1c4f2d' }, svg);
+  poly([[-4, -3], [104, -3], [104, 103], [-4, 103]], { fill: '#2b6f3f' }, svg);
+  for (let i = 0; i < 10; i++) poly([[0, i * 10], [100, i * 10], [100, i * 10 + 10], [0, i * 10 + 10]], { fill: i % 2 ? '#2f7a46' : '#2a6d3e' }, svg);
+  const Lg = el('g', { stroke: 'rgba(255,255,255,.85)', 'stroke-width': '.35', 'stroke-linejoin': 'round' }, svg);
+  line([[0, 0], [100, 0], [100, 100], [0, 100], [0, 0]], {}, Lg); line([[0, 50], [100, 50]], {}, Lg);
+  line(Array.from({ length: 41 }, (_, i) => [50 + 10.7 * Math.cos(i / 40 * 2 * Math.PI), 50 + 7 * Math.sin(i / 40 * 2 * Math.PI)]), {}, Lg);
+  [[0, 15.1, 5.8, 10.5, -1.7], [100, 84.9, 94.2, 89.5, 101.7]].forEach(([y0, yp, yg, ys, yn]) => {
+    line([[23.2, y0], [23.2, yp], [76.8, yp], [76.8, y0]], {}, Lg); line([[37.5, y0], [37.5, yg], [62.5, yg], [62.5, y0]], {}, Lg);
+    poly([[42.9, y0], [57.1, y0], [57.1, yn], [42.9, yn]], { fill: 'rgba(255,255,255,.25)', stroke: '#fff', 'stroke-width': '.3' }, svg);
+    const [sx, sy, s] = proj(50, ys); el('circle', { cx: sx, cy: sy, r: .35 * s, fill: '#fff' }, svg);
+  });
+  const [cx0, cy0, cs] = proj(50, 50); el('circle', { cx: cx0, cy: cy0, r: .35 * cs, fill: '#fff' }, svg);
+  const ghost = el('g', { class: 'ghost' }, svg); ghost.style.display = 'none';
+  el('circle', { r: 2.4, fill: 'none', stroke: '#ffd84d', 'stroke-width': '.5', 'stroke-dasharray': '1 .7' }, ghost);
+  const gT = el('g', {}, svg);
+  const cast = patCast(P), states = patStates(P);
+  const toks = {};
+  cast.forEach(c => {
+    const g = el('g', { class: 'ftok' }, gT); g.dataset.n = c.n;
+    el('ellipse', { cx: 0, cy: 1.6, rx: 1.8, ry: .5, fill: 'rgba(0,0,0,.35)' }, g);
+    const ring = el('circle', { r: 2.7, fill: 'none', stroke: '#ffd84d', 'stroke-width': '.45' }, g); ring.style.display = 'none';
+    el('circle', { r: 1.85, fill: club, stroke: '#fff', 'stroke-width': '.3' }, g);
+    const t = el('text', { y: '.72', 'text-anchor': 'middle', 'font-size': '1.95', 'font-weight': '800', 'font-family': 'Barlow Condensed, Arial Narrow, sans-serif', fill: '#fff' }, g); t.textContent = c.num;
+    const nm = el('text', { y: '3.9', 'text-anchor': 'middle', 'font-size': '1.55', 'font-weight': '700', 'font-family': 'Barlow, sans-serif', fill: '#fff', stroke: 'rgba(0,0,0,.75)', 'stroke-width': '.45', 'paint-order': 'stroke' }, g); nm.textContent = c.name;
+    g.setAttribute('aria-label', `${c.name}, nummer ${c.num}`);
+    toks[c.n] = { g, ring, nm, y: c.y };
+  });
+  const opp = (states[0].opp || []).map(() => { const g = el('g', { class: 'fopp' }, gT); el('ellipse', { cx: 0, cy: 1.2, rx: 1.1, ry: .35, fill: 'rgba(0,0,0,.3)' }, g); el('path', { d: 'M-.75,1.2 L-.45,-1.4 Q0,-2 .45,-1.4 L.75,1.2 Z', fill: '#f0d64a', stroke: '#8a7414', 'stroke-width': '.15' }, g); return { g, y: 0 }; });
+  const ballG = el('g', {}, svg); el('ellipse', { cx: .3, cy: .7, rx: .8, ry: .25, fill: 'rgba(0,0,0,.35)' }, ballG); el('circle', { r: .75, fill: '#fff', stroke: '#111', 'stroke-width': '.18' }, ballG);
+  const me = { states, cast, k: 0, playing: false, speed: 1, follow: null, names: true, onFrame: () => {}, raf: 0, t0: 0 };
+  const put = (g, x, y, big) => { const [sx, sy, s] = proj(x, y); g.setAttribute('transform', `translate(${sx.toFixed(2)},${sy.toFixed(2)}) scale(${(s * (big ? 1.25 : 1)).toFixed(3)})`); return sy; };
+  function draw(a, b, p) {
+    const e = ease(Math.min(1, Math.max(0, p))), lerp = (u, v) => [u[0] + (v[0] - u[0]) * e, u[1] + (v[1] - u[1]) * e];
+    const order = [];
+    cast.forEach(c => { const pos = lerp(a.pos[c.n], b.pos[c.n]); toks[c.n].y = pos[1]; put(toks[c.n].g, pos[0], pos[1], me.follow === c.n); order.push(toks[c.n]); });
+    opp.forEach((o, i) => { const pa = a.opp[i] || b.opp[i], pb = b.opp[i] || pa; if (!pa) return; const pos = lerp(pa, pb); o.y = pos[1]; put(o.g, pos[0], pos[1]); order.push(o); });
+    order.sort((u, v) => u.y - v.y).forEach(o => gT.appendChild(o.g));
+    if (a.ball && b.ball) { const bp = lerp([a.ball[0], a.ball[1] - 3.2], [b.ball[0], b.ball[1] - 3.2]); put(ballG, bp[0] + 2.4, Math.min(101, bp[1] + 2.6)); ballG.style.display = ''; } else ballG.style.display = 'none';
+  }
+  function decorate() {
+    cast.forEach(c => { const t = toks[c.n]; const on = me.follow === c.n; t.ring.style.display = on ? '' : 'none'; t.g.style.opacity = me.follow && !on ? '.42' : '1'; t.nm.style.display = me.names || on ? '' : 'none'; });
+    opp.forEach(o => o.g.style.opacity = me.follow ? '.6' : '1');
+  }
+  const MOVE = 1500, HOLD = 900, END = 1800;
+  function loop(ts) {
+    if (!svg.isConnected) return stop();
+    if (!me.t0) me.t0 = ts;
+    const el_ = (ts - me.t0) * me.speed, n = states.length;
+    if (me.k >= n - 1) { draw(states[n - 1], states[n - 1], 1); if (el_ > END) { me.k = 0; me.t0 = ts; me.onFrame(0); } }
+    else {
+      draw(states[me.k], states[me.k + 1], el_ / MOVE);
+      if (el_ >= MOVE && !me.entered) { me.entered = true; me.onFrame(me.k + 1); }
+      if (el_ > MOVE + HOLD) { me.k++; me.t0 = ts; me.entered = false; }
+    }
+    me.raf = requestAnimationFrame(loop);
+  }
+  function stop() { cancelAnimationFrame(me.raf); me.raf = 0; me.playing = false; }
+  Object.assign(me, {
+    svg, toks,
+    show(k) { stop(); me.k = k; draw(states[k], states[k], 1); },
+    play() { if (me.playing) return; me.playing = true; me.t0 = 0; me.entered = false; if (me.k >= states.length - 1) { me.k = 0; me.onFrame(0); } me.raf = requestAnimationFrame(loop); },
+    pause() { const k = me.entered ? me.k + 1 : me.k; stop(); me.show(Math.min(k, states.length - 1)); },
+    stop, decorate,
+    segment(k, done) { stop(); const t0 = performance.now(); const step = ts => { if (!svg.isConnected) return; const p = (ts - t0) / 1500; draw(states[k - 1], states[k], p); if (p < 1) me.raf = requestAnimationFrame(step); else { me.k = k; done && done(); } }; me.raf = requestAnimationFrame(step); },
+    ghost(at) { if (!at) { ghost.style.display = 'none'; return; } ghost.style.display = ''; put(ghost, at[0], at[1]); }
+  });
+  draw(states[0], states[0], 1); decorate();
+  return me;
+}
 function viewPatterns() {
-  const pats = kind('pattern');
-  if (!pats.length) { $('#view').innerHTML = `<div class="panel empty">Nog geen patronen.</div>`; return; }
-  if (!S.pat || !pats.find(p => p.id === S.pat)) S.pat = pats[0].id;
-  $('#view').innerHTML = `<div class="chips">${pats.map(p => `<button data-id="${p.id}" class="${p.id === S.pat ? 'on' : ''}">${esc(p.title)}</button>`).join('')}</div>
-    <div class="layout"><svg class="pitch" id="ppitch" aria-label="Veld met spelpatroon"></svg>
-    <div class="panel"><div class="kicker" id="pstep"></div><h2 id="ptitle"></h2><p class="caption" id="pcap" aria-live="polite"></p>
-      <div class="row mt"><button class="btn" id="pprev">Vorige</button><button class="btn primary" id="pplay">Afspelen</button><button class="btn" id="pnext">Volgende</button></div>
-      <p class="small muted mt">Witte lijn: pass. Gele stippellijn: loopactie. Witte stippen: dribbel.</p></div></div>`;
-  document.querySelectorAll('.chips button').forEach(b => b.onclick = () => { S.pat = b.dataset.id; S.step = 0; stopPlay(); viewPatterns(); });
-  patBoard = Board($('#ppitch'), 'p');
-  $('#pprev').onclick = () => { stopPlay(); if (S.step > 0) { S.step--; drawPat(); } };
-  $('#pnext').onclick = () => { const P = curPat(); stopPlay(); if (S.step < P.data.frames.length - 1) { S.step++; drawPat(); } };
-  $('#pplay').onclick = () => { if (timer) return stopPlay(); S.step = 0; drawPat(true); $('#pplay').textContent = 'Pauze'; timer = setInterval(() => { const P = curPat(); if (S.step < P.data.frames.length - 1) { S.step++; drawPat(); } else stopPlay(); }, 2300); };
-  drawPat(true);
+  const all = kind('pattern');
+  if (!all.length) { $('#view').innerHTML = `<div class="panel empty">Nog geen patronen.</div>`; return; }
+  if (film) film.stop(); stopPlay();
+  const systems = FM().ORDER.filter(c => all.some(p => patSys(p) === c));
+  const mSys = sysOf(matchLineup());
+  if (S.pmatch !== mSys) { S.pmatch = mSys; S.psys = null; }
+  if (!S.psys || !systems.includes(S.psys)) S.psys = systems.includes(mSys) ? mSys : systems[0];
+  const pats = all.filter(p => patSys(p) === S.psys);
+  if (!S.pat || !pats.find(p => p.id === S.pat)) { S.pat = pats[0].id; S.step = 0; }
+  S.pmode ||= 'film';
+  const P = curPat(), cast = patCast(P);
+  if (S.follow && !cast.find(c => c.n === S.follow)) S.follow = null;
+  if (!S.follow && S.mode === 'player' && S.me) S.follow = cast.find(c => c.pid === S.me.id)?.n || null;
+  $('#view').innerHTML = `<div class="chips" role="group" aria-label="Systeem">${systems.map(c => `<button data-sys="${c}" class="${c === S.psys ? 'on' : ''}">${c === mSys ? '★ ' : ''}${esc(FM().SYSTEMS[c].naam)}</button>`).join('')}</div>
+    <div class="chips" role="group" aria-label="Patroon">${pats.map(p => `<button data-id="${p.id}" class="${p.id === S.pat ? 'on' : ''}">${esc(p.title)}</button>`).join('')}</div>
+    <div class="layout patlayout"><div>${S.pmode === 'film' ? '<div class="filmwrap"><svg class="pitch film" id="fpitch" aria-label="Geanimeerd spelpatroon"></svg></div>' : '<svg class="pitch" id="ppitch" aria-label="Veld met spelpatroon"></svg>'}</div>
+    <div class="panel"><div class="kicker" id="pstep"></div><h2 id="ptitle">${esc(P.title)}</h2><p class="caption" id="pcap" aria-live="polite"></p><p class="you" id="pyou" aria-live="polite"></p>
+      ${S.pmode === 'film' ? `<div class="row mt"><button class="btn primary" id="fplay">▶ Afspelen</button><button class="btn" id="fslow" aria-pressed="${S.slow ? 'true' : 'false'}">${S.slow ? 'Normaal tempo' : 'Langzaam'}</button><button class="btn ghost" id="toStep">Stap voor stap</button></div>`
+        : `<div class="row mt"><button class="btn" id="pprev">Vorige</button><button class="btn primary" id="pplay">Afspelen</button><button class="btn" id="pnext">Volgende</button><button class="btn ghost" id="toFilm">Film</button></div><p class="small muted mt">Witte lijn: pass. Gele stippellijn: loopactie. Witte stippen: dribbel.</p>`}
+      <label class="f" for="pfol">Volg een speler</label><select class="i" id="pfol"><option value="">Niemand, het hele team</option>${cast.map(c => `<option value="${esc(c.n)}" ${c.n === S.follow ? 'selected' : ''}>${esc(c.name)} (${c.num})</option>`).join('')}</select>
+      <div class="row mt"><button class="btn" id="quizB" ${S.follow ? '' : 'disabled'}>Waar loop jij naartoe?</button></div>
+      <div id="quiz" class="quiz" hidden></div></div></div>`;
+  document.querySelectorAll('[data-sys]').forEach(b => b.onclick = () => { S.psys = b.dataset.sys; S.pat = null; viewPatterns(); });
+  document.querySelectorAll('[data-id]').forEach(b => b.onclick = () => { S.pat = b.dataset.id; S.step = 0; viewPatterns(); });
+  $('#pfol').onchange = () => { S.follow = $('#pfol').value || null; if (film) { film.follow = S.follow; film.decorate(); film.show(film.k); } $('#quizB').disabled = !S.follow; showCap(S.pmode === 'film' ? film.k : S.step); if (S.pmode !== 'film') drawPat(); };
+  $('#quizB').onclick = () => startQuiz();
+  if (S.pmode === 'film') {
+    film = Film($('#fpitch'), P); film.follow = S.follow; film.speed = S.slow ? .5 : 1; film.decorate();
+    film.onFrame = k => showCap(k);
+    showCap(0);
+    $('#fplay').onclick = () => { if (film.playing) { film.pause(); $('#fplay').textContent = '▶ Afspelen'; } else { closeQuiz(); film.play(); $('#fplay').textContent = '⏸ Pauze'; } };
+    $('#fslow').onclick = () => { S.slow = !S.slow; film.speed = S.slow ? .5 : 1; $('#fslow').textContent = S.slow ? 'Normaal tempo' : 'Langzaam'; $('#fslow').setAttribute('aria-pressed', S.slow ? 'true' : 'false'); };
+    $('#toStep').onclick = () => { S.pmode = 'stap'; S.step = film.k; viewPatterns(); };
+  } else {
+    film = null;
+    patBoard = Board($('#ppitch'), 'p');
+    $('#pprev').onclick = () => { stopPlay(); if (S.step > 0) { S.step--; drawPat(); } };
+    $('#pnext').onclick = () => { stopPlay(); if (S.step < curPat().data.frames.length - 1) { S.step++; drawPat(); } };
+    $('#pplay').onclick = () => { if (timer) return stopPlay(); S.step = 0; drawPat(true); $('#pplay').textContent = 'Pauze'; timer = setInterval(() => { if (S.step < curPat().data.frames.length - 1) { S.step++; drawPat(); } else stopPlay(); }, 2300); };
+    $('#toFilm').onclick = () => { stopPlay(); S.pmode = 'film'; viewPatterns(); };
+    drawPat(true);
+  }
+}
+function showCap(k) {
+  const P = curPat(), st = patStates(P), n = st.length;
+  if (!$('#pcap')) return;
+  $('#pstep').textContent = `Stap ${k + 1} van ${n}`;
+  $('#pcap').textContent = patCap(P, st[k].cap);
+  $('#pyou').textContent = S.follow ? youLine(P, st, k, S.follow) : '';
 }
 const curPat = () => kind('pattern').find(p => p.id === S.pat);
 function stopPlay() { if (timer) { clearInterval(timer); timer = null; } const b = $('#pplay'); if (b) b.textContent = 'Afspelen'; }
 function drawPat(instant) {
-  const P = curPat(); const fr = P.data.frames; const f = fr[S.step];
-  const roles = basisRoleMap();
-  const B = FM().BASIS;
-  const st = {}; Object.entries(B).forEach(([n, v]) => st[n] = [v[0], v[1], v[2]]);
-  for (let k = 0; k <= S.step; k++) if (fr[k].set) Object.entries(fr[k].set).forEach(([n, v]) => { if (st[n]) { st[n][0] = v[0]; st[n][1] = v[1]; } });
-  const list = Object.entries(st).map(([n, v]) => { const pid = roles[v[2]]; return { key: 's' + n, name: pid ? nick(pid) : n, label: v[2], x: v[0], y: v[1] }; });
+  const P = curPat(), cast = patCast(P), st = patStates(P), f = st[S.step], fr = P.data.frames[S.step];
+  const list = cast.map(c => ({ key: 's' + c.n, name: c.name, label: c.num, x: f.pos[c.n][0], y: f.pos[c.n][1] }));
   (f.opp || []).forEach((o, i) => list.push({ key: 'o' + i, team: 'opp', x: o[0], y: o[1] }));
-  patBoard.render(list, instant); patBoard.ball(f.ball); patBoard.arrows(f.ar);
-  $('#ptitle').textContent = P.title; $('#pstep').textContent = `Stap ${S.step + 1} van ${fr.length}`;
-  let cap = f.cap; Object.keys(B).forEach(n => { const pid = roles[B[n][2]]; if (pid && nick(pid) !== n) cap = cap.replaceAll(n, nick(pid)); });
-  $('#pcap').textContent = cap;
-  $('#pprev').disabled = S.step === 0; $('#pnext').disabled = S.step === fr.length - 1;
+  patBoard.render(list, instant); patBoard.ball(fr.ball); patBoard.arrows(fr.ar);
+  patBoard.svg.querySelectorAll('.tok').forEach(g => { g.style.opacity = S.follow && g.dataset.key !== 's' + S.follow && g.dataset.key[0] === 's' ? '.45' : '1'; });
+  showCap(S.step);
+  $('#pprev').disabled = S.step === 0; $('#pnext').disabled = S.step === st.length - 1;
+}
+/* ---- quiz: waar loop jij naartoe? ---- */
+let quiz = null;
+function closeQuiz() { quiz = null; const q = $('#quiz'); if (q) { q.hidden = true; q.innerHTML = ''; } if (film) film.ghost(null); }
+function startQuiz() {
+  const P = curPat(), st = patStates(P), n = S.follow;
+  if (!n) return;
+  if (S.pmode !== 'film') { S.pmode = 'film'; viewPatterns(); }
+  const qs = st.map((s, k) => k).filter(k => k > 0 && dist(st[k - 1].pos[n], st[k].pos[n]) > 5);
+  const box = $('#quiz'); box.hidden = false;
+  if (!qs.length) { box.innerHTML = `<p><strong>In dit patroon blijf jij op je plek.</strong> Kies een ander patroon, of volg een andere speler.</p>`; return; }
+  quiz = { qs, i: 0, good: 0, n };
+  film.stop(); $('#fplay').textContent = '▶ Afspelen';
+  askQuiz();
+}
+function askQuiz() {
+  const P = curPat(), st = patStates(P), q = quiz, k = q.qs[q.i], name = patCast(P).find(c => c.n === q.n).name;
+  film.show(k - 1); film.ghost(null); showCap(k - 1);
+  $('#pyou').textContent = '';
+  $('#quiz').innerHTML = `<div class="kicker">Vraag ${q.i + 1} van ${q.qs.length}</div><p><strong>${esc(name)}, waar loop jij nu naartoe?</strong> Sleep je gele rondje naar de plek waar je heen gaat.</p>`;
+  const tok = film.toks[q.n].g, svg = film.svg; let drag = false, pos = st[k - 1].pos[q.n].slice();
+  const toSvg = e => { const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY; return pt.matrixTransform(svg.getScreenCTM().inverse()); };
+  const move = e => { if (!drag) return; e.preventDefault(); const p = toSvg(e); pos = unproj(p.x, p.y); const [sx, sy, s] = proj(pos[0], pos[1]); tok.setAttribute('transform', `translate(${sx},${sy}) scale(${s * 1.25})`); };
+  const up = () => {
+    if (!drag) return; drag = false; svg.removeEventListener('pointermove', move); svg.removeEventListener('pointerup', up); svg.removeEventListener('pointercancel', up);
+    const target = st[k].pos[q.n], d = dist(pos, target);
+    const verdict = d < 7 ? ['Goed!', 'good'] : d < 13 ? ['Bijna!', 'close'] : ['Kijk goed waar je heen gaat.', 'miss'];
+    if (d < 7) q.good++;
+    film.ghost(target);
+    film.segment(k, () => {
+      $('#pyou').textContent = youLine(P, st, k, q.n); showCap(k); $('#pyou').textContent = youLine(P, st, k, q.n);
+      const last = q.i === q.qs.length - 1;
+      $('#quiz').innerHTML = `<p class="verdict ${verdict[1]}"><strong>${verdict[0]}</strong> ${d < 7 ? '' : 'Het gele rondje is de goede plek.'}</p>${last ? `<p><strong>Klaar: je had er ${q.good} van de ${q.qs.length} goed.</strong></p><div class="row"><button class="btn" id="qAgain">Nog een keer</button></div>` : '<div class="row"><button class="btn primary" id="qNext">Volgende vraag</button></div>'}`;
+      if ($('#qNext')) $('#qNext').onclick = () => { q.i++; askQuiz(); };
+      if ($('#qAgain')) $('#qAgain').onclick = () => startQuiz();
+    });
+  };
+  tok.style.cursor = 'grab'; tok.style.touchAction = 'none';
+  tok.onpointerdown = e => { if (!quiz || quiz.qs[quiz.i] !== k) return; e.preventDefault(); drag = true; svg.addEventListener('pointermove', move); svg.addEventListener('pointerup', up); svg.addEventListener('pointercancel', up); };
 }
 
 /* ---------------- trainingen ---------------- */
@@ -1058,6 +1267,7 @@ function viewWeek() {
   $('#view').innerHTML = `<div class="layout">
     <div class="panel"><div class="pcard">${shirtSVG(me.shirt ?? '')}<div><div class="kicker">Week ${weekLabel(S.pweek)}</div><h2 style="margin:0">Hoi ${esc(me.nickname)}!</h2><div class="muted">${done} van ${S.assign.length} oefeningen gedaan</div></div></div>
       <div class="mt" style="padding:12px;border-radius:12px;background:color-mix(in srgb,var(--club) 18%,transparent);border:1px solid color-mix(in srgb,var(--club) 45%,transparent)"><div class="kicker" style="color:#fff">Het hele team</div><strong style="font:800 1.6rem 'Barlow Condensed'">${S.teamTotal}</strong> keer samen geoefend deze week</div>
+      <div class="row mt"><button class="btn primary" id="toPat">Tactiek oefenen: volg jezelf</button></div>
       <h3 class="mt">Jouw taak op het veld</h3>${cardHTML(playerById(me.id) || { id: me.id, nickname: me.nickname, shirt: me.shirt }, { lineup: matchLineup() }).replace(/^<div class="pcard">[\s\S]*?<\/div><\/div><\/div>/, '')}</div>
     <div class="grid">${S.assign.map(a => { const h = { title: a.drill.title, data: a.drill.data };
       return `<article class="panel">${homeHTML(h, `${a.note ? `<p class="small"><strong>Trainer:</strong> “${esc(a.note)}”</p>` : ''}
@@ -1066,6 +1276,7 @@ function viewWeek() {
     <p class="small muted mt" style="text-align:center"><a href="#" id="wd" style="color:inherit">Toestemming intrekken en gegevens verwijderen</a></p>`;
   document.querySelectorAll('[data-done]').forEach(b => b.onclick = async () => { const [id, m] = b.dataset.done.split('|'); const { data, error } = await sb.rpc('complete_assignment', { p_token: S.token, p_assignment: id, p_mood: +m }); if (error || !data) return toast('Dat lukte niet'); toast('Goed gedaan!'); loadPlayer(); });
   document.querySelectorAll('[data-undo]').forEach(b => b.onclick = async () => { await sb.rpc('undo_completion', { p_token: S.token, p_assignment: b.dataset.undo }); loadPlayer(); });
+  $('#toPat').onclick = () => { S.view = 'patronen'; S.follow = null; S.psys = null; render(); };
   $('#wd').onclick = async e => { e.preventDefault(); if (!confirm('Weet je het zeker? De gegevens van deze speler worden direct verwijderd en deze link werkt daarna niet meer.')) return; await sb.rpc('withdraw_consent', { p_token: S.token }); renderMessage('De gegevens zijn verwijderd.', 'Je kunt deze pagina sluiten.'); };
 }
 
@@ -1087,7 +1298,9 @@ const HELP_TRAINER = [
   ['Trainen', [
     ['Training voor een systeem', 'Tik bij een opstelling op “Training voor dit systeem”. De oefenvormen die bij dat systeem passen, staan dan klaar in het tabblad Trainingen onder “Jouw training”.'],
     ['Trainingsplan en oefenvormen', 'In Trainingen staat een weekplan. Met “Gebruik deze training” zet je een week klaar; met “Training kopiëren” plak je hem in WhatsApp of een mail. Bij elke oefenvorm staan het probleem, waarom en hoe, coachpunten en een makkelijkere of moeilijkere variant. Je kunt oefenvormen en weken aanpassen of toevoegen.'],
-    ['Patronen', 'In Patronen speel je spelsituaties stap voor stap af, met uitleg bij elke stap. Handig om voor de training of in de rust te laten zien.']
+    ['Patronen als film', 'In Patronen kies je eerst het systeem (de ster is de wedstrijdopstelling) en dan een patroon. Het speelt af als een filmpje op een schuin veld, met rugnummers en gele pionnen als tegenstanders. “Langzaam” halveert het tempo; “Stap voor stap” laat pijlen en elke stap apart zien.'],
+    ['Volg een speler', 'Kies bij “Volg een speler” een naam. Die speler krijgt een gele ring, de rest wordt lichter, en bij elke stap staat in één zin wat híj doet. Op de pagina van een speler staat hij zelf al gekozen.'],
+    ['Waar loop jij naartoe?', 'Kies eerst een speler en tik dan op “Waar loop jij naartoe?”. Het filmpje stopt vlak voor elke actie van die speler; hij sleept zijn rondje naar de plek waar hij heen gaat en ziet meteen of het klopt. Kijken én zelf aanwijzen blijft beter hangen dan alleen kijken. Laat kinderen het thuis doen, of samen op een tablet in de kleedkamer.']
   ]],
   ['Spelers en huiswerk', [
     ['Spelers en taken per positie', 'In Spelers zie je per speler zijn taken in de gekozen situatie. Met “Taken per positie” pas je de standaardtaken van een positie aan; elke speler op die positie krijgt ze automatisch, behalve waar een systeem of plek iets anders zegt.'],
@@ -1107,7 +1320,8 @@ const HELP_PLAYER = [
   ['Voor spelers en ouders', [
     ['Mijn week', 'Hier staat jouw taak op het veld in de opstelling voor de komende wedstrijd: wat je doet met de bal, zonder de bal, na balverlies, na balwinst en bij corners en vrije trappen. Daaronder staan je thuisoefeningen van deze week.'],
     ['Thuis oefenen', 'Elke oefening duurt ongeveer tien minuten, op het terras, een pad of tegen een muur, alleen of met een ouder of vriend. Gedaan? Tik op de smiley die past bij hoe het ging. De trainer ziet dat en kan je een compliment sturen. Per ongeluk getikt? Kies “Toch nog niet gedaan”.'],
-    ['Meekijken', 'In Opstelling tik je op een speler om zijn taken te zien. In Patronen speel je spelsituaties stap voor stap af. In Trainingen zie je wat we op de training doen.'],
+    ['Tactiek oefenen', 'Tik op “Tactiek oefenen: volg jezelf”. Je ziet een filmpje van een spelsituatie; jij hebt een gele ring en onder het veld staat wat jij doet. Tik op “Waar loop jij naartoe?”: het filmpje stopt en jij sleept je rondje naar de plek waar je heen moet. Hoeveel had je goed?'],
+    ['Meekijken', 'In Opstelling tik je op een speler om zijn taken te zien. In Trainingen zie je wat we op de training doen.'],
     ['Privacy', 'We bewaren alleen je voornaam of bijnaam, rugnummer, positie en welke oefeningen je hebt gedaan. Onderaan Mijn week kan een ouder de toestemming intrekken; dan worden de gegevens meteen verwijderd.']
   ]]
 ];

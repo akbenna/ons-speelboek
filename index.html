@@ -100,6 +100,13 @@ dialog .dfoot{display:flex;gap:8px;justify-content:flex-end;padding:12px 20px;bo
 .sysinfo{margin-top:6px}
 details.speelwijze{margin-top:6px;border-top:1px solid var(--line);padding-top:4px}
 details.speelwijze summary{color:var(--club)}
+.filmwrap{border-radius:18px;overflow:hidden;background:#1c4f2d;box-shadow:0 30px 60px -30px rgba(0,0,0,.9),0 0 0 1px rgba(255,255,255,.08)}
+.pitch.film{box-shadow:none;border-radius:0}
+@media(min-width:900px){.layout.patlayout{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)}}
+.ftok text{pointer-events:none}
+p.you{min-height:1.5em;margin:6px 0 0;font-weight:700;color:#ffd84d;font-size:1.05rem}
+.quiz{margin-top:12px;padding:12px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.04)}
+.verdict.good strong{color:var(--ok)}.verdict.close strong{color:var(--warn)}.verdict.miss strong{color:#ff8a8a}
 .help{max-width:760px}.help details{border-bottom:1px solid var(--line);padding:2px 0}.help details p{margin:0 0 12px;color:#d7dbd6}
 label.sysopt{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:12px;margin:8px 0;cursor:pointer}
 label.sysopt:has(input:checked){border-color:var(--club);background:color-mix(in srgb,var(--club) 14%,transparent)}
