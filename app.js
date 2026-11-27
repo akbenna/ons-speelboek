@@ -1,6 +1,9 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm';
 const SEED = await fetch(new URL('./seed.json', import.meta.url)).then(r => r.json());
 const SEED11 = await fetch(new URL('./seed11.json', import.meta.url)).then(r => r.json());
+/* De kennisbank: posities, systemen, patronen en tegenstandertypes. Los van een team; namen worden pas bij het tonen ingevuld. */
+const K8 = await fetch(new URL('./kennis8.json', import.meta.url)).then(r => r.json());
+const K11 = await fetch(new URL('./kennis11.json', import.meta.url)).then(r => r.json());
 
 const SUPABASE_URL = 'https://ygxvhlmutsdmaqishzla.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_ql89Fvs9DRbCG_MRvkctrA_cQoTDuD0';
@@ -53,108 +56,41 @@ const HOME = [
    stappen: ['Gooi de bal tegen de muur.', 'Vang hem met je lichaam achter de bal en je handen in een W.', 'Laat de bal ook eens stuiteren en ga hem tegemoet.', 'Rol hem daarna meteen naar een doeltje opzij.'],
    tip: 'Na het vangen: meteen kort uitspelen, niet lang trappen.' }
 ];
-const ROLES = {
-  K:  { naam: 'Keeper', bal: 'Speel kort uit naar de backs. Lang alleen als de spits al diep loopt.', geen: 'Praat met je verdedigers en roep duidelijk “keeper” als je de bal pakt.', extra: ['Tegen felle druk: krijg je de bal terug, speel hem meteen naar de vrije kant.', 'Na een fout: handschoenen goed, “volgende bal”.'], drills: ['keeper', 'opbouw'], home: ['h-keeper', 'h-kaatsen'] },
-  LA: { naam: 'Linksachter', bal: 'Sta breed bij de zijlijn en speel kort op de centrale middenvelder of de linksbuiten.', geen: 'Houd je man voor je en laat je niet uitlokken. De linksbuiten komt je helpen.', extra: ['Tegen felle druk: blijf breed staan; bij twijfel terug op de laatste man of de keeper.'], drills: ['1tegen1', '5tegen4'], home: ['h-1tegen1', 'h-kaatsen', 'h-omkijken'] },
-  CV: { naam: 'Laatste man', bal: 'Speel rustig en kort op de middenvelder of de vrije verdediger. Een actie alleen aan de zijkant, met ruimte voor je.', geen: 'Jij bent de laatste man. Kijk naar de bal en win je duel.', extra: ['Bij corners voor ons blijf je achter.', 'Zeg wat je ziet en stuur je medespelers.'], drills: ['1tegen1', 'compact', '5tegen4'], home: ['h-1tegen1', 'h-kaatsen', 'h-omkijken'] },
-  RA: { naam: 'Rechtsachter', bal: 'Schuif in naast de centrale middenvelder. Speel in op de rechtsbuiten en vraag de bal terug.', geen: 'Terug naar rechtsachter. Jij coacht de verdediging.', extra: ['Tegen felle druk: blijf breed staan als aanspeelpunt.'], drills: ['5tegen4', 'derdeman'], home: ['h-kaatsen', 'h-omkijken', 'h-1tegen1'] },
-  LB: { naam: 'Linksbuiten', bal: 'Sta hoog, naast de spits. Snij naar binnen op je sterke been en zoek het schot.', geen: 'Loop terug en help de linksachter.', extra: ['Vraag de bal in de ruimte, niet in de voeten.'], drills: ['actie', 'vleugelzones', 'derdeman'], home: ['h-aanname', 'h-dribbel', 'h-afronden'] },
-  CM: { naam: 'Centrale middenvelder', bal: 'Haal de bal bij de verdedigers, kijk om voordat hij komt, draai en speel de spits of een buitenspeler diep. Dribbel vooral op de helft van de tegenstander.', geen: 'Jij zet als eerste druk. Spreek met de rechtsachter af wie er gaat, zodat het midden niet leeg komt.', extra: ['Tegen felle druk: zak terug tot naast de laatste man en vraag de bal.', 'Bij voorsprong: win je de bal, ga dan direct naar voren en zoek de spits.'], drills: ['draaien', 'positie', 'rondo'], home: ['h-muurpass', 'h-omkijken', 'h-draaien', 'h-steekpass'] },
-  RB: { naam: 'Rechtsbuiten', bal: 'Sta breed en kaats met de rechtsachter. Eén actie, dan afspelen.', geen: 'Vijf seconden meejagen, dan terug naar je plek.', extra: ['Vraag de bal in de ruimte, niet in de voeten.'], drills: ['actie', 'vleugelzones', 'derdeman'], home: ['h-aanname', 'h-dribbel', 'h-afronden'] },
-  SP: { naam: 'Spits', bal: 'Loop diep achter de verdediging, of kom kort om de bal in te kaatsen. Rond af in één of twee keer raken.', geen: 'Jij zet als eerste druk op de verdediger met de bal.', extra: ['Bij corners voor ons sta je rond de tweede paal.'], drills: ['afronden', 'golven', 'actie'], home: ['h-afronden', 'h-aanname', 'h-dribbel'] },
-  LM: { naam: 'Links middenveld', bal: 'Speel breed en zoek de spitsen in de diepte.', geen: 'Loop terug en sluit de linkerkant af.', extra: [], drills: ['vleugelzones', 'actie'], home: ['h-aanname', 'h-steekpass'] },
-  RM: { naam: 'Rechts middenveld', bal: 'Speel breed en zoek de spitsen in de diepte.', geen: 'Loop terug en sluit de rechterkant af.', extra: [], drills: ['vleugelzones', 'actie'], home: ['h-aanname', 'h-steekpass'] }
-};
 const PERSONAL = {
   Amine: ['De eerste weken begin je linksachter en schuif je bij balbezit naar binnen.'],
   Maddox: ['Als het tegenzit: bij het afgesproken signaal adem je even uit en speel je door.', 'Als Mees er niet is, keep jij.'],
   Joas: ['Als Mees er niet is, speel je links en loop je mee terug om Nassim te helpen.'],
   Mees: ['Na een fout: handschoenen goed, “volgende bal”.']
 };
-/* ---------------- systemen ----------------
-   Per systeem: idee, sterk, risico en per plek (in volgorde) de speler die er op kwaliteit het best past,
-   met taken die in dit systeem afwijken van de standaard positiekaart. Niet ingevuld = standaard positiekaart. */
-const SYSTEMS = {
-  '1331': { naam: '1-3-3-1', titel: 'Basis 1-3-3-1',
-    idee: 'Drie achter, drie op het middenveld en één spits. Amine verdeelt het spel, Sasha schuift bij balbezit in naast hem en Maddox komt vanaf links naar binnen.',
-    sterk: 'Evenwichtig: altijd drie spelers achter de bal en een vaste spelverdeler in het midden.',
-    risico: 'Colin staat vaak alleen voorin; de buitenspelers moeten op tijd aansluiten.',
-    slots: [
-      ['K', 50, 94, 'Mees'], ['LA', 18, 76, 'Nassim'], ['CV', 50, 80, 'Sjoerd'], ['RA', 82, 76, 'Sasha'],
-      ['LB', 18, 48, 'Maddox'], ['CM', 50, 56, 'Amine'], ['RB', 82, 48, 'Suleiman'], ['SP', 50, 24, 'Colin']
-    ].map(([role, x, y, wie]) => ({ role, x, y, wie })) },
-  '1322': { naam: '1-3-2-2', titel: 'Twee spitsen 1-3-2-2',
-    idee: 'Drie achter, twee op het middenveld en twee spitsen. Colin gaat diep, Maddox komt kort en Amine bedient ze, met Suleiman als vangnet achter hem.',
-    sterk: 'Altijd twee spelers voor het doel en veel druk op hun verdediging.',
-    risico: 'Er staat niemand vast op de flanken: de buitenste verdedigers maken de breedte, maar nooit allebei tegelijk.',
-    slots: [
-      { role: 'K', x: 50, y: 94, wie: 'Mees', bal: 'Speel kort uit naar de buitenste verdedigers; zij staan breed. Is alles dicht, dan lang op Colin.' },
-      { role: 'LA', x: 18, y: 78, wie: 'Nassim', bal: 'Jij bent ook de linksbuiten: schuif op langs de zijlijn als de bal rechts is, zo maak je het veld breed.', geen: 'Bij balverlies meteen terug. Jij en de rechtsachter staan nooit allebei hoog.' },
-      { role: 'CV', x: 50, y: 82, wie: 'Sjoerd', geen: 'Met twee spitsen voorin zijn we achter met z\'n drieën: blijf centraal en stuur de buitenste verdedigers terug.' },
-      { role: 'RA', x: 82, y: 78, wie: 'Sasha', bal: 'Schuif op langs de zijlijn als Nassim achter blijft. Jij maakt rechts de breedte en speelt in op Maddox.', geen: 'Nooit samen met Nassim hoog: één van jullie blijft altijd achter.' },
-      { role: 'CM', x: 38, y: 56, wie: 'Amine', naam: 'Spelmaker', bal: 'Haal de bal, kijk om en draai. Zoek Colin in de diepte of Maddox in de voeten, en ga daarna mee voor de tweede bal.', geen: 'Zet druk op hun middenvelder. Suleiman blijft achter je.' },
-      { role: 'CM', x: 62, y: 60, wie: 'Suleiman', naam: 'Controleur', bal: 'Sta schuin achter Amine als aanspeelpunt. Zit het midden dicht, speel dan simpel breed naar een buitenste verdediger.', geen: 'Jij blijft altijd voor de verdediging. Onderschep de bal en geef hem meteen aan Amine.' },
-      { role: 'SP', x: 38, y: 24, wie: 'Colin', naam: 'Diepe spits', bal: 'Loop diep in de ruimte tussen hun centrale verdediger en de back. Maddox komt kort, jij gaat lang.', geen: 'Zet samen met Maddox druk op hun verdedigers en sluit de pass naar het midden af.' },
-      { role: 'SP', x: 62, y: 26, wie: 'Maddox', naam: 'Tweede spits', bal: 'Kom kort tussen de linies, draai op je rechterbeen en schiet, of steek Colin diep.', geen: 'Jaag op de verdediger met de bal; Colin pakt de pass naar zijn maatje.' }
-    ] },
-  '1313': { naam: '1-3-1-3', titel: 'Breed aanvallen 1-3-1-3',
-    idee: 'Drie achter, Amine als enige middenvelder en drie aanvallers hoog en breed. We zetten de tegenstander vast op zijn eigen helft.',
-    sterk: 'Drie aanvallers houden hun hele verdediging bezig; het veld wordt groot en Amine krijgt ruimte.',
-    risico: 'Amine staat alleen in het midden. Bij balverlies moeten de buitenspelers meteen terug tot de middenlijn.',
-    slots: [
-      { role: 'K', x: 50, y: 94, wie: 'Mees' },
-      { role: 'LA', x: 18, y: 78, wie: 'Nassim', bal: 'Schuif op tot de middenlijn en speel kort op Amine of op Maddox aan de zijlijn.' },
-      { role: 'CV', x: 50, y: 82, wie: 'Sjoerd' },
-      { role: 'RA', x: 82, y: 78, wie: 'Sasha', bal: 'Schuif in naast Amine, zodat hij er niet alleen voor staat.', geen: 'Bij balverlies meteen terug naar rechtsachter.' },
-      { role: 'CM', x: 50, y: 58, wie: 'Amine', naam: 'Enige middenvelder', bal: 'Jij bent het aanspeelpunt in het midden: blijf bewegen, kijk om en speel de drie aanvallers aan. Ga niet te ver mee naar voren.', geen: 'Blijf in het midden voor de verdediging en vertraag de tegenstander tot de buitenspelers terug zijn.' },
-      { role: 'LB', x: 14, y: 28, wie: 'Maddox', bal: 'Blijf hoog en breed bij de zijlijn. Neem de bal aan en snij naar binnen op je rechterbeen.', geen: 'Zet druk op hun rechtsachter. Bij balverlies vijf seconden jagen, dan terug tot de middenlijn.' },
-      { role: 'SP', x: 50, y: 22, wie: 'Colin', bal: 'Blijf tussen de centrale verdedigers. Kom kort om te kaatsen, ga diep zodra een buitenspeler de bal heeft.', geen: 'Zet druk op hun laatste man.' },
-      { role: 'RB', x: 86, y: 28, wie: 'Suleiman', bal: 'Sta hoog en breed. Ga 1 tegen 1 of geef een lage voorzet op Colin.', geen: 'Zet druk op hun linksachter, dan terug tot de middenlijn.' }
-    ] },
-  '1232': { naam: '1-2-3-2', titel: 'Bij achterstand 1-2-3-2',
-    idee: 'Twee verdedigers, drie middenvelders en twee spitsen. Aanvallender, maar kwetsbaar bij balverlies, dus alleen als we moeten scoren.',
-    sterk: 'Veel spelers rond hun zestien; elke bal mag snel naar voren.',
-    risico: 'Achter staan er maar twee. Bij balverlies moet iedereen een sprint terug trekken.',
-    slots: [
-      { role: 'K', x: 50, y: 94, wie: 'Mees', geen: 'Sta wat verder voor je doel; een lange bal achter de verdediging is voor jou.' },
-      { role: 'CV', x: 34, y: 78, wie: 'Sjoerd', naam: 'Linker verdediger', bal: 'Jullie staan met z\'n tweeën achter. Speel rustig breed naar je maatje of kort op Amine.', geen: 'Jij blijft altijd achter, ook bij een corner voor ons.' },
-      { role: 'CV', x: 66, y: 78, wie: 'Sasha', naam: 'Rechter verdediger', bal: 'Je mag inschuiven tot de middenlijn, nooit verder.', geen: 'Bij balverlies meteen terug naast Sjoerd. Blijf dicht bij elkaar.' },
-      { role: 'LM', x: 15, y: 50, wie: 'Maddox', bal: 'Breed bij de zijlijn, snij naar binnen en schiet.', geen: 'Loop terug tot naast de verdedigers: jij bent nu ook linksachter.' },
-      { role: 'CM', x: 50, y: 56, wie: 'Amine', bal: 'Speel snel vooruit naar de twee spitsen; elke bal mag naar voren.', geen: 'Zak terug voor de twee verdedigers.' },
-      { role: 'RM', x: 85, y: 50, wie: 'Suleiman', bal: 'Breed en hoog, geef voorzetten op de spitsen.', geen: 'Terug tot naast Sasha.' },
-      { role: 'SP', x: 38, y: 24, wie: 'Colin', naam: 'Diepe spits', bal: 'Loop diep; Joas komt kort.', geen: 'Zet druk op hun verdedigers.' },
-      { role: 'SP', x: 62, y: 24, wie: 'Joas', naam: 'Tweede spits', bal: 'Kom kort, kaats op Amine en ga mee de zestien in.', geen: 'Zet druk op de verdediger met de bal.' }
-    ] },
-  '1421': { naam: '1-4-2-1', titel: 'Compact 1-4-2-1',
-    idee: 'Vier achter, twee op het middenveld en Colin alleen voorin. Voor tegenstanders die sneller of sterker zijn: weinig ruimte achter ons, en bij balwinst snel naar Colin.',
-    sterk: 'Moeilijk te bespelen; de verdediging kan altijd met één speler extra dekken.',
-    risico: 'Colin staat alleen. Het middenveld moet snel aansluiten, anders komt de bal steeds terug.',
-    slots: [
-      { role: 'K', x: 50, y: 95, wie: 'Mees', geen: 'Kom uit je doel bij een lange bal achter de verdediging.' },
-      { role: 'LA', x: 12, y: 78, wie: 'Nassim', bal: 'Speel kort op Amine of meteen diep op Colin.', geen: 'Blijf dicht bij je centrale verdediger, laat geen gat.' },
-      { role: 'CV', x: 38, y: 83, wie: 'Sjoerd', bal: 'Speel breed naar Nassim of kort op Amine.', geen: 'Jij en Sasha staan dicht bij elkaar: één gaat naar de bal, de ander dekt achter hem.' },
-      { role: 'CV', x: 62, y: 83, wie: 'Sasha', bal: 'Speel kort op Amine of breed naar rechts.', geen: 'Dek achter Sjoerd als hij naar de bal gaat.' },
-      { role: 'RA', x: 88, y: 78, wie: 'Suleiman', bal: 'Schuif op als de bal rechts is en we rust hebben.', geen: 'Houd je man voor je en laat hem niet naar binnen.' },
-      { role: 'CM', x: 38, y: 60, wie: 'Amine', naam: 'Controleur en spelverdeler', bal: 'Bij balwinst meteen kijken naar Colin. Is hij niet vrij, dan rustig kort houden.', geen: 'Blijf voor de verdediging en sluit het midden af.' },
-      { role: 'CM', x: 62, y: 56, wie: 'Maddox', naam: 'Aanvallende middenvelder', bal: 'Sluit snel aan bij Colin als hij de bal heeft. Schiet van afstand als je ruimte krijgt.', geen: 'Loop terug tot naast Amine; samen sluiten jullie het midden af.' },
-      { role: 'SP', x: 50, y: 32, wie: 'Colin', naam: 'Uitvalspunt', bal: 'Bij balwinst ben jij het aanspeelpunt. Houd de bal vast tot Maddox aansluit, of ga zelf diep.', geen: 'Blijf tussen hun verdedigers en de middenlijn; jaag niet op de keeper.' }
-    ] }
-};
-/* Spelkennis 8 tegen 8: fases per positie, speelwijze per systeem, oefenvormen per plek. */
-Object.entries({"K": {"verlies": "Kom een paar meter uit je doel en coach: “terug!”", "winst": "Speel of gooi de bal snel naar een vrije speler aan de kant.", "herv": "Doeltrap: kort op een verdediger als die vrij staat. Corner tegen: roep “keeper” bij hoge ballen."}, "LA": {"verlies": "Meteen terug naar je plek: eerst je man, dan de bal.", "winst": "Speel snel vooruit of op de vrije middenvelder.", "herv": "Corner tegen: dek de eerste paal. Ingooi: gooi snel en vraag de bal terug."}, "CV": {"verlies": "Zak terug en houd de verdediging bij elkaar.", "winst": "Eerst kijken, dan de veilige pass vooruit.", "herv": "Corner voor: jij blijft achter. Corner tegen: dek hun beste kopper."}, "RA": {"verlies": "Meteen terug naar je plek: eerst je man, dan de bal.", "winst": "Schuif in naast de middenvelder en vraag de bal.", "herv": "Corner tegen: dek de tweede paal. Ingooi: gooi snel en vraag de bal terug."}, "LB": {"verlies": "Vijf seconden druk op de man met de bal, dan terug.", "winst": "Ga meteen diep langs de zijlijn.", "herv": "Corner voor: rand van de zestien voor de tweede bal. Corner tegen: dek hun back."}, "CM": {"verlies": "Zet direct druk, zodat ze niet snel vooruit kunnen.", "winst": "Zoek meteen de spits of een buitenspeler in de diepte.", "herv": "Corner voor: rand van de zestien. Vrije trap: jij neemt hem of legt hem klaar."}, "RB": {"verlies": "Vijf seconden druk op de man met de bal, dan terug.", "winst": "Ga meteen diep langs de zijlijn.", "herv": "Corner voor: rand van de zestien voor de tweede bal. Corner tegen: dek hun back."}, "SP": {"verlies": "Zet direct druk op de verdediger met de bal.", "winst": "Loop meteen diep of bied je kort aan.", "herv": "Corner voor: tweede paal. Corner tegen: blijf rond de middenlijn voor de counter."}, "LM": {"verlies": "Terug naar je kant en sluit de flank.", "winst": "Breed en vooruit, zoek de spitsen.", "herv": "Corner tegen: dek je man."}, "RM": {"verlies": "Terug naar je kant en sluit de flank.", "winst": "Breed en vooruit, zoek de spitsen.", "herv": "Corner tegen: dek je man."}}).forEach(([r, x]) => Object.assign(ROLES[r], x));
-Object.entries({"1331": {"fases": {"opbouw": "De keeper speelt kort op de backs. Amine komt de bal halen, Sasha schuift in naast hem.", "aanval": "Via Amine naar Colin in de diepte of naar Maddox die naar binnen komt. De backs maken het veld breed.", "verdedigen": "Colin stuurt hun verdediger naar één kant, het middenveld schuift mee en de laatste man coacht.", "omschakelen": "Bij balverlies vijf seconden samen druk, daarna terug in de vorm. Bij balwinst eerst Amine zoeken."}, "tegen": "Tegen bijna elke tegenstander: het uitgangspunt.", "coach": ["Staat Amine open als hij de bal krijgt?", "Blijven er altijd drie achter de bal?", "Sluiten de buitenspelers aan bij Colin?"], "train": ["rondo", "opbouw", "draaien", "wedstrijd8"]}, "1322": {"fases": {"opbouw": "Drie achter breed, Suleiman komt kort, Amine iets hoger.", "aanval": "Snel naar de twee spitsen: Colin diep, Maddox kort, Amine sluit aan voor de tweede bal.", "verdedigen": "Twee spitsen zetten druk op hun centrale verdedigers. De buitenkant laten we toe, het midden blijft dicht.", "omschakelen": "Bij balverlies zakt één buitenste verdediger direct terug. Bij balwinst meteen diep op Colin."}, "tegen": "Tegen een tegenstander met één spits, of die zwak opbouwt door het midden.", "coach": ["Lopen de spitsen tegengesteld: één diep, één kort?", "Staat Suleiman altijd achter de bal?", "Staan de buitenste verdedigers nooit allebei hoog?"], "train": ["golven", "afronden", "derdeman", "wedstrijd8"]}, "1313": {"fases": {"opbouw": "De backs schuiven op, Amine staat alleen in het midden en Sasha schuift in om hem te helpen.", "aanval": "Breed: de buitenspelers hoog aan de zijlijn, 1 tegen 1 en lage voorzetten op Colin.", "verdedigen": "Drie aanvallers zetten hoog druk, Amine schermt het midden af.", "omschakelen": "Bij balverlies de buitenspelers terug tot de middenlijn. Bij balwinst direct naar de vrije buitenspeler."}, "tegen": "Tegen een tegenstander die laag blijft staan of met vier verdedigers speelt.", "coach": ["Blijven de buitenspelers echt breed?", "Is Amine steeds aanspeelbaar?", "Komen de buitenspelers terug na balverlies?"], "train": ["vleugelzones", "actie", "storen", "wedstrijd8"]}, "1232": {"fases": {"opbouw": "Snel en vooruit. Weinig risico achterin: liever lang dan balverlies voor eigen doel.", "aanval": "Veel spelers rond hun zestien, schieten en de tweede bal pakken.", "verdedigen": "Hoog druk zetten, maar de twee verdedigers blijven altijd achter.", "omschakelen": "Bij balverlies trekt iedereen een sprint terug."}, "tegen": "Alleen als we moeten scoren, bijvoorbeeld de laatste tien minuten.", "coach": ["Blijven de twee verdedigers achter?", "Pakken we de tweede ballen?", "Sprint iedereen terug na balverlies?"], "train": ["tweedebal", "afronden", "golven", "wedstrijd8"]}, "1421": {"fases": {"opbouw": "Rustig achterin; bij twijfel lang op Colin.", "aanval": "Snel omschakelen naar Colin, Maddox sluit aan.", "verdedigen": "Compact op eigen helft: vier achter, twee voor de verdediging.", "omschakelen": "Bij balwinst direct diep. Bij balverlies meteen terug in twee lijnen."}, "tegen": "Tegen een sterkere of snellere tegenstander.", "coach": ["Staan de lijnen dicht bij elkaar?", "Gaat de bal na balwinst snel naar Colin?", "Sluit Maddox op tijd aan?"], "train": ["compact", "omschakel", "1tegen1", "wedstrijd8"]}}).forEach(([c, x]) => Object.assign(SYSTEMS[c], x));
-Object.entries({"1322": [["CM", 1, {"drills": ["positie", "compact", "rondo"], "home": ["h-omkijken", "h-kaatsen"]}], ["SP", 1, {"drills": ["afronden", "derdeman", "actie"], "home": ["h-draaien", "h-afronden"]}]], "1313": [["CM", 0, {"drills": ["positie", "draaien", "storen"], "home": ["h-omkijken", "h-draaien", "h-muurpass"]}]], "1232": [["CV", 0, {"drills": ["1tegen1", "compact"], "home": ["h-1tegen1", "h-kaatsen"]}], ["CV", 1, {"drills": ["1tegen1", "compact"], "home": ["h-1tegen1", "h-kaatsen"]}]], "1421": [["CM", 1, {"drills": ["afronden", "tweedebal", "derdeman"], "home": ["h-afronden", "h-steekpass"]}], ["SP", 0, {"drills": ["omschakel", "afronden", "actie"], "home": ["h-aanname", "h-afronden"]}]]}).forEach(([c, list]) => list.forEach(([r, n, ov]) => Object.assign(SYSTEMS[c].slots.filter(s => s.role === r)[n], ov)));
-Object.entries({"1322": [["CM", 1, {"verlies": "Blijf voor de verdediging en sluit het midden af; Amine zet druk.", "winst": "Speel de bal direct naar Amine of breed naar een vrije verdediger.", "extra": ["Jij gaat niet mee de zestien in, ook niet bij een corner voor ons."]}], ["SP", 1, {"verlies": "Jaag op de verdediger met de bal; Colin pakt de pass.", "winst": "Kom kort voor de bal of steek Colin diep.", "extra": ["Bij corners voor ons sta je bij de eerste paal."]}]], "1313": [["CM", 0, {"verlies": "Blijf in het midden en vertraag; de buitenspelers komen terug.", "winst": "Zoek meteen de vrije buitenspeler.", "extra": ["Ga niet mee de zestien in: jij bent het vangnet."]}]], "1232": [["CV", 0, {"verlies": "Blijf achter en praat: “terug!”", "winst": "Speel snel vooruit naar Amine of de spitsen.", "extra": []}], ["CV", 1, {"verlies": "Meteen terug naast Sjoerd.", "winst": "Speel snel vooruit naar Amine of de spitsen.", "extra": []}], ["SP", 1, {"verlies": "Zet druk op de verdediger met de bal.", "winst": "Kom kort en kaats, of ga mee diep.", "extra": []}]], "1421": [["CM", 0, {"verlies": "Sluit het midden af voor de verdediging.", "winst": "Kijk eerst naar Colin in de diepte.", "extra": ["Jij blijft achter bij corners voor ons."]}], ["CM", 1, {"verlies": "Terug naast Amine, samen het midden dicht.", "winst": "Sprint mee om Colin te helpen.", "extra": []}], ["SP", 0, {"verlies": "Blijf tussen hun verdedigers en de middenlijn; niet doorjagen.", "winst": "Bied je aan als uitvalspunt en houd de bal vast.", "extra": []}]]}).forEach(([c, list]) => list.forEach(([r, n, ov]) => Object.assign(SYSTEMS[c].slots.filter(s => s.role === r)[n], ov)));
-const SLUG_SYS = { basis: '1331', fase1: '1331', druk: '1331', voorsprong: '1331', zondermees: '1331', achterstand: '1232', tweespitsen: '1322' };
+/* Oude opstellingen uit de eerste versie: drie horen bij een systeem, vier waren situaties van ons team en worden niet meer getoond. */
+const SLUG_SYS = { basis: '1331', achterstand: '1232', tweespitsen: '1322' };
+const HIDDEN = new Set(['fase1', 'druk', 'voorsprong', 'zondermees']);
 /* Speelvorm per team: 8 tegen 8 (standaard) of 11 tegen 11. Elk team heeft zijn eigen posities, systemen en patronen. */
 const fmt = () => (S.team?.colors?.format === 11 ? 11 : 8);
 function FMf(f) {
   return f === 11
-    ? { f: 11, label: '11 tegen 11', ROLES: SEED11.ROLES, SYSTEMS: SEED11.SYSTEMS, SLUG: {}, ALT: SEED11.ALT, OPP: SEED11.OPP, BASIS: SEED11.BASIS, PERSONAL: SEED11.PERSONAL, def: '1433', ORDER: ['1433', '14231', '1442', '1343', '14141'] }
-    : { f: 8, label: '8 tegen 8', ROLES, SYSTEMS, SLUG: SLUG_SYS, ALT: SEED.ALT, OPP: SEED.OPP, BASIS: SEED.BASIS, PERSONAL, def: '1322', ORDER: ['1331', '1322', '1313', '1232', '1421'] };
+    ? { f: 11, label: '11 tegen 11', ...K11, SLUG: {}, ALT: SEED11.ALT, PERSONAL: SEED11.PERSONAL, def: '1433' }
+    : { f: 8, label: '8 tegen 8', ...K8, SLUG: SLUG_SYS, ALT: SEED.ALT, PERSONAL, def: '1331' };
 }
 const FM = () => FMf(fmt());
 const sysOf = L => L?.data?.sys || FM().SLUG[L?.data?.slug] || null;
+const lineups = () => kind('lineup').filter(l => !HIDDEN.has(l.data.slug) && !l.data.hidden);
+const lineupTitle = L => (FM().SLUG[L?.data?.slug] && FM().SYSTEMS[FM().SLUG[L.data.slug]]?.titel) || L?.title || '';
+const tegenLabel = t => FM().TEGEN.find(x => x[0] === t)?.[1] || t;
+/* Een plek in de tekst ({CM}, {SP2}) wordt de naam van de speler op die plek, of anders de naam van de plek. */
+function slotLabel(sys, id) {
+  const T = FM().SYSTEMS[sys], t = T?.slots.find(x => x.id === id), role = t?.role || id.replace(/\d+$/, '');
+  return 'de ' + (t?.naam || FM().ROLES[role]?.naam || role).replace(/\s*\(.*?\)/, '').toLowerCase();
+}
+function lineupFor(sys) { const ls = lineups().filter(l => sysOf(l) === sys); return ls.find(l => l.data.match) || ls[0]; }
+function fillT(text, sys, L) {
+  if (!text || !String(text).includes('{')) return text || '';
+  L = L || lineupFor(sys);
+  return String(text).replace(/\{([A-Z]+)(\d?)\}/g, (m, role, n) => {
+    const sl = L?.data.slots.filter(x => x.role === role)[n ? +n - 1 : 0], p = sl && playerById(sl.player_id);
+    return p ? p.nickname : slotLabel(sys, role + n);
+  }).replace(/(^|[.!?]\s+)de /g, (m, a) => a + 'De ');
+}
 /* De plek in het systeemsjabloon die bij dit slot hoort: zelfde positie, zelfde volgnummer. */
 function tplSlot(L, slot, orig = slot) {
   const T = FM().SYSTEMS[sysOf(L)]; if (!T) return null;
@@ -167,17 +103,17 @@ function slotTasks(L, slot, orig = slot) {
   const base = FM().ROLES[slot.role] || {};
   const rc = { ...base, ...(roleCard(slot.role)?.data || {}) };
   const t = tplSlot(L, slot, orig) || {};
-  const pick = k => slot[k] || t[k] || rc[k] || base[k] || '';
+  const sys = sysOf(L), pick = k => fillT(slot[k] || t[k] || rc[k] || base[k] || '', sys, L);
   const list = k => (slot[k]?.length ? slot[k] : t[k]?.length ? t[k] : rc[k]?.length ? rc[k] : base[k] || []);
   return {
     naam: slot.naam || t.naam || rc.naam || slot.role,
     bal: pick('bal'), geen: pick('geen'), verlies: pick('verlies'), winst: pick('winst'), herv: pick('herv'),
-    extra: Array.isArray(slot.extra) ? slot.extra : Array.isArray(t.extra) ? t.extra : rc.extra || [],
+    extra: (Array.isArray(slot.extra) ? slot.extra : Array.isArray(t.extra) ? t.extra : rc.extra || []).map(x => fillT(x, sys, L)),
     drills: list('drills'), home: list('home'), eigen: !!(slot.bal || slot.geen), rc
   };
 }
 /* De opstelling voor de komende wedstrijd: daar volgen de spelerspagina en het huiswerk standaard op. */
-function matchLineup() { const ls = kind('lineup'); return ls.find(l => l.data.match) || ls[0]; }
+function matchLineup() { const ls = lineups(); return ls.find(l => l.data.match) || ls[0]; }
 
 const REACT = { top: 'Top!', goed_bezig: 'Goed bezig', knap: 'Knap gedaan', volhouden: 'Volhouden' };
 const MOOD = { 1: '😕', 2: '🙂', 3: '😄' };
@@ -188,6 +124,10 @@ function weekLabel(ws) { const [y, m, d] = ws.split('-').map(Number); const a = 
 /* ---------------- toestand ---------------- */
 const S = { mode: 'loading', user: null, teams: [], team: null, players: [], content: [], staff: false, view: 'opstelling', scen: null, pat: null, step: 0, tf: 'Alle' };
 const kind = k => S.content.filter(c => c.kind === k).sort((a, b) => a.sort - b.sort);
+S.opp = store.get('sb:opp') || null;
+function oppPicker() { return `<label class="pick"><span>Tegenstander</span><select class="i" id="oppSel"><option value="">Elke tegenstander</option>${FM().TEGEN.map(([k, l]) => `<option value="${k}" ${S.opp === k ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select></label>`; }
+function wireOpp(redraw) { $('#oppSel').onchange = () => { S.opp = $('#oppSel').value || null; store.set('sb:opp', S.opp); redraw(); }; }
+const fits = (sys, t) => !!FM().SYSTEMS[sys]?.goed?.some(g => g[0] === t);
 const playerById = id => S.players.find(p => p.id === id);
 const nick = id => playerById(id)?.nickname || '?';
 function applyColors() {
@@ -235,30 +175,25 @@ async function loadStaff(preferId) {
     if (!error) await reloadTeamData();
   }
   await ensureSystems();
-  await ensurePatterns();
   render();
 }
-/* Elk systeem uit de bibliotheek staat één keer klaar als opstelling, ingevuld op kwaliteit. */
+/* Elk systeem uit de kennisbank staat één keer klaar als opstelling; spelers worden ingedeeld op hun voorkeurspositie. */
 function lineupFromSystem(code) {
   const T = FM().SYSTEMS[code], byName = n => S.players.find(p => p.nickname.toLowerCase() === String(n || '').toLowerCase())?.id || null;
   const used = new Set();
-  const slots = T.slots.map(t => { const id = byName(t.wie); if (id) used.add(id); return { role: t.role, x: t.x, y: t.y, player_id: id }; });
+  const slots = T.slots.map(t => { let id = byName(t.demo); if (id && used.has(id)) id = null; if (id) used.add(id); return { role: t.role, x: t.x, y: t.y, player_id: id }; });
+  slots.forEach(sl => {
+    if (sl.player_id) return;
+    const naam = (FM().ROLES[sl.role]?.naam || '').toLowerCase();
+    const p = S.players.find(x => !used.has(x.id) && x.active !== false && (x.position || '').toLowerCase() === naam);
+    if (p) { sl.player_id = p.id; used.add(p.id); }
+  });
   slots.forEach(sl => { sl.alt = (FM().ALT[sl.role] || []).map(byName).filter(id => id && id !== sl.player_id); });
-  return { sys: code, slug: 'sys-' + code, note: T.idee, slots };
-}
-/* Patronen per systeem: ontbrekende uit de bibliotheek één keer toevoegen. */
-async function ensurePatterns() {
-  if (!S.staff) return;
-  const src = (fmt() === 11 ? SEED11 : SEED).PATSYS || [];
-  const have = new Set(kind('pattern').map(p => p.data.slug));
-  const missing = src.filter(p => !have.has(p.id)); if (!missing.length) return;
-  const base = Math.max(-1, ...kind('pattern').map(c => c.sort)) + 1;
-  const { error } = await sb.from('content').insert(missing.map((p, i) => ({ team_id: S.team.id, kind: 'pattern', title: p.name, sort: base + i, data: { slug: p.id, sys: p.sys, frames: p.frames }, updated_by: S.user.id })));
-  if (!error) await reloadTeamData();
+  return { sys: code, slug: 'sys-' + code, slots };
 }
 async function ensureSystems() {
-  if (!S.staff || !S.players.length) return;
-  const have = new Set(kind('lineup').map(sysOf).filter(Boolean));
+  if (!S.staff) return;
+  const have = new Set(lineups().map(sysOf).filter(Boolean));
   const missing = FM().ORDER.filter(c => !have.has(c));
   if (!missing.length) return;
   const base = Math.max(-1, ...kind('lineup').map(c => c.sort)) + 1;
@@ -309,13 +244,14 @@ function renderLogin() {
 }
 function renderCreateTeam() {
   shell(`<form class="panel" id="ctForm" style="max-width:560px"><div class="kicker">Welkom</div><h2>Maak je team aan</h2>
-    <p class="muted small">Het team start met de opstellingen, patronen, trainingen en taken die al zijn uitgewerkt. Alles is daarna aan te passen.</p>
+    <p class="muted small">Het team start met beproefde systemen, spelpatronen, taken per positie, oefenvormen en trainingsplannen. Spelers voeg je daarna zelf toe; alles is aan te passen.</p>
     <label class="f" for="tfm">Speelvorm</label><select class="i" id="tfm"><option value="8">8 tegen 8 (onder 13)</option><option value="11">11 tegen 11 (vanaf onder 13)</option></select>
     <p class="small muted" style="margin:4px 0 0">Elke speelvorm heeft eigen posities, systemen, patronen en trainingen. Wil je beide, maak dan twee teams aan.</p>
     <label class="f" for="tn">Teamnaam</label><input class="i" id="tn" required value="JO12">
     <label class="f" for="tc">Club</label><input class="i" id="tc" value="FC Geleen Zuid">
     <label class="f" for="ts">Seizoen</label><input class="i" id="ts" value="2026-2027">
-    <label class="row small mt"><input type="checkbox" id="tseed" checked> Startinhoud en selectie laden (12 spelers met voornaam)</label>
+    <label class="row small mt"><input type="checkbox" id="tseed" checked> Kennisbank en startinhoud laden</label>
+    <label class="row small"><input type="checkbox" id="troster"> Voorbeeldspelers toevoegen (12 voornamen om mee te oefenen)</label>
     <div class="row mt"><button class="btn primary" type="submit" id="ctBtn">Team aanmaken</button></div><p class="small muted" id="ctMsg"></p></form>`);
   $('#tfm').onchange = () => { const n = $('#tn'); if (n.value === 'JO12' || n.value === 'JO13') n.value = $('#tfm').value === '11' ? 'JO13' : 'JO12'; };
   $('#ctForm').onsubmit = async e => {
@@ -324,27 +260,24 @@ function renderCreateTeam() {
     if (error) { $('#ctMsg').textContent = error.message; $('#ctBtn').disabled = false; return; }
     const f = +$('#tfm').value === 11 ? 11 : 8;
     if (f === 11) { const { error: e2 } = await sb.from('teams').update({ colors: { format: 11 } }).eq('id', id); if (e2) { $('#ctMsg').textContent = e2.message; $('#ctBtn').disabled = false; return; } }
-    if ($('#tseed').checked) { $('#ctMsg').textContent = 'Startinhoud laden…'; await seedTeam(id, f); }
+    if ($('#tseed').checked) { $('#ctMsg').textContent = 'Startinhoud laden…'; await seedTeam(id, f, $('#troster').checked); }
     S.view = 'opstelling'; S.scen = null; selSlot = null;
     await loadStaff(id);
   };
 }
 
 /* ---------------- startinhoud ---------------- */
-async function seedTeam(teamId, f = 8) {
+async function seedTeam(teamId, f = 8, roster = false) {
   const C = FMf(f), ids = {};
-  const pos11 = Object.fromEntries(SEED11.SYSTEMS['1433'].slots.map(t => [t.wie, SEED11.ROLES[t.role].naam]));
-  for (const name of SEED.ROSTER) {
-    const position = f === 11 ? (pos11[name] || 'Wissel') : SEED.TASK[name]?.pos || null;
-    const { data } = await sb.rpc('add_player', { p_team: teamId, p_nickname: name, p_position: position });
-    if (data?.[0]) ids[name] = data[0].player_id;
+  if (roster) {
+    const pos11 = Object.fromEntries(K11.SYSTEMS['1433'].slots.map(t => [t.demo, K11.ROLES[t.role].naam]));
+    for (const name of SEED.ROSTER) {
+      const position = f === 11 ? (pos11[name] || 'Wissel') : SEED.TASK[name]?.pos || null;
+      const { data } = await sb.rpc('add_player', { p_team: teamId, p_nickname: name, p_position: position });
+      if (data?.[0]) ids[name] = data[0].player_id;
+    }
   }
   const rows = [];
-  if (f === 8) SEED.SCEN.forEach((s, i) => rows.push({ team_id: teamId, kind: 'lineup', title: s.name, sort: i, data: {
-    slug: s.id, note: s.note,
-    slots: Object.entries(s.pos).map(([n, v]) => ({ role: v[2], x: v[0], y: v[1], player_id: ids[n] || null,
-      alt: (SEED.ALT[v[2]] || []).map(a => ids[a]).filter(Boolean) })) } }));
-  [...(f === 11 ? SEED11 : SEED).PAT, ...(f === 11 ? SEED11 : SEED).PATSYS].forEach((p, i) => rows.push({ team_id: teamId, kind: 'pattern', title: p.name, sort: i, data: { slug: p.id, sys: p.sys, frames: p.frames } }));
   const drills = f === 11 ? [...SEED11.DRILLS, ...SEED.DRILLS.filter(d => d.id !== 'wedstrijd8')] : SEED.DRILLS;
   drills.forEach((d, i) => { const { name, ...rest } = d; rows.push({ team_id: teamId, kind: 'drill', title: name, sort: i, data: { ...rest, slug: d.id } }); });
   (f === 11 ? SEED11.TRAIN : SEED.TRAIN).forEach((t, i) => rows.push({ team_id: teamId, kind: 'plan', title: t.name, sort: i, data: { weken: t.weken, prob: t.prob, drills: t.drills } }));
@@ -391,63 +324,87 @@ function render() {
 }
 
 /* ---------------- veld ---------------- */
+/* Het veld schuin van achter het eigen doel gezien, zoals een tv-beeld. Veldcoördinaten 0–100 (x van links naar rechts, y van hun doel naar het onze). */
+const F0 = 240, D0 = 150, HC = 143.3, HZ = -135.3;
+function proj(x, y) { const u = (x - 50) * 0.6, d = D0 + (100 - y) * 0.9; return [50 + u * F0 / d, HZ + HC * F0 / d, F0 / d]; }
+function unproj(sx, sy) { const d = HC * F0 / Math.max(1, sy - HZ), u = (sx - 50) * d / F0; return [Math.max(0, Math.min(100, 50 + u / 0.6)), Math.max(0, Math.min(100, 100 - (d - D0) / 0.9))]; }
+const P2 = (x, y) => proj(x, y).slice(0, 2).map(v => v.toFixed(2)).join(',');
+function drawPitch3D(svg) {
+  svg.setAttribute('viewBox', '0 0 100 106'); svg.innerHTML = '';
+  const poly = (pts, attrs, parent = svg) => el('polygon', { points: pts.map(([x, y]) => P2(x, y)).join(' '), ...attrs }, parent);
+  const line = (pts, parent) => el('polyline', { points: pts.map(([x, y]) => P2(x, y)).join(' '), fill: 'none' }, parent);
+  el('rect', { x: -5, y: -5, width: 110, height: 116, fill: '#1c4f2d' }, svg);
+  poly([[-5, -4], [105, -4], [105, 104], [-5, 104]], { fill: '#2b6f3f' });
+  for (let i = 0; i < 10; i++) poly([[0, i * 10], [100, i * 10], [100, i * 10 + 10], [0, i * 10 + 10]], { fill: i % 2 ? '#2f7a46' : '#2a6d3e' });
+  const Lg = el('g', { stroke: 'rgba(255,255,255,.85)', 'stroke-width': '.35', 'stroke-linejoin': 'round' }, svg);
+  line([[0, 0], [100, 0], [100, 100], [0, 100], [0, 0]], Lg); line([[0, 50], [100, 50]], Lg);
+  line(Array.from({ length: 41 }, (_, i) => [50 + 10.7 * Math.cos(i / 40 * 2 * Math.PI), 50 + 7 * Math.sin(i / 40 * 2 * Math.PI)]), Lg);
+  [[0, 15.1, 5.8, 10.5, -1.7], [100, 84.9, 94.2, 89.5, 101.7]].forEach(([y0, yp, yg, ys, yn]) => {
+    line([[23.2, y0], [23.2, yp], [76.8, yp], [76.8, y0]], Lg); line([[37.5, y0], [37.5, yg], [62.5, yg], [62.5, y0]], Lg);
+    poly([[42.9, y0], [57.1, y0], [57.1, yn], [42.9, yn]], { fill: 'rgba(255,255,255,.25)', stroke: '#fff', 'stroke-width': '.3' });
+    const [sx, sy, sc] = proj(50, ys); el('circle', { cx: sx, cy: sy, r: .35 * sc, fill: '#fff' }, svg);
+  });
+  const [cx0, cy0, cs] = proj(50, 50); el('circle', { cx: cx0, cy: cy0, r: .35 * cs, fill: '#fff' }, svg);
+}
+function makeToken(parent, own, club) {
+  const g = el('g', { class: 'tok' }, parent);
+  el('rect', { class: 'hit', x: -3.4, y: -2.8, width: 6.8, height: own ? 7.4 : 5, rx: 2, fill: 'transparent' }, g);
+  if (own) {
+    el('ellipse', { cx: 0, cy: 1.6, rx: 1.8, ry: .5, fill: 'rgba(0,0,0,.35)' }, g);
+    const ring = el('circle', { class: 'ring', r: 2.7, fill: 'none', stroke: '#ffd84d', 'stroke-width': '.45' }, g); ring.style.display = 'none';
+    el('circle', { class: 'body', r: 1.85, fill: club, stroke: '#fff', 'stroke-width': '.3' }, g);
+    const lab = el('text', { y: '.72', 'text-anchor': 'middle', 'font-size': '1.95', 'font-weight': '800', 'font-family': 'Barlow Condensed, Arial Narrow, sans-serif', fill: '#fff' }, g);
+    const nm = el('text', { y: '3.9', 'text-anchor': 'middle', 'font-size': '1.55', 'font-weight': '700', 'font-family': 'Barlow, sans-serif', fill: '#fff', stroke: 'rgba(0,0,0,.75)', 'stroke-width': '.45', 'paint-order': 'stroke' }, g);
+    return { g, ring, lab, nm };
+  }
+  el('ellipse', { cx: 0, cy: 1.2, rx: 1.1, ry: .35, fill: 'rgba(0,0,0,.3)' }, g);
+  el('path', { d: 'M-.75,1.2 L-.45,-1.4 Q0,-2 .45,-1.4 L.75,1.2 Z', fill: '#f0d64a', stroke: '#8a7414', 'stroke-width': '.15' }, g);
+  return { g };
+}
+/* Board: statisch veld met verplaatsbare spelers (opstelling, stap voor stap, animatiebord). */
 function Board(svg, prefix) {
-  svg.setAttribute('viewBox', '0 0 60 90'); svg.innerHTML = '';
+  drawPitch3D(svg);
   const defs = el('defs', {}, svg);
-  [['W', '#ffffff'], ['Y', '#ffd84d']].forEach(([n, c]) => { const m = el('marker', { id: prefix + n, viewBox: '0 0 6 6', refX: '5', refY: '3', markerWidth: '4', markerHeight: '4', orient: 'auto' }, defs); el('path', { d: 'M0,0 L6,3 L0,6 z', fill: c }, m); });
-  const g = el('linearGradient', { id: prefix + 'g', x1: '0', y1: '0', x2: '0', y2: '1' }, defs);
-  el('stop', { offset: '0', 'stop-color': '#2f7a46' }, g); el('stop', { offset: '1', 'stop-color': '#1d5631' }, g);
-  const v = el('radialGradient', { id: prefix + 'v', cx: '.5', cy: '.45', r: '.75' }, defs);
-  el('stop', { offset: '.55', 'stop-color': '#000', 'stop-opacity': '0' }, v); el('stop', { offset: '1', 'stop-color': '#000', 'stop-opacity': '.45' }, v);
-  const sh = el('filter', { id: prefix + 's', x: '-50%', y: '-50%', width: '200%', height: '200%' }, defs);
-  el('feDropShadow', { dx: '0', dy: '.6', stdDeviation: '.6', 'flood-color': '#000', 'flood-opacity': '.55' }, sh);
-  el('rect', { x: 0, y: 0, width: 60, height: 90, fill: `url(#${prefix}g)` }, svg);
-  for (let i = 0; i < 9; i++) if (i % 2) el('rect', { x: 0, y: i * 10, width: 60, height: 10, fill: '#fff', opacity: '.035' }, svg);
-  const L = el('g', { stroke: 'rgba(255,255,255,.78)', 'stroke-width': '.3', fill: 'none' }, svg);
-  el('rect', { x: 2, y: 2, width: 56, height: 86 }, L); el('line', { x1: 2, y1: 45, x2: 58, y2: 45 }, L); el('circle', { cx: 30, cy: 45, r: 6 }, L);
-  el('rect', { x: 15, y: 2, width: 30, height: 13 }, L); el('rect', { x: 23, y: 2, width: 14, height: 5 }, L);
-  el('rect', { x: 15, y: 75, width: 30, height: 13 }, L); el('rect', { x: 23, y: 83, width: 14, height: 5 }, L);
-  el('rect', { x: 26, y: .5, width: 8, height: 1.5 }, L); el('rect', { x: 26, y: 88, width: 8, height: 1.5 }, L);
-  [[30, 45], [30, 11], [30, 79]].forEach(([a, b]) => el('circle', { cx: a, cy: b, r: .4, fill: 'rgba(255,255,255,.8)' }, svg));
-  el('rect', { x: 0, y: 0, width: 60, height: 90, fill: `url(#${prefix}v)`, 'pointer-events': 'none' }, svg);
+  [['W', '#ffffff'], ['Y', '#ffd84d']].forEach(([n, c]) => { const m = el('marker', { id: prefix + n, viewBox: '0 0 6 6', refX: '5', refY: '3', markerWidth: '3.2', markerHeight: '3.2', orient: 'auto' }, defs); el('path', { d: 'M0,0 L6,3 L0,6 z', fill: c }, m); });
+  const club = getComputedStyle(document.documentElement).getPropertyValue('--club').trim() || '#db1e3b';
   const gA = el('g', {}, svg), gT = el('g', {}, svg);
   const ball = el('g', { class: 'ballg' }, svg);
-  el('circle', { r: 1.3, fill: '#fff', stroke: '#111', 'stroke-width': '.3', filter: `url(#${prefix}s)` }, ball); ball.style.display = 'none';
+  el('ellipse', { cx: .3, cy: .7, rx: .8, ry: .25, fill: 'rgba(0,0,0,.35)' }, ball); el('circle', { r: .75, fill: '#fff', stroke: '#111', 'stroke-width': '.18' }, ball); ball.style.display = 'none';
   const toks = {};
-  const place = (k, x, y) => { const t = toks[k]; if (t) t.g.style.transform = `translate(${X(x)}px,${Y(y)}px)`; };
-  function make(o) {
-    const g = el('g', { class: 'tok' }, gT); g.dataset.key = o.key;
-    const own = o.team !== 'opp';
-    const club = getComputedStyle(document.documentElement).getPropertyValue('--club').trim() || '#db1e3b';
-    el('path', { d: SHIRT, fill: own ? club : '#e9edf2', stroke: own ? 'rgba(0,0,0,.55)' : '#24364d', 'stroke-width': '.35', filter: `url(#${prefix}s)` }, g);
-    const lab = el('text', { y: '1.4', 'text-anchor': 'middle', 'font-size': '2.3', 'font-weight': '800', 'font-family': 'Barlow Condensed, Arial Narrow, sans-serif', fill: own ? '#fff' : '#24364d' }, g);
-    const nm = el('text', { y: '6.6', 'text-anchor': 'middle', 'font-size': '2.5', 'font-weight': '700', 'font-family': 'Barlow, sans-serif', fill: '#fff', stroke: 'rgba(0,0,0,.7)', 'stroke-width': '.6', 'paint-order': 'stroke' }, g);
-    return (toks[o.key] = { g, lab, nm });
-  }
+  const put = (g, x, y, k = 1) => { const [sx, sy, sc] = proj(x, y); g.style.transform = `translate(${sx.toFixed(2)}px,${sy.toFixed(2)}px) scale(${(sc * k).toFixed(3)})`; };
+  const order = () => Object.values(toks).sort((a, b) => (a.y + (a.lab ? .6 : 0)) - (b.y + (b.lab ? .6 : 0))).forEach(t => gT.appendChild(t.g));
+  const place = (k, x, y) => { const t = toks[k]; if (!t) return; t.x = x; t.y = y; put(t.g, x, y); };
   return {
     svg, place,
+    toField(e) { const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY; const p = pt.matrixTransform(svg.getScreenCTM().inverse()); const [x, y] = unproj(p.x, p.y); return [Math.min(99, Math.max(1, x)), Math.min(99, Math.max(1, y))]; },
     render(list, instant) {
       if (instant) svg.classList.add('noanim');
       const keys = new Set(list.map(o => o.key));
       Object.keys(toks).forEach(k => { if (!keys.has(k)) { toks[k].g.remove(); delete toks[k]; } });
       list.forEach(o => {
-        const t = toks[o.key] || make(o);
-        t.lab.textContent = o.label || '';
-        t.nm.textContent = '';
-        (o.names || [o.name || '']).forEach((n, i) => { const ts = el('tspan', { x: '0', dy: i ? '2.5' : '0', 'font-size': i ? '2.05' : '2.5', 'fill-opacity': i ? '.85' : '1' }, t.nm); ts.textContent = n; });
+        const t = toks[o.key] || (toks[o.key] = makeToken(gT, o.team !== 'opp', club));
+        t.g.dataset.key = o.key;
+        if (t.lab) {
+          const lab = String(o.label ?? ''); t.lab.textContent = lab; t.lab.setAttribute('font-size', lab.length > 2 ? '1.3' : '1.95');
+          t.nm.textContent = '';
+          (o.names || [o.name || '']).forEach((n, i) => { const ts = el('tspan', { x: '0', dy: i ? '1.6' : '0', 'font-size': i ? '1.25' : '1.55', 'fill-opacity': i ? '.85' : '1' }, t.nm); ts.textContent = n; });
+          t.g.style.opacity = o.dim ? '.55' : '';
+        }
         t.g.setAttribute('aria-label', o.name ? `${o.name}${o.label ? ', ' + o.label : ''}` : 'Tegenstander');
         place(o.key, o.x, o.y);
       });
+      order();
       if (instant) { svg.getBoundingClientRect(); requestAnimationFrame(() => svg.classList.remove('noanim')); }
     },
-    ball(b) { if (!b) { ball.style.display = 'none'; return; } ball.style.display = ''; ball.style.transform = `translate(${X(b[0])}px,${Y(b[1]) + 2.8}px)`; },
+    ball(b) { if (!b) { ball.style.display = 'none'; return; } ball.style.display = ''; put(ball, b[0] + 2.4, Math.min(101, b[1] - .6)); },
     arrows(arr) {
       gA.innerHTML = '';
       (arr || []).forEach(a => {
-        const at = a[4] === 'run' ? { stroke: '#ffd84d', 'stroke-width': '.5', 'stroke-dasharray': '1.3 .9', 'marker-end': `url(#${prefix}Y)` }
-          : a[4] === 'drib' ? { stroke: '#fff', 'stroke-width': '.5', 'stroke-dasharray': '.3 .8', 'stroke-linecap': 'round', 'marker-end': `url(#${prefix}W)` }
-            : { stroke: '#fff', 'stroke-width': '.45', 'marker-end': `url(#${prefix}W)` };
-        el('line', Object.assign({ x1: X(a[0]), y1: Y(a[1]), x2: X(a[2]), y2: Y(a[3]), fill: 'none' }, at), gA);
+        const at = a[4] === 'run' ? { stroke: '#ffd84d', 'stroke-width': '.55', 'stroke-dasharray': '1.4 1', 'marker-end': `url(#${prefix}Y)` }
+          : a[4] === 'drib' ? { stroke: '#fff', 'stroke-width': '.55', 'stroke-dasharray': '.3 .9', 'stroke-linecap': 'round', 'marker-end': `url(#${prefix}W)` }
+            : { stroke: '#fff', 'stroke-width': '.5', 'marker-end': `url(#${prefix}W)` };
+        const [x1, y1] = proj(a[0], a[1]), [x2, y2] = proj(a[2], a[3]);
+        el('line', Object.assign({ x1, y1, x2, y2, fill: 'none' }, at), gA);
       });
     }
   };
@@ -457,23 +414,26 @@ function Board(svg, prefix) {
 let lineupBoard = null, showOpp = false, benchSel = null;
 let selSlot = null;
 function viewLineup() {
-  const lineups = kind('lineup');
-  if (!lineups.length) { $('#view').innerHTML = `<div class="panel empty">Nog geen opstellingen.</div>`; return; }
-  if (!S.scen || !lineups.find(l => l.id === S.scen)) S.scen = matchLineup().id;
-  const L = lineups.find(l => l.id === S.scen);
-  const T = FM().SYSTEMS[sysOf(L)];
-  $('#view').innerHTML = `<div class="chips" role="group" aria-label="Systeem of wedstrijdsituatie">${lineups.map(l => `<button data-id="${l.id}" class="${l.id === S.scen ? 'on' : ''}">${l.data.match ? '★ ' : ''}${esc(l.title)}</button>`).join('')}</div>
-    <div class="layout"><div><svg class="pitch ${S.staff ? 'edit' : ''}" id="pitch" aria-label="Veld met opstelling"></svg>
-      <div class="row mt"><button class="btn" id="oppT">${showOpp ? 'Tegenstander verbergen' : 'Tegenstander tonen'}</button>${S.staff ? '<button class="btn ghost" id="addSys">Systeem toevoegen</button><button class="btn ghost" id="addL">Nieuwe situatie</button>' : ''}</div></div>
-      <div><div class="panel"><div class="kicker">${T ? 'Systeem ' + esc(T.naam) : 'Wedstrijdsituatie'}</div><h2>${esc(L.title)}</h2><p style="margin:0">${esc(L.data.note || '')}</p>
+  const lineups_ = lineups();
+  if (!lineups_.length) { $('#view').innerHTML = `<div class="panel empty">Nog geen opstellingen.</div>`; return; }
+  if (!S.scen || !lineups_.find(l => l.id === S.scen)) S.scen = matchLineup().id;
+  const L = lineups_.find(l => l.id === S.scen);
+  const sys = sysOf(L), T = FM().SYSTEMS[sys];
+  const good = S.opp ? FM().ORDER.filter(c => fits(c, S.opp)) : [];
+  $('#view').innerHTML = `<div class="pickers"><label class="pick"><span>Systeem</span><select class="i" id="lsel">${lineups_.map(l => `<option value="${l.id}" ${l.id === S.scen ? 'selected' : ''}>${l.data.match ? '★ ' : ''}${esc(lineupTitle(l))}${S.opp && fits(sysOf(l), S.opp) ? ' ✓' : ''}</option>`).join('')}</select></label>${oppPicker()}</div>
+    <div class="layout patlayout"><div><div class="filmwrap"><svg class="pitch film ${S.staff ? 'edit' : ''}" id="pitch" aria-label="Veld met opstelling"></svg></div>
+      <div class="row mt"><button class="btn" id="oppT">${showOpp ? 'Tegenstander verbergen' : 'Tegenstander tonen'}</button>${S.staff ? '<button class="btn ghost" id="addSys">Systeem toevoegen</button><button class="btn ghost" id="addL">Variant maken</button>' : ''}</div></div>
+      <div><div class="panel"><div class="kicker">${T ? 'Systeem ' + esc(T.naam) : 'Eigen variant'}</div><h2>${esc(lineupTitle(L))}</h2><p style="margin:0">${esc(T && (L.data.slug in FM().SLUG || /^sys-/.test(L.data.slug || '')) ? fillT(T.idee, sys, L) : fillT(L.data.note || T?.idee || '', sys, L))}</p>
+        ${S.opp && T ? (fits(sys, S.opp) ? `<p class="small fitline good">✓ Past goed tegen een tegenstander die “${esc(tegenLabel(S.opp).toLowerCase())}”.</p>` : `<p class="small fitline">Tegen een tegenstander die “${esc(tegenLabel(S.opp).toLowerCase())}” passen beter: ${good.map(c => esc(FM().SYSTEMS[c].naam)).join(', ') || 'geen vaste keuze'}.</p>`) : ''}
         ${L.data.match ? '<p class="small mt" style="margin-bottom:0"><span class="badge" style="background:var(--club);color:#fff">★ Wedstrijdopstelling</span> De spelerspagina\'s volgen deze opstelling.</p>' : ''}
-        ${T ? `<dl class="task sysinfo"><dt>Sterk</dt><dd>${esc(T.sterk)}</dd><dt>Risico</dt><dd>${esc(T.risico)}</dd>${T.tegen ? `<dt>Wanneer</dt><dd>${esc(T.tegen)}</dd>` : ''}</dl>
-        ${T.fases ? `<details class="speelwijze"><summary>Speelwijze per fase</summary><dl class="task"><dt>Opbouwen</dt><dd>${esc(T.fases.opbouw)}</dd><dt>Aanvallen</dt><dd>${esc(T.fases.aanval)}</dd><dt>Verdedigen</dt><dd>${esc(T.fases.verdedigen)}</dd><dt>Omschakelen</dt><dd>${esc(T.fases.omschakelen)}</dd>${(T.coach || []).length ? `<dt>Waar let de trainer op</dt>${T.coach.map(c => `<dd>${esc(c)}</dd>`).join('')}` : ''}</dl></details>` : ''}` : ''}
+        ${T ? `<dl class="task sysinfo"><dt>Sterk</dt><dd>${esc(fillT(T.sterk, sys, L))}</dd><dt>Risico</dt><dd>${esc(fillT(T.risico, sys, L))}</dd>${(T.goed || []).length ? `<dt>Goed tegen</dt>${T.goed.map(([k, w]) => `<dd><b>${esc(tegenLabel(k))}</b>: ${esc(fillT(w, sys, L))}</dd>`).join('')}` : ''}${T.wanneer ? `<dt>Wanneer</dt><dd>${esc(T.wanneer)}</dd>` : ''}</dl>
+        ${T.fases ? `<details class="speelwijze"><summary>Speelwijze per fase</summary><dl class="task"><dt>Opbouwen</dt><dd>${esc(fillT(T.fases.opbouw, sys, L))}</dd><dt>Aanvallen</dt><dd>${esc(fillT(T.fases.aanval, sys, L))}</dd><dt>Verdedigen</dt><dd>${esc(fillT(T.fases.verdedigen, sys, L))}</dd><dt>Omschakelen</dt><dd>${esc(fillT(T.fases.omschakelen, sys, L))}</dd>${(T.coach || []).length ? `<dt>Waar let de trainer op</dt>${T.coach.map(c => `<dd>${esc(fillT(c, sys, L))}</dd>`).join('')}` : ''}</dl></details>` : ''}` : ''}
         <div class="row mt">${T?.train ? '<button class="btn" id="trainSys">Training voor dit systeem</button>' : ''}${S.staff ? `<button class="btn" id="hwSys">Huiswerk voor deze opstelling</button><button class="btn ${L.data.match ? '' : 'ghost'}" id="matchL">${L.data.match ? '★ Wedstrijdopstelling' : '☆ Maak wedstrijdopstelling'}</button>` : ''}</div>
         ${S.staff ? `<p class="small muted mt">Tik op een shirt voor de taken van die speler in dit systeem. Sleep een shirt om het te verplaatsen.</p><div class="row"><button class="btn ghost" id="editL">Naam en uitleg aanpassen</button></div>
         <h3 class="mt">Niet opgesteld</h3><div class="bench" id="bench"></div><p class="small muted" style="margin:6px 0 0">Tik op een naam en daarna op een shirt om te wisselen. De taken passen zich meteen aan.</p>` : '<p class="small muted mt">Tik op een speler voor zijn taken in dit systeem.</p>'}</div>
         <div class="panel mt" id="card" aria-live="polite"></div></div></div>`;
-  document.querySelectorAll('.chips button').forEach(b => b.onclick = () => { S.scen = b.dataset.id; benchSel = null; selSlot = null; viewLineup(); });
+  $('#lsel').onchange = () => { S.scen = $('#lsel').value; benchSel = null; selSlot = null; viewLineup(); };
+  wireOpp(viewLineup);
   $('#oppT').onclick = () => { showOpp = !showOpp; viewLineup(); };
   if ($('#trainSys')) $('#trainSys').onclick = () => {
     const have = new Set(kind('drill').map(d => d.data.slug || d.id));
@@ -483,16 +443,16 @@ function viewLineup() {
   if ($('#hwSys')) $('#hwSys').onclick = () => { S.week ||= weekStart(); assignByRole(L.id); };
   if ($('#matchL')) $('#matchL').onclick = async () => {
     const was = !!L.data.match;
-    for (const o of kind('lineup')) if (o.data.match && o.id !== L.id) { delete o.data.match; await saveContent(o, { data: o.data }); }
+    for (const o of lineups()) if (o.data.match && o.id !== L.id) { delete o.data.match; await saveContent(o, { data: o.data }); }
     if (was) delete L.data.match; else L.data.match = true;
-    await saveContent(L, { data: L.data }); viewLineup(); toast(was ? 'Geen wedstrijdopstelling meer gekozen' : `${L.title} is de wedstrijdopstelling`);
+    await saveContent(L, { data: L.data }); viewLineup(); toast(was ? 'Geen wedstrijdopstelling meer gekozen' : `${lineupTitle(L)} is de wedstrijdopstelling`);
   };
   lineupBoard = Board($('#pitch'), 'b');
   if (selSlot == null || !L.data.slots[selSlot]) selSlot = Math.max(0, L.data.slots.findIndex(s => s.role === 'CM'));
   drawLineup(L, true);
   if (S.staff) {
     $('#editL').onclick = () => editLineupMeta(L);
-    $('#addL').onclick = async () => { const base = L; const row = await insertContent('lineup', 'Nieuwe situatie', JSON.parse(JSON.stringify({ ...base.data, slug: null, note: '' }))); if (row) { S.scen = row.id; viewLineup(); } };
+    $('#addL').onclick = async () => { const base = L; const row = await insertContent('lineup', `${lineupTitle(base)} (variant)`, JSON.parse(JSON.stringify({ ...base.data, sys: sysOf(base), slug: null, match: undefined, note: '' }))); if (row) { S.scen = row.id; viewLineup(); } };
     $('#addSys').onclick = () => addSystemDialog();
     wireDrag(L);
   } else {
@@ -524,7 +484,7 @@ function showSlot(L, i, open) {
 }
 function emptySlotHTML(L, slot) {
   const st = slotTasks(L, slot);
-  return `<div class="pcard">${shirtSVG(slot.role)}<div><h2 style="margin:0">Nog leeg</h2><div class="muted">${esc(st.naam)} · ${esc(L.title)}</div></div></div>
+  return `<div class="pcard">${shirtSVG(slot.role)}<div><h2 style="margin:0">Nog leeg</h2><div class="muted">${esc(st.naam)} · ${esc(lineupTitle(L))}</div></div></div>
     <dl class="task"><dt>Wij hebben de bal</dt><dd>${esc(st.bal)}</dd><dt>Zij hebben de bal</dt><dd>${esc(st.geen)}</dd></dl>`;
 }
 function openSheet(html) {
@@ -560,7 +520,7 @@ function drawLineup(L, instant) {
   const list = L.data.slots.map((s, i) => {
     const alts = (s.alt || []).filter(a => !onField.has(a) && playerById(a)).slice(0, 2).map(nick);
     const p = playerById(s.player_id);
-    return { key: 's' + i, name: p ? p.nickname : '—', names: alts.length ? [p ? p.nickname : '—', alts.join(' / ')] : [p ? p.nickname : '—'], label: p?.shirt ?? s.role, x: s.x, y: s.y };
+    return { key: 's' + i, name: p ? p.nickname : '—', names: alts.length ? [p ? p.nickname : '—', alts.join(' / ')] : [p ? p.nickname : '—'], label: p?.shirt ?? ROLENUM[s.role] ?? s.role, x: s.x, y: s.y, dim: !p };
   });
   if (showOpp) FM().OPP.forEach((o, i) => list.push({ key: 'o' + i, team: 'opp', x: o[0], y: o[1] }));
   lineupBoard.render(list, instant);
@@ -576,7 +536,7 @@ function drawLineup(L, instant) {
 }
 function wireDrag(L) {
   const svg = lineupBoard.svg; let drag = null, saveT = null;
-  const toU = e => { const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY; const p = pt.matrixTransform(svg.getScreenCTM().inverse()); return [Math.min(99, Math.max(1, (p.x - 2) / .56)), Math.min(99, Math.max(1, (p.y - 2) / .86))]; };
+  const toU = e => lineupBoard.toField(e);
   svg.onpointerdown = e => { const g = e.target.closest('.tok'); if (!g) return; drag = { key: g.dataset.key, sx: e.clientX, sy: e.clientY, moved: false }; svg.setPointerCapture(e.pointerId); };
   svg.onpointermove = e => {
     if (!drag) return;
@@ -603,7 +563,7 @@ function showCard(pid) {
   const p = playerById(pid); if (!p) { box.innerHTML = '<p class="muted">Kies een speler.</p>'; return; }
   box.innerHTML = cardHTML(p);
 }
-function curLineup() { const ls = kind('lineup'); return ls.find(l => l.id === S.scen) || matchLineup(); }
+function curLineup() { const ls = lineups(); return ls.find(l => l.id === S.scen) || matchLineup(); }
 function roleCards() { const db = kind('session'); return db.length ? db : Object.entries(FM().ROLES).map(([code, r], i) => ({ id: 'std-' + code, kind: 'session', title: r.naam, sort: i, std: true, data: { role: code, ...r } })); }
 function roleCard(code) { return roleCards().find(r => r.data.role === code); }
 function roleName(code) { return roleCard(code)?.data.naam || FM().ROLES[code]?.naam || code; }
@@ -624,7 +584,7 @@ function cardHTML(p, opts = {}) {
   const roleExtra = [...(rc?.data.extra || []), ...(slot ? slotTasks(L, slot).extra : [])].map(x => x.split(' ').slice(0, 3).join(' ').toLowerCase());
   const personal = (tc?.data.extra || []).filter(x => !roleExtra.includes(x.split(' ').slice(0, 3).join(' ').toLowerCase()));
   const st = slot ? slotTasks(L, slot) : null;
-  const head = `<div class="pcard">${shirtSVG(p.shirt ?? (slot?.role || ''))}<div><h2 style="margin:0">${esc(p.nickname)}</h2><div class="muted">${slot ? `${esc(st.naam)} · ${esc(L.title)}` : `Niet opgesteld in ${esc(L?.title || 'deze situatie')}`}</div></div></div>`;
+  const head = `<div class="pcard">${shirtSVG(p.shirt ?? (slot?.role || ''))}<div><h2 style="margin:0">${esc(p.nickname)}</h2><div class="muted">${slot ? `${esc(st.naam)} · ${esc(lineupTitle(L))}` : `Niet opgesteld in ${esc(lineupTitle(L) || 'dit systeem')}`}</div></div></div>`;
   if (!r && !st) {
     const legacy = tc?.data;
     return head + (alsoRoles.length ? `<p class="small muted mt">Kan in deze situatie ook spelen als ${alsoRoles.map(x => esc(roleName(x))).join(' of ')}.</p>` : '') +
@@ -676,42 +636,49 @@ function editLineupMeta(L) {
 /* ---------------- patronen ---------------- */
 let patBoard = null, timer = null, film = null;
 const ROLENUM = { K: 1, RA: 2, CV: 3, RCV: 3, LCV: 4, LA: 5, VM: 6, RB: 7, RM: 7, RW: 7, CM: 8, SP: 9, AM: 10, SS: 10, LB: 11, LM: 11, LW: 11 };
-function basisRoleMap() {
-  const basis = kind('lineup')[0];
-  const m = {}; (basis?.data.slots || []).forEach(s => { m[s.role] = s.player_id; });
-  return m;
+const FASE = { opbouw: 'Opbouw', aanval: 'Aanval', omschakelen: 'Omschakelen', verdedigen: 'Verdedigen' };
+/* Oude startpatronen in de database (uit de eerste versies, met namen van ons team): niet meer tonen, de kennisbank vervangt ze. */
+const OLD_PAT = new Set(['nulang', 'nulinks', 'beterlinks', 'numidden', 'betergroot', 'indribbel', 'viaspits', 'opbouw', 'driehoek', 'lang', 'balverlies', 'opbouw4', 'derdeman6', 'overlaplinks', 'druk11']);
+/* Alle patronen: de kennisbank, een eigen aanpassing daarvan, en eigen patronen van het team. */
+function allPatterns() {
+  const lib = FM().PATTERNS.map((p, i) => ({ id: 'lib-' + p.id, kind: 'pattern', title: p.name, sort: i, lib: true, data: { slug: p.id, sys: p.sys, fase: p.fase, tegen: p.tegen, frames: p.frames } }));
+  const libSlugs = new Set(lib.map(p => p.data.slug));
+  const db = kind('pattern').filter(p => p.data.edited || !(libSlugs.has(p.data.slug) || OLD_PAT.has(p.data.slug) || /^s1/.test(p.data.slug || '')));
+  const over = new Map(db.filter(p => libSlugs.has(p.data.slug)).map(p => [p.data.slug, p]));
+  return [...lib.map(p => over.get(p.data.slug) || p), ...db.filter(p => !libSlugs.has(p.data.slug)).map(p => Object.assign(p, { own: true }))];
 }
 const patSys = P => (P.data.sys && FM().SYSTEMS[P.data.sys]) ? P.data.sys : FM().ORDER[0];
-/* Wie staat waar in dit patroon: het systeemsjabloon, met de echte spelers uit de opstelling van dat systeem. */
+/* Wie staat waar: het systeemsjabloon, met de spelers uit de opstelling van dat systeem. */
 function patCast(P) {
-  const sys = patSys(P), T = FM().SYSTEMS[sys];
-  const ls = kind('lineup').filter(l => sysOf(l) === sys), L = ls.find(l => l.data.match) || ls[0];
-  const byNick = n => S.players.find(p => p.nickname.toLowerCase() === String(n).toLowerCase())?.id || null;
+  const sys = patSys(P), T = FM().SYSTEMS[sys], L = lineupFor(sys);
   const used = new Set();
   const out = T.slots.map((t, i) => {
-    const nr = T.slots.slice(0, i).filter(s => s.role === t.role).length;
-    const sl = L?.data.slots.filter(s => s.role === t.role)[nr];
-    const pid = sl ? sl.player_id : byNick(t.wie);
-    const p = pid ? playerById(pid) : null;
+    const nr = T.slots.slice(0, i).filter(x => x.role === t.role).length;
+    const sl = L?.data.slots.filter(x => x.role === t.role)[nr];
+    const p = sl?.player_id ? playerById(sl.player_id) : null;
     if (p?.shirt != null) used.add(p.shirt);
-    return { n: t.wie, x: t.x, y: t.y, role: t.role, pid, name: p ? p.nickname : t.wie, num: p?.shirt ?? null };
+    const lab = slotLabel(sys, t.id);
+    return { n: t.id, demo: t.demo, x: t.x, y: t.y, role: t.role, pid: p?.id || null, name: p ? p.nickname : lab.charAt(0).toUpperCase() + lab.slice(1), show: p ? p.nickname : '', num: p?.shirt ?? null };
   });
-  /* Geen eigen rugnummer: het positienummer, en bij dubbele posities het eerstvolgende vrije nummer. */
   out.forEach(c => { if (c.num != null) return; let n = ROLENUM[c.role]; if (n == null || used.has(n)) n = [6, 10, 11, 7, 4, 9, 2, 3, 5, 8, 12, 13, 14].find(x => !used.has(x)); c.num = n; used.add(n); });
   return out;
 }
 function patStates(P) {
-  const cast = patCast(P), pos = Object.fromEntries(cast.map(c => [c.n, [c.x, c.y]]));
+  const cast = patCast(P), pos = Object.fromEntries(cast.map(c => [c.n, [c.x, c.y]])), alias = Object.fromEntries(cast.map(c => [c.demo, c.n]));
   return P.data.frames.map(f => {
-    if (f.set) Object.entries(f.set).forEach(([n, v]) => { if (pos[n]) pos[n] = [v[0], v[1]]; });
+    if (f.set) Object.entries(f.set).forEach(([k, v]) => { const id = pos[k] ? k : alias[k]; if (id) pos[id] = [v[0], v[1]]; });
     return { pos: JSON.parse(JSON.stringify(pos)), opp: f.opp || [], ball: f.ball, cap: f.cap, ar: f.ar };
   });
 }
-function patCap(P, cap) { let c = cap || ''; patCast(P).forEach(x => { if (x.name !== x.n) c = c.replaceAll(x.n, x.name); }); return c; }
+function patCap(P, cap) {
+  const sys = patSys(P); let c = fillT(cap || '', sys);
+  patCast(P).forEach(x => { if (x.demo && x.show && x.demo !== x.show) c = c.replace(new RegExp('\\b' + x.demo + '\\b', 'g'), x.show); });
+  return c;
+}
 const dist = (a, b) => Math.hypot((a[0] - b[0]) * 0.6, (a[1] - b[1]) * 0.9);
 /* Eén zin voor één speler: wat doe jij in deze stap? */
 function youLine(P, states, k, n) {
-  const cast = patCast(P), nm = x => cast.find(c => c.n === x)?.name || x;
+  const cast = patCast(P), nm = x => { const c = cast.find(c => c.n === x); return c ? (c.show || c.name.toLowerCase()) : x; };
   const cur = states[k], prev = states[k - 1];
   const at = (st, who) => { const p = st.pos[who]; return p && st.ball && Math.hypot(st.ball[0] - p[0], st.ball[1] - 3 - p[1]) < 5; };
   const holder = st => Object.keys(st.pos).find(w => at(st, w));
@@ -730,67 +697,87 @@ function youLine(P, states, k, n) {
   if (moved) return `Jij loopt ${waar}. Zo maak je ruimte of word je aanspeelbaar.`;
   return 'Jij blijft op je plek, houdt je positie en kijkt mee waar de bal gaat.';
 }
-/* ---- schuin veld in perspectief ---- */
-const F0 = 240, D0 = 150, HC = 143.3, HZ = -135.3;
-function proj(x, y) { const u = (x - 50) * 0.6, d = D0 + (100 - y) * 0.9; return [50 + u * F0 / d, HZ + HC * F0 / d, F0 / d]; }
-function unproj(sx, sy) { const d = HC * F0 / Math.max(1, sy - HZ), u = (sx - 50) * d / F0; return [Math.max(0, Math.min(100, 50 + u / 0.6)), Math.max(0, Math.min(100, 100 - (d - D0) / 0.9))]; }
 const ease = p => p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+const easeOut = p => 1 - Math.pow(1 - p, 2.2);
+/* Film: vloeiend afspelen op het schuine veld.
+   Realisme: de pass vertrekt pas als de loopactie op gang is en is sneller dan de lopers; een lange bal gaat door de lucht
+   (bal omhoog, schaduw blijft op het gras); tegenstanders schuiven licht mee met de bal; lopende spelers trekken een vaag spoor. */
 function Film(svg, P) {
-  svg.setAttribute('viewBox', '0 0 100 106'); svg.innerHTML = '';
+  drawPitch3D(svg);
   const club = getComputedStyle(document.documentElement).getPropertyValue('--club').trim() || '#db1e3b';
-  const poly = (pts, attrs, parent) => el('polygon', { points: pts.map(([x, y]) => proj(x, y).slice(0, 2).map(v => v.toFixed(2)).join(',')).join(' '), ...attrs }, parent);
-  const line = (pts, attrs, parent) => el('polyline', { points: pts.map(([x, y]) => proj(x, y).slice(0, 2).map(v => v.toFixed(2)).join(',')).join(' '), fill: 'none', ...attrs }, parent);
-  el('rect', { x: -5, y: -5, width: 110, height: 116, fill: '#1c4f2d' }, svg);
-  poly([[-4, -3], [104, -3], [104, 103], [-4, 103]], { fill: '#2b6f3f' }, svg);
-  for (let i = 0; i < 10; i++) poly([[0, i * 10], [100, i * 10], [100, i * 10 + 10], [0, i * 10 + 10]], { fill: i % 2 ? '#2f7a46' : '#2a6d3e' }, svg);
-  const Lg = el('g', { stroke: 'rgba(255,255,255,.85)', 'stroke-width': '.35', 'stroke-linejoin': 'round' }, svg);
-  line([[0, 0], [100, 0], [100, 100], [0, 100], [0, 0]], {}, Lg); line([[0, 50], [100, 50]], {}, Lg);
-  line(Array.from({ length: 41 }, (_, i) => [50 + 10.7 * Math.cos(i / 40 * 2 * Math.PI), 50 + 7 * Math.sin(i / 40 * 2 * Math.PI)]), {}, Lg);
-  [[0, 15.1, 5.8, 10.5, -1.7], [100, 84.9, 94.2, 89.5, 101.7]].forEach(([y0, yp, yg, ys, yn]) => {
-    line([[23.2, y0], [23.2, yp], [76.8, yp], [76.8, y0]], {}, Lg); line([[37.5, y0], [37.5, yg], [62.5, yg], [62.5, y0]], {}, Lg);
-    poly([[42.9, y0], [57.1, y0], [57.1, yn], [42.9, yn]], { fill: 'rgba(255,255,255,.25)', stroke: '#fff', 'stroke-width': '.3' }, svg);
-    const [sx, sy, s] = proj(50, ys); el('circle', { cx: sx, cy: sy, r: .35 * s, fill: '#fff' }, svg);
-  });
-  const [cx0, cy0, cs] = proj(50, 50); el('circle', { cx: cx0, cy: cy0, r: .35 * cs, fill: '#fff' }, svg);
   const ghost = el('g', { class: 'ghost' }, svg); ghost.style.display = 'none';
   el('circle', { r: 2.4, fill: 'none', stroke: '#ffd84d', 'stroke-width': '.5', 'stroke-dasharray': '1 .7' }, ghost);
+  const gTrail = el('g', { fill: 'none', 'stroke-linecap': 'round' }, svg);
   const gT = el('g', {}, svg);
   const cast = patCast(P), states = patStates(P);
   const toks = {};
   cast.forEach(c => {
-    const g = el('g', { class: 'ftok' }, gT); g.dataset.n = c.n;
-    el('ellipse', { cx: 0, cy: 1.6, rx: 1.8, ry: .5, fill: 'rgba(0,0,0,.35)' }, g);
-    const ring = el('circle', { r: 2.7, fill: 'none', stroke: '#ffd84d', 'stroke-width': '.45' }, g); ring.style.display = 'none';
-    el('circle', { r: 1.85, fill: club, stroke: '#fff', 'stroke-width': '.3' }, g);
-    const t = el('text', { y: '.72', 'text-anchor': 'middle', 'font-size': '1.95', 'font-weight': '800', 'font-family': 'Barlow Condensed, Arial Narrow, sans-serif', fill: '#fff' }, g); t.textContent = c.num;
-    const nm = el('text', { y: '3.9', 'text-anchor': 'middle', 'font-size': '1.55', 'font-weight': '700', 'font-family': 'Barlow, sans-serif', fill: '#fff', stroke: 'rgba(0,0,0,.75)', 'stroke-width': '.45', 'paint-order': 'stroke' }, g); nm.textContent = c.name;
-    g.setAttribute('aria-label', `${c.name}, nummer ${c.num}`);
-    toks[c.n] = { g, ring, nm, y: c.y };
+    const t = makeToken(gT, true, club); t.g.classList.add('ftok'); t.g.dataset.n = c.n;
+    t.lab.textContent = c.num; t.nm.textContent = c.show;
+    t.g.setAttribute('aria-label', `${c.name}, nummer ${c.num}`);
+    toks[c.n] = { ...t, y: c.y };
   });
-  const opp = (states[0].opp || []).map(() => { const g = el('g', { class: 'fopp' }, gT); el('ellipse', { cx: 0, cy: 1.2, rx: 1.1, ry: .35, fill: 'rgba(0,0,0,.3)' }, g); el('path', { d: 'M-.75,1.2 L-.45,-1.4 Q0,-2 .45,-1.4 L.75,1.2 Z', fill: '#f0d64a', stroke: '#8a7414', 'stroke-width': '.15' }, g); return { g, y: 0 }; });
-  const ballG = el('g', {}, svg); el('ellipse', { cx: .3, cy: .7, rx: .8, ry: .25, fill: 'rgba(0,0,0,.35)' }, ballG); el('circle', { r: .75, fill: '#fff', stroke: '#111', 'stroke-width': '.18' }, ballG);
+  const opp = (states[0].opp || []).map(() => { const t = makeToken(gT, false); t.g.classList.add('fopp'); return { g: t.g, y: 0 }; });
+  const shadow = el('ellipse', { rx: .8, ry: .25, fill: 'rgba(0,0,0,.4)' }, svg);
+  const ballG = el('g', {}, svg); el('circle', { r: .75, fill: '#fff', stroke: '#111', 'stroke-width': '.18' }, ballG);
   const me = { states, cast, k: 0, playing: false, speed: 1, follow: null, names: true, onFrame: () => {}, raf: 0, t0: 0 };
-  const put = (g, x, y, big) => { const [sx, sy, s] = proj(x, y); g.setAttribute('transform', `translate(${sx.toFixed(2)},${sy.toFixed(2)}) scale(${(s * (big ? 1.25 : 1)).toFixed(3)})`); return sy; };
-  function draw(a, b, p) {
-    const e = ease(Math.min(1, Math.max(0, p))), lerp = (u, v) => [u[0] + (v[0] - u[0]) * e, u[1] + (v[1] - u[1]) * e];
+  const put = (g, x, y, big) => { const [sx, sy, s] = proj(x, y); g.setAttribute('transform', `translate(${sx.toFixed(2)},${sy.toFixed(2)}) scale(${(s * (big ? 1.25 : 1)).toFixed(3)})`); return [sx, sy, s]; };
+  const holderAt = (st, b) => b && Object.keys(st.pos).find(w => Math.hypot(b[0] - st.pos[w][0], b[1] - 3 - st.pos[w][1]) < 5);
+  /* Per overgang: is het een pass (andere ontvanger) of een dribbel? */
+  const kindOf = states.map((s, k) => {
+    if (!k) return null; const a = states[k - 1];
+    if (!a.ball || !s.ball || dist(a.ball, s.ball) < 3) return 'stil';
+    const ha = holderAt(a, a.ball), hb = holderAt(s, s.ball);
+    if (ha && ha === hb) return 'drib';
+    return dist(a.ball, s.ball) > 30 ? 'lang' : 'pass';
+  });
+  function draw(a, b, p, kk) {
+    const e = ease(Math.min(1, Math.max(0, p))), lerp = (u, v, f = e) => [u[0] + (v[0] - u[0]) * f, u[1] + (v[1] - u[1]) * f];
     const order = [];
-    cast.forEach(c => { const pos = lerp(a.pos[c.n], b.pos[c.n]); toks[c.n].y = pos[1]; put(toks[c.n].g, pos[0], pos[1], me.follow === c.n); order.push(toks[c.n]); });
-    opp.forEach((o, i) => { const pa = a.opp[i] || b.opp[i], pb = b.opp[i] || pa; if (!pa) return; const pos = lerp(pa, pb); o.y = pos[1]; put(o.g, pos[0], pos[1]); order.push(o); });
-    order.sort((u, v) => u.y - v.y).forEach(o => gT.appendChild(o.g));
-    if (a.ball && b.ball) { const bp = lerp([a.ball[0], a.ball[1] - 3.2], [b.ball[0], b.ball[1] - 3.2]); put(ballG, bp[0] + 2.4, Math.min(101, bp[1] + 2.6)); ballG.style.display = ''; } else ballG.style.display = 'none';
+    gTrail.innerHTML = '';
+    cast.forEach(c => {
+      const pa = a.pos[c.n], pb = b.pos[c.n], pos = lerp(pa, pb); toks[c.n].y = pos[1]; put(toks[c.n].g, pos[0], pos[1], me.follow === c.n); order.push(toks[c.n]);
+      if (p > 0 && p < 1 && dist(pa, pb) > 4) {
+        const back = lerp(pa, pb, Math.max(0, e - .35));
+        el('polyline', { points: `${P2(back[0], back[1])} ${P2(pos[0], pos[1])}`, stroke: me.follow === c.n ? 'rgba(255,216,77,.55)' : 'rgba(255,255,255,.28)', 'stroke-width': '1.1' }, gTrail);
+      }
+    });
+    /* bal */
+    let bp = null, lift = 0;
+    if (a.ball && b.ball) {
+      const kind_ = kindOf[kk] || 'stil';
+      if (kind_ === 'pass' || kind_ === 'lang') {
+        const q = Math.min(1, Math.max(0, (p - .3) / (kind_ === 'lang' ? .62 : .5))), f = kind_ === 'lang' ? q : easeOut(q);
+        bp = lerp(a.ball, b.ball, f);
+        if (kind_ === 'lang') lift = Math.sin(Math.PI * q) * Math.min(7, dist(a.ball, b.ball) / 7);
+      } else bp = lerp(a.ball, b.ball);
+    }
+    if (bp) {
+      /* tegenstanders schuiven een beetje mee met de bal */
+      opp.forEach((o, i) => { const pa = a.opp[i] || b.opp[i], pb = b.opp[i] || pa; if (!pa) return; const q = lerp(pa, pb); const pos = [q[0] + (bp[0] - q[0]) * .08, q[1] + (bp[1] - 3 - q[1]) * .05]; o.y = pos[1]; put(o.g, pos[0], pos[1]); order.push(o); });
+      const gx = bp[0] + 2.4, gy = Math.min(101, bp[1] - .6), [sx, sy, sc] = proj(gx, gy);
+      shadow.setAttribute('transform', `translate(${(sx + .3 * sc).toFixed(2)},${(sy + .7 * sc).toFixed(2)}) scale(${sc.toFixed(3)})`);
+      ballG.setAttribute('transform', `translate(${sx.toFixed(2)},${(sy - lift * sc).toFixed(2)}) scale(${(sc * (1 + lift / 25)).toFixed(3)})`);
+      shadow.style.display = ballG.style.display = '';
+    } else {
+      opp.forEach((o, i) => { const pa = a.opp[i] || b.opp[i], pb = b.opp[i] || pa; if (!pa) return; const pos = lerp(pa, pb); o.y = pos[1]; put(o.g, pos[0], pos[1]); order.push(o); });
+      shadow.style.display = ballG.style.display = 'none';
+    }
+    order.sort((u, v) => (u.y + (u.lab ? .6 : 0)) - (v.y + (v.lab ? .6 : 0))).forEach(o => gT.appendChild(o.g));
+    svg.appendChild(shadow); svg.appendChild(ballG);
   }
   function decorate() {
     cast.forEach(c => { const t = toks[c.n]; const on = me.follow === c.n; t.ring.style.display = on ? '' : 'none'; t.g.style.opacity = me.follow && !on ? '.42' : '1'; t.nm.style.display = me.names || on ? '' : 'none'; });
     opp.forEach(o => o.g.style.opacity = me.follow ? '.6' : '1');
   }
-  const MOVE = 1500, HOLD = 900, END = 1800;
+  const MOVE = 1700, HOLD = 800, END = 1800;
   function loop(ts) {
     if (!svg.isConnected) return stop();
     if (!me.t0) me.t0 = ts;
     const el_ = (ts - me.t0) * me.speed, n = states.length;
-    if (me.k >= n - 1) { draw(states[n - 1], states[n - 1], 1); if (el_ > END) { me.k = 0; me.t0 = ts; me.onFrame(0); } }
+    if (me.k >= n - 1) { draw(states[n - 1], states[n - 1], 1, n - 1); if (el_ > END) { me.k = 0; me.t0 = ts; me.onFrame(0); } }
     else {
-      draw(states[me.k], states[me.k + 1], el_ / MOVE);
+      draw(states[me.k], states[me.k + 1], el_ / MOVE, me.k + 1);
       if (el_ >= MOVE && !me.entered) { me.entered = true; me.onFrame(me.k + 1); }
       if (el_ > MOVE + HOLD) { me.k++; me.t0 = ts; me.entered = false; }
     }
@@ -800,35 +787,42 @@ function Film(svg, P) {
   const total = () => (states.length - 1) * (MOVE + HOLD) + END;
   Object.assign(me, {
     svg, toks, duration: total,
-    renderAt(t) { const seg = MOVE + HOLD, k = Math.floor(t / seg); if (k >= states.length - 1) { draw(states[states.length - 1], states[states.length - 1], 1); return states.length - 1; } const r = t - k * seg; draw(states[k], states[k + 1], r / MOVE); return r >= MOVE ? k + 1 : k; },
-    show(k) { stop(); me.k = k; draw(states[k], states[k], 1); },
+    renderAt(t) { const seg = MOVE + HOLD, k = Math.floor(t / seg); if (k >= states.length - 1) { draw(states[states.length - 1], states[states.length - 1], 1, states.length - 1); return states.length - 1; } const r = t - k * seg; draw(states[k], states[k + 1], r / MOVE, k + 1); return r >= MOVE ? k + 1 : k; },
+    show(k) { stop(); me.k = k; draw(states[k], states[k], 1, k); },
     play() { if (me.playing) return; me.playing = true; me.t0 = 0; me.entered = false; if (me.k >= states.length - 1) { me.k = 0; me.onFrame(0); } me.raf = requestAnimationFrame(loop); },
     pause() { const k = me.entered ? me.k + 1 : me.k; stop(); me.show(Math.min(k, states.length - 1)); },
     stop, decorate,
-    segment(k, done) { stop(); const t0 = performance.now(); const step = ts => { if (!svg.isConnected) return; const p = (ts - t0) / 1500; draw(states[k - 1], states[k], p); if (p < 1) me.raf = requestAnimationFrame(step); else { me.k = k; done && done(); } }; me.raf = requestAnimationFrame(step); },
+    segment(k, done) { stop(); const t0 = performance.now(); const step = ts => { if (!svg.isConnected) return; const p = (ts - t0) / MOVE; draw(states[k - 1], states[k], p, k); if (p < 1) me.raf = requestAnimationFrame(step); else { me.k = k; done && done(); } }; me.raf = requestAnimationFrame(step); },
     ghost(at) { if (!at) { ghost.style.display = 'none'; return; } ghost.style.display = ''; put(ghost, at[0], at[1]); }
   });
-  draw(states[0], states[0], 1); decorate();
+  draw(states[0], states[0], 1, 0); decorate();
   return me;
 }
 function viewPatterns() {
-  const all = kind('pattern');
+  const all = allPatterns();
   if (!all.length) { $('#view').innerHTML = `<div class="panel empty">Nog geen patronen.</div>`; return; }
   if (film) film.stop(); stopPlay();
-  const systems = FM().ORDER.filter(c => all.some(p => patSys(p) === c));
   const mSys = sysOf(matchLineup());
+  const fitsP = p => !S.opp || (p.data.tegen || []).includes(S.opp);
+  let systems = FM().ORDER.filter(c => all.some(p => patSys(p) === c && fitsP(p)));
+  const noFit = S.opp && !systems.length; if (noFit) systems = FM().ORDER.filter(c => all.some(p => patSys(p) === c));
   if (S.pmatch !== mSys) { S.pmatch = mSys; S.psys = null; }
   if (!S.psys || !systems.includes(S.psys)) S.psys = systems.includes(mSys) ? mSys : systems[0];
-  const pats = all.filter(p => patSys(p) === S.psys);
+  const pats = all.filter(p => patSys(p) === S.psys && (noFit || fitsP(p)));
   if (!S.pat || !pats.find(p => p.id === S.pat)) { S.pat = pats[0].id; S.step = 0; }
   S.pmode ||= 'film';
   const P = curPat(), cast = patCast(P);
   if (S.follow && !cast.find(c => c.n === S.follow)) S.follow = null;
   if (!S.follow && S.mode === 'player' && S.me) S.follow = cast.find(c => c.pid === S.me.id)?.n || null;
-  $('#view').innerHTML = `<div class="chips" role="group" aria-label="Systeem">${systems.map(c => `<button data-sys="${c}" class="${c === S.psys ? 'on' : ''}">${c === mSys ? '★ ' : ''}${esc(FM().SYSTEMS[c].naam)}</button>`).join('')}</div>
-    <div class="chips" role="group" aria-label="Patroon">${pats.map(p => `<button data-id="${p.id}" class="${p.id === S.pat ? 'on' : ''}">${esc(p.title)}</button>`).join('')}</div>
-    <div class="layout patlayout"><div>${S.pmode === 'film' ? '<div class="filmwrap"><svg class="pitch film" id="fpitch" aria-label="Geanimeerd spelpatroon"></svg></div>' : '<svg class="pitch" id="ppitch" aria-label="Veld met spelpatroon"></svg>'}</div>
-    <div class="panel"><div class="kicker" id="pstep"></div><h2 id="ptitle">${esc(P.title)}</h2><p class="caption" id="pcap" aria-live="polite"></p><p class="you" id="pyou" aria-live="polite"></p>
+  $('#view').innerHTML = `<div class="pickers">
+      <label class="pick"><span>Systeem</span><select class="i" id="psysSel">${systems.map(c => `<option value="${c}" ${c === S.psys ? 'selected' : ''}>${c === mSys ? '★ ' : ''}${esc(FM().SYSTEMS[c].titel)}</option>`).join('')}</select></label>
+      <label class="pick"><span>Patroon</span><select class="i" id="patSel">${pats.map(p => `<option value="${p.id}" ${p.id === S.pat ? 'selected' : ''}>${p.data.fase ? FASE[p.data.fase] + ' · ' : ''}${esc(p.title)}${p.own ? ' (eigen)' : p.data.edited ? ' (aangepast)' : ''}</option>`).join('')}</select></label>
+      ${oppPicker()}</div>
+    ${noFit ? `<p class="small fitline">Voor een tegenstander die “${esc(tegenLabel(S.opp).toLowerCase())}” is nog geen patroon gekoppeld; je ziet alle patronen.</p>` : ''}
+    <div class="layout patlayout"><div>${S.pmode === 'film' ? '<div class="filmwrap"><svg class="pitch film" id="fpitch" aria-label="Geanimeerd spelpatroon"></svg></div>' : '<div class="filmwrap"><svg class="pitch film" id="ppitch" aria-label="Veld met spelpatroon"></svg></div>'}</div>
+    <div class="panel"><div class="kicker" id="pstep"></div><h2 id="ptitle">${esc(P.title)}</h2>
+      ${(P.data.tegen || []).length ? `<p class="small muted" style="margin:0 0 4px">Goed tegen: ${P.data.tegen.map(t => esc(tegenLabel(t).toLowerCase())).join(' · ')}</p>` : ''}
+      <p class="caption" id="pcap" aria-live="polite"></p><p class="you" id="pyou" aria-live="polite"></p>
       ${S.pmode === 'film' ? `<div class="row mt"><button class="btn primary" id="fplay">▶ Afspelen</button><button class="btn" id="fslow" aria-pressed="${S.slow ? 'true' : 'false'}">${S.slow ? 'Normaal tempo' : 'Langzaam'}</button><button class="btn ghost" id="toStep">Stap voor stap</button></div>`
         : `<div class="row mt"><button class="btn" id="pprev">Vorige</button><button class="btn primary" id="pplay">Afspelen</button><button class="btn" id="pnext">Volgende</button><button class="btn ghost" id="toFilm">Film</button></div><p class="small muted mt">Witte lijn: pass. Gele stippellijn: loopactie. Witte stippen: dribbel.</p>`}
       <label class="f" for="pfol">Volg een speler</label><select class="i" id="pfol"><option value="">Niemand, het hele team</option>${cast.map(c => `<option value="${esc(c.n)}" ${c.n === S.follow ? 'selected' : ''}>${esc(c.name)} (${c.num})</option>`).join('')}</select>
@@ -837,8 +831,9 @@ function viewPatterns() {
       <div class="row mt"><button class="btn" id="vidB">Deel als video</button>${S.staff ? `<button class="btn ghost" id="editP">Patroon aanpassen</button><button class="btn ghost" id="newP">Nieuw patroon</button>` : ''}</div></div></div>`;
   $('#vidB').onclick = () => { if (S.pmode !== 'film') { S.pmode = 'film'; viewPatterns(); } shareVideo(); };
   if (S.staff) { $('#editP').onclick = () => editPattern(curPat()); $('#newP').onclick = () => editPattern(null, S.psys); }
-  document.querySelectorAll('[data-sys]').forEach(b => b.onclick = () => { S.psys = b.dataset.sys; S.pat = null; viewPatterns(); });
-  document.querySelectorAll('[data-id]').forEach(b => b.onclick = () => { S.pat = b.dataset.id; S.step = 0; viewPatterns(); });
+  $('#psysSel').onchange = () => { S.psys = $('#psysSel').value; S.pat = null; viewPatterns(); };
+  $('#patSel').onchange = () => { S.pat = $('#patSel').value; S.step = 0; viewPatterns(); };
+  wireOpp(() => { S.pat = null; viewPatterns(); });
   $('#pfol').onchange = () => { S.follow = $('#pfol').value || null; if (film) { film.follow = S.follow; film.decorate(); film.show(film.k); } $('#quizB').disabled = !S.follow; showCap(S.pmode === 'film' ? film.k : S.step); if (S.pmode !== 'film') drawPat(); };
   $('#quizB').onclick = () => startQuiz();
   if (S.pmode === 'film') {
@@ -861,18 +856,18 @@ function viewPatterns() {
 function showCap(k) {
   const P = curPat(), st = patStates(P), n = st.length;
   if (!$('#pcap')) return;
-  $('#pstep').textContent = `Stap ${k + 1} van ${n}`;
+  $('#pstep').textContent = `${P.data.fase ? FASE[P.data.fase] + ' · ' : ''}Stap ${k + 1} van ${n}`;
   $('#pcap').textContent = patCap(P, st[k].cap);
   $('#pyou').textContent = S.follow ? youLine(P, st, k, S.follow) : '';
 }
-const curPat = () => kind('pattern').find(p => p.id === S.pat);
+const curPat = () => allPatterns().find(p => p.id === S.pat);
 function stopPlay() { if (timer) { clearInterval(timer); timer = null; } const b = $('#pplay'); if (b) b.textContent = 'Afspelen'; }
 function drawPat(instant) {
   const P = curPat(), cast = patCast(P), st = patStates(P), f = st[S.step], fr = P.data.frames[S.step];
-  const list = cast.map(c => ({ key: 's' + c.n, name: c.name, label: c.num, x: f.pos[c.n][0], y: f.pos[c.n][1] }));
+  const list = cast.map(c => ({ key: 's' + c.n, name: c.show, label: c.num, x: f.pos[c.n][0], y: f.pos[c.n][1] }));
   (f.opp || []).forEach((o, i) => list.push({ key: 'o' + i, team: 'opp', x: o[0], y: o[1] }));
   patBoard.render(list, instant); patBoard.ball(fr.ball); patBoard.arrows(fr.ar);
-  patBoard.svg.querySelectorAll('.tok').forEach(g => { g.style.opacity = S.follow && g.dataset.key !== 's' + S.follow && g.dataset.key[0] === 's' ? '.45' : '1'; });
+  patBoard.svg.querySelectorAll('.tok').forEach(g => { g.style.opacity = S.follow && g.dataset.key !== 's' + S.follow && g.dataset.key[0] === 's' ? '.45' : '1'; const r = g.querySelector('.ring'); if (r) r.style.display = g.dataset.key === 's' + S.follow ? '' : 'none'; });
   showCap(S.step);
   $('#pprev').disabled = S.step === 0; $('#pnext').disabled = S.step === st.length - 1;
 }
@@ -949,7 +944,7 @@ async function shareVideo() {
       ctx.drawImage(img, 0, TOP, W, FH);
       ctx.fillStyle = club; ctx.fillRect(0, 0, W, TOP);
       ctx.fillStyle = '#fff'; ctx.font = '800 30px Barlow Condensed, Arial Narrow, sans-serif'; ctx.textBaseline = 'middle';
-      ctx.fillText(`${FM().SYSTEMS[patSys(P)].naam} · ${P.title}`.toUpperCase().slice(0, 48), 22, TOP / 2);
+      ctx.fillText(`${FM().SYSTEMS[patSys(P)].naam} · ${P.title}`.toUpperCase().slice(0, 52), 22, TOP / 2);
       const capY = TOP + FH + 46;
       ctx.font = '600 28px Barlow, Arial, sans-serif'; ctx.fillStyle = '#fff'; ctx.textBaseline = 'alphabetic';
       let y = capY + 10; wrap(patCap(P, st[k].cap), W - 44).slice(0, 3).forEach(line => { ctx.fillText(line, 22, y); y += 36; });
@@ -979,24 +974,25 @@ function editPattern(P0, sys0) {
   stopPlay(); if (film) film.stop(); closeQuiz();
   const sys = P0 ? patSys(P0) : sys0;
   const tmp = P0 || { title: 'Nieuw patroon', data: { sys, frames: [{ ball: null, opp: FM().OPP, cap: '' }] } };
+  const restore = P0 && !P0.lib && P0.data.edited && FM().PATTERNS.some(x => x.id === P0.data.slug);
   const cast = patCast(tmp), first = patStates(tmp);
   const holderOf = s => { if (!s.ball) return ''; if (s.ball[1] <= 3) return '__goal'; const own = Object.entries(s.pos).find(([, p]) => Math.hypot(s.ball[0] - p[0], s.ball[1] - 3 - p[1]) < 5); if (own) return own[0]; const oi = s.opp.findIndex(o => Math.hypot(s.ball[0] - o[0], s.ball[1] - o[1]) < 6); return oi >= 0 ? 'o' + oi : ''; };
   const E = { title: tmp.title, sys, k: 0, steps: first.map(s => ({ pos: JSON.parse(JSON.stringify(s.pos)), opp: JSON.parse(JSON.stringify(s.opp)), hold: holderOf(s), cap: s.cap || '' })) };
   if (!E.steps[0].hold) E.steps[0].hold = cast[0].n;
   const ballOf = s => s.hold === '__goal' ? [50, 2] : s.hold?.[0] === 'o' && /^o\d+$/.test(s.hold) ? [s.opp[+s.hold.slice(1)][0], s.opp[+s.hold.slice(1)][1] + 2] : s.pos[s.hold] ? [s.pos[s.hold][0], s.pos[s.hold][1] + 3] : null;
   $('#view').innerHTML = `<div class="kicker">Animatiebord · ${esc(FM().SYSTEMS[sys].naam)}</div>
-    <div class="layout"><div><svg class="pitch edit" id="epitch" aria-label="Animatiebord"></svg><p class="small muted">Sleep spelers en pionnen naar waar ze in deze stap staan. Geef de bal aan een speler hieronder.</p></div>
+    <div class="layout patlayout"><div><div class="filmwrap"><svg class="pitch film edit" id="epitch" aria-label="Animatiebord"></svg></div><p class="small muted">Sleep spelers en pionnen naar waar ze in deze stap staan. Geef de bal aan een speler hieronder.</p></div>
     <div class="panel"><label class="f" for="etitle">Naam van het patroon</label><input class="i" id="etitle" maxlength="60" value="${esc(E.title)}">
       <div class="row mt" style="justify-content:space-between"><strong id="estep"></strong><div class="row"><button class="btn" id="eprev" aria-label="Vorige stap">‹</button><button class="btn" id="enext" aria-label="Volgende stap">›</button></div></div>
       <label class="f" for="ehold">Bal bij</label><select class="i" id="ehold"></select>
       <label class="f" for="ecap">Uitleg bij deze stap</label><textarea class="i" id="ecap" maxlength="240" placeholder="Bijvoorbeeld: Sasha speelt in op Amine, die tussen de linies vrij staat."></textarea>
       <div class="row mt"><button class="btn" id="eadd">+ Stap erbij</button><button class="btn ghost" id="edel">Stap weg</button></div>
-      <div class="row mt"><button class="btn primary" id="esave">Opslaan</button><button class="btn ghost" id="ecancel">Annuleren</button>${P0 ? '<button class="btn danger" id="eremove">Patroon verwijderen</button>' : ''}</div></div></div>`;
+      <div class="row mt"><button class="btn primary" id="esave">Opslaan</button><button class="btn ghost" id="ecancel">Annuleren</button>${P0 && !P0.lib ? `<button class="btn danger" id="eremove">${restore ? 'Terug naar origineel' : 'Patroon verwijderen'}</button>` : ''}</div>${P0?.lib ? '<p class="small muted mt">Dit patroon komt uit de kennisbank. Opslaan bewaart jouw aangepaste versie; het origineel blijft bewaard.</p>' : ''}</div></div>`;
   const board = Board($('#epitch'), 'e');
   const svg = $('#epitch');
   function paint(instant) {
     const s = E.steps[E.k];
-    const list = cast.map(c => ({ key: 's' + c.n, name: c.name, label: c.num, x: s.pos[c.n][0], y: s.pos[c.n][1] }));
+    const list = cast.map(c => ({ key: 's' + c.n, name: c.show || c.name, label: c.num, x: s.pos[c.n][0], y: s.pos[c.n][1] }));
     s.opp.forEach((o, i) => list.push({ key: 'o' + i, team: 'opp', x: o[0], y: o[1] }));
     board.render(list, instant); board.ball(ballOf(s));
     if (E.k > 0) { const p = E.steps[E.k - 1], ar = []; cast.forEach(c => { const a = p.pos[c.n], b = s.pos[c.n]; if (dist(a, b) > 2) ar.push([a[0], a[1], b[0], b[1], s.hold === c.n && p.hold === c.n ? 'drib' : 'run']); }); const pb = ballOf(p), nb = ballOf(s); if (pb && nb && p.hold !== s.hold) ar.push([pb[0], pb[1] - 3, nb[0], nb[1] - 3, 'pass']); board.arrows(ar); } else board.arrows([]);
@@ -1016,11 +1012,11 @@ function editPattern(P0, sys0) {
   $('#eadd').onclick = () => { const s = E.steps[E.k]; E.steps.splice(E.k + 1, 0, { pos: JSON.parse(JSON.stringify(s.pos)), opp: JSON.parse(JSON.stringify(s.opp)), hold: s.hold, cap: '' }); E.k++; paint(true); $('#ecap').focus(); };
   $('#edel').onclick = () => { if (E.steps.length < 2) return; E.steps.splice(E.k, 1); E.k = Math.max(0, E.k - 1); paint(true); };
   $('#ecancel').onclick = () => viewPatterns();
-  if ($('#eremove')) $('#eremove').onclick = async () => { if (!confirm('Dit patroon verwijderen?')) return; await deleteContent(P0); S.pat = null; viewPatterns(); };
+  if ($('#eremove')) $('#eremove').onclick = async () => { if (!confirm(restore ? 'Jouw aanpassing weggooien en het origineel terugzetten?' : 'Dit patroon verwijderen?')) return; await deleteContent(P0); S.pat = restore ? 'lib-' + P0.data.slug : null; viewPatterns(); };
   $('#esave').onclick = async () => {
     const title = $('#etitle').value.trim(); if (!title) return toast('Geef het patroon een naam');
     if (E.steps.some(s => !s.cap.trim())) return toast('Schrijf bij elke stap een korte uitleg');
-    const base = Object.fromEntries(FM().SYSTEMS[sys].slots.map(t => [t.wie, [t.x, t.y]]));
+    const base = Object.fromEntries(FM().SYSTEMS[sys].slots.map(t => [t.id, [t.x, t.y]]));
     const frames = E.steps.map((s, k) => {
       const prev = k ? E.steps[k - 1] : { pos: base, hold: null }, f = { ball: ballOf(s), opp: s.opp.map(o => [Math.round(o[0]), Math.round(o[1])]), cap: s.cap.trim() };
       const set = {}; cast.forEach(c => { if (dist(prev.pos[c.n], s.pos[c.n]) > 1) set[c.n] = s.pos[c.n].map(Math.round); }); if (Object.keys(set).length) f.set = set;
@@ -1028,12 +1024,12 @@ function editPattern(P0, sys0) {
       if (f.ball) f.ball = f.ball.map(Math.round);
       return f;
     });
-    const data = { ...(P0?.data || {}), sys, frames, slug: P0?.data.slug || 'eigen-' + Date.now() };
-    if (P0) await saveContent(P0, { title, data }); else { const row = await insertContent('pattern', title, data); if (!row) return; S.pat = row.id; }
+    const data = { ...(P0?.data || {}), sys, frames, slug: P0?.data.slug || 'eigen-' + Date.now(), edited: true };
+    if (P0 && !P0.lib) await saveContent(P0, { title, data }); else { const row = await insertContent('pattern', title, data); if (!row) return; S.pat = row.id; }
     S.psys = sys; toast('Patroon opgeslagen'); viewPatterns();
   };
   let drag = null;
-  const toField = e => { const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY; const p = pt.matrixTransform(svg.getScreenCTM().inverse()); return [Math.max(0, Math.min(100, (p.x - 2) / 0.56)), Math.max(0, Math.min(100, (p.y - 2) / 0.86))]; };
+  const toField = e => board.toField(e);
   svg.addEventListener('pointerdown', e => { const g = e.target.closest('.tok'); if (!g) return; e.preventDefault(); drag = g.dataset.key; svg.setPointerCapture?.(e.pointerId); svg.classList.add('noanim'); });
   svg.addEventListener('pointermove', e => {
     if (!drag) return; e.preventDefault(); const [x, y] = toField(e), s = E.steps[E.k];
@@ -1144,12 +1140,12 @@ function editPlan(p, drills) {
 /* ---------------- spelers ---------------- */
 function viewPlayers() {
   const ps = S.players.filter(p => p.active);
-  const lineups = kind('lineup'); const L = curLineup();
-  $('#view').innerHTML = `<div class="chips" role="group" aria-label="Situatie">${lineups.map(l => `<button data-sc="${l.id}" class="${l.id === L?.id ? 'on' : ''}">${esc(l.title)}</button>`).join('')}</div>
-    <p class="muted small" style="margin:0 0 12px">De taken volgen uit de positie in de opstelling “${esc(L?.title || '')}”. Kies hierboven een andere situatie om te zien wat er dan verandert.</p>
+  const ls = lineups(); const L = curLineup();
+  $('#view').innerHTML = `<div class="pickers"><label class="pick"><span>Systeem</span><select class="i" id="scSel">${ls.map(l => `<option value="${l.id}" ${l.id === L?.id ? 'selected' : ''}>${l.data.match ? '★ ' : ''}${esc(lineupTitle(l))}</option>`).join('')}</select></label></div>
+    <p class="muted small" style="margin:0 0 12px">De taken volgen uit de plek in “${esc(lineupTitle(L))}”. Kies een ander systeem om te zien wat er dan verandert.</p>
     ${S.staff ? `<div class="row" style="margin-bottom:12px"><button class="btn primary" id="addP">Speler toevoegen</button><button class="btn" id="roles">Taken per positie</button></div>` : ''}
     <div class="grid two">${ps.map(p => `<article class="panel">${cardHTML(p, { lineup: L })}${S.staff ? `<div class="row mt"><span class="badge">${p.consent_at ? 'Toestemming gegeven' : 'Nog geen toestemming'}</span><button class="btn ghost" data-ep="${p.id}">Bewerken</button><button class="btn" data-link="${p.id}">Spelerslink</button></div>` : ''}</article>`).join('') || '<div class="panel empty">Nog geen spelers.</div>'}</div>`;
-  document.querySelectorAll('[data-sc]').forEach(b => b.onclick = () => { S.scen = b.dataset.sc; viewPlayers(); });
+  $('#scSel').onchange = () => { S.scen = $('#scSel').value; viewPlayers(); };
   if (S.staff) {
     $('#addP').onclick = () => editPlayer(null);
     $('#roles').onclick = () => viewRoles();
@@ -1337,10 +1333,10 @@ function assignDialog() {
     }]]);
 }
 function assignByRole(preId) {
-  const lineups = kind('lineup'); const pre = preId || curLineup()?.id;
+  const lsA = lineups(); const pre = preId || curLineup()?.id;
   openDialog(`<div class="kicker">Week ${weekLabel(S.week)}</div><h2>Huiswerk per positie</h2>
     <p class="small muted">Iedere speler krijgt de thuisoefeningen die bij zijn positie horen, volgens de gekozen opstelling.</p>
-    <label class="f" for="abl">Opstelling</label><select class="i" id="abl">${lineups.map(l => `<option value="${l.id}" ${l.id === pre ? 'selected' : ''}>${esc(l.title)}${l.data.match ? ' ★' : ''}</option>`).join('')}</select>
+    <label class="f" for="abl">Opstelling</label><select class="i" id="abl">${lsA.map(l => `<option value="${l.id}" ${l.id === pre ? 'selected' : ''}>${esc(lineupTitle(l))}${l.data.match ? ' ★' : ''}</option>`).join('')}</select>
     <label class="f" for="abn">Aantal oefeningen per speler</label><select class="i" id="abn"><option value="1">1</option><option value="2" selected>2</option><option value="3">3</option></select>
     <div id="abprev" class="small mt"></div>`,
     [['Annuleren'], ['Geven', 'primary', async () => {
@@ -1350,8 +1346,8 @@ function assignByRole(preId) {
       toast(`${rows.length} oefeningen gegeven`); viewHomework();
     }]]);
   function plan() {
-    const L = lineups.find(l => l.id === $('#abl').value), n = +$('#abn').value, rows = [];
-    (L?.data.slots || []).forEach(s => { if (!s.player_id || !playerById(s.player_id)) return; const st = slotTasks(L, s); st.home.slice(0, n).forEach(sl => { const d = kind('homedrill').find(h => h.data.slug === sl || h.id === sl); if (d) rows.push({ pid: s.player_id, drill: d, role: `${st.naam} in ${L.title}` }); }); });
+    const L = lsA.find(l => l.id === $("#abl").value), n = +$("#abn").value, rows = [];
+    (L?.data.slots || []).forEach(s => { if (!s.player_id || !playerById(s.player_id)) return; const st = slotTasks(L, s); st.home.slice(0, n).forEach(sl => { const d = kind('homedrill').find(h => h.data.slug === sl || h.id === sl); if (d) rows.push({ pid: s.player_id, drill: d, role: `${st.naam} in ${lineupTitle(L)}` }); }); });
     return rows;
   }
   const prev = () => { const rows = plan(); const by = {}; rows.forEach(r => { (by[r.pid] ||= []).push(r.drill.title); }); $('#abprev').innerHTML = Object.entries(by).map(([pid, t]) => `<div><strong>${esc(nick(pid))}</strong>: ${t.map(esc).join(', ')}</div>`).join('') || '<span class="muted">Geen passende oefeningen.</span>'; };
@@ -1418,11 +1414,13 @@ function viewWeek() {
 /* ---------------- handleiding ---------------- */
 const HELP_TRAINER = [
   ['Starten', [
-    ['Inloggen en een team maken', 'Log in met je e-mailadres en een wachtwoord. Bij je eerste keer maak je een team aan. Kies daarbij de speelvorm: 8 tegen 8 of 11 tegen 11. Laat “Startinhoud laden” aan staan: dan krijgt het team meteen spelers, systemen, patronen, oefenvormen en taken die al zijn uitgewerkt. Alles is daarna aan te passen.'],
+    ['Inloggen en een team maken', 'Log in met je e-mailadres en een wachtwoord. Bij je eerste keer maak je een team aan en kies je de speelvorm: 8 tegen 8 of 11 tegen 11. Het team krijgt meteen de kennisbank: beproefde systemen, spelpatronen, taken per positie, oefenvormen en trainingsplannen. Daarna voeg je in Spelers je eigen spelers toe (met hun voorkeurspositie) en zet je ze in de opstellingen. Wil je eerst rondkijken, vink dan “Voorbeeldspelers toevoegen” aan.'],
+    ['De kennisbank', 'Systemen, taken en patronen zijn geschreven in posities, niet in namen: “de controleur speelt in op de spelmaker”. Staat er in jouw opstelling een speler op die plek, dan zie je zijn naam; anders de naam van de plek. Zo werkt dezelfde kennis voor elk team.'],
     ['8 tegen 8 en 11 tegen 11', 'Elke speelvorm is een eigen team met eigen posities, systemen, patronen en trainingen. Wil je beide, maak dan een tweede team aan via Beheer → Nieuw team aanmaken. Bovenaan wissel je tussen je teams. De speelvorm staat in de kop naast de teamnaam.']
   ]],
   ['Opstelling en systemen', [
-    ['Een systeem kiezen', 'Bovenaan de Opstelling staan de systemen en wedstrijdsituaties als knoppen. Tik er een aan om hem op het veld te zien. Rechts (op de telefoon eronder) staan het idee, wat het systeem sterk maakt, het risico en wanneer je het kiest. Klap “Speelwijze per fase” open voor opbouwen, aanvallen, verdedigen, omschakelen en waar je als trainer op let.'],
+    ['Kiezen op tegenstander', 'Bovenaan staat de keuzelijst “Tegenstander”: bouwt rustig op, speelt lang, zet hoog druk, staat laag, is snel in de omschakeling, speelt via de flanken, is sterk op het middenveld of is sterker dan wij. Kies er een, dan krijgen de systemen die daar goed tegen werken een vinkje, zie je bij elk systeem of het past, en toont Patronen alleen de patronen voor dat type tegenstander.'],
+    ['Een systeem kiezen', 'Kies bovenaan in de keuzelijst “Systeem” een systeem; het veld staat schuin, zoals op tv. Met “Variant maken” maak je een eigen versie, bijvoorbeeld voor één tegenstander. Rechts (op de telefoon eronder) staan het idee, wat het systeem sterk maakt, het risico en wanneer je het kiest. Klap “Speelwijze per fase” open voor opbouwen, aanvallen, verdedigen, omschakelen en waar je als trainer op let.'],
     ['Taken van een speler zien', 'Tik op een shirt. Op de telefoon schuift er een blad omhoog, op de computer verschijnen de taken naast het veld. Op de computer zie je ook een korte samenvatting als je met de muis op een speler staat. De taken horen bij de plek in dit systeem: met bal, zonder bal, na balverlies, na balwinst, spelhervattingen, oefenvormen en thuisoefeningen.'],
     ['Wisselen', 'Tik onder “Niet opgesteld” op een naam en daarna op een shirt. De nieuwe speler krijgt direct de taken, oefeningen en thuisoefeningen van die plek. Een shirt verplaatsen doe je door het te slepen.'],
     ['Speler, positie of taken van een plek aanpassen', 'Tik op een shirt en kies “Speler, positie of taken wijzigen”. Je kiest de speler, de positie en de naam van de plek, en je past de taken in dit systeem aan. Kies je een andere positie, dan vullen de taken zich vanzelf met wat bij die positie hoort. Onderaan zet je wie hier ook kan spelen; die namen staan klein onder het shirt.'],
@@ -1432,7 +1430,7 @@ const HELP_TRAINER = [
   ['Trainen', [
     ['Training voor een systeem', 'Tik bij een opstelling op “Training voor dit systeem”. De oefenvormen die bij dat systeem passen, staan dan klaar in het tabblad Trainingen onder “Jouw training”.'],
     ['Trainingsplan en oefenvormen', 'In Trainingen staat een weekplan. Met “Gebruik deze training” zet je een week klaar; met “Training kopiëren” plak je hem in WhatsApp of een mail. Bij elke oefenvorm staan het probleem, waarom en hoe, coachpunten en een makkelijkere of moeilijkere variant. Je kunt oefenvormen en weken aanpassen of toevoegen.'],
-    ['Patronen als film', 'In Patronen kies je eerst het systeem (de ster is de wedstrijdopstelling) en dan een patroon. Het speelt af als een filmpje op een schuin veld, met rugnummers en gele pionnen als tegenstanders. “Langzaam” halveert het tempo; “Stap voor stap” laat pijlen en elke stap apart zien.'],
+    ['Patronen als film', 'In Patronen kies je in de keuzelijsten het systeem (de ster is de wedstrijdopstelling) en het patroon; voor elk patroon staat de fase (opbouw, aanval, omschakelen, verdedigen) en tegen welk type tegenstander het werkt. Een pass vertrekt pas als de loopactie op gang is, een lange bal gaat door de lucht, tegenstanders schuiven mee met de bal en wie loopt laat een spoor achter. Het speelt af als een filmpje op een schuin veld, met rugnummers en gele pionnen als tegenstanders. “Langzaam” halveert het tempo; “Stap voor stap” laat pijlen en elke stap apart zien.'],
     ['Volg een speler', 'Kies bij “Volg een speler” een naam. Die speler krijgt een gele ring, de rest wordt lichter, en bij elke stap staat in één zin wat híj doet. Op de pagina van een speler staat hij zelf al gekozen.'],
     ['Delen als video', 'Tik bij een patroon op “Deel als video”. De app maakt er een filmpje van, met de uitleg in beeld; volg je een speler, dan staat ook zijn zin erbij. Op de telefoon kies je daarna direct WhatsApp, op de computer wordt het bestand gedownload.'],
     ['Zelf een patroon maken', 'Tik op “Nieuw patroon” (in het gekozen systeem) of “Patroon aanpassen”. Sleep spelers en pionnen naar hun plek, kies bij wie de bal is en schrijf bij elke stap een korte uitleg. Met “+ Stap erbij” maak je de volgende stap; die begint waar de vorige eindigde. De pijlen tekent de app zelf. Na “Opslaan” speelt je patroon als film en werkt “Waar loop jij naartoe?” er ook mee.'],
